@@ -1,0 +1,134 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "model": "anthropic/claude-sonnet-4-6",
+  "mcp": {},
+  "lsp": {
+    "pyright": {
+      "disabled": true
+    },
+    "mypy": {
+      "command": ["pylsp"],
+      "extensions": [".py", ".pyi"],
+      "initialization": {
+        "pylsp": {
+          "plugins": {
+            "pylsp_mypy": {
+              "enabled": true,
+              "live_mode": false,
+              "strict": true
+            },
+            "pyflakes":    { "enabled": false },
+            "pycodestyle": { "enabled": false },
+            "autopep8":    { "enabled": false },
+            "yapf":        { "enabled": false },
+            "mccabe":      { "enabled": false }
+          }
+        }
+      }
+    },
+    "yaml-ls": {
+      "disabled": true
+    }
+  },
+  "watcher": {
+    "ignore": [
+      // from .gitignore
+      "__pycache__/**",
+      "*.egg-info/**",
+      "node_modules/**",
+      "build/**",
+      "dist/**",
+      "artifacts/**",
+      // tracked by git but high-churn / irrelevant to OpenCode
+      ".venv/**",
+      "uv.lock",
+      // generated output
+      "deploy/**",
+      "test_results.xml",
+      ".mypy_cache/**"
+    ]
+  },
+  // Global: read-only bash pre-approved; edits and mutations require approval.
+  // Applies to plan mode and as the base for build mode.
+  "permission": {
+    "*": "ask",
+    "read": {
+      "*": "allow"
+    },
+    "bash": {
+      "*": "ask",
+      "git status *": "allow",
+      "git status": "allow",
+      "git log *": "allow",
+      "git log": "allow",
+      "git diff *": "allow",
+      "git diff": "allow",
+      "git branch *": "allow",
+      "git branch": "allow",
+      "git remote -v": "allow",
+      "git worktree list *": "allow",
+      "git worktree list": "allow",
+      "git reflog *": "allow",
+      "git reflog": "allow",
+      "ls *": "allow",
+      "ls": "allow",
+      "pwd": "allow",
+      "which *": "allow",
+      "wc *": "allow",
+      "file *": "allow",
+      // AGENTS.md forbids these in favor of Read/Glob/Grep/Edit/Write.
+      "grep *": "deny",
+      "rg *": "deny",
+      "find *": "deny",
+      "cat *": "deny",
+      "sed *": "deny",
+      "awk *": "deny",
+      // Pipe-tail patterns. OpenCode's matcher is glob-prefix-anchored, so the
+      // leading `*` may or may not span a pipe — keep the patterns conservative
+      // and rely on the leading-token denies above to catch the common cases.
+      "* | head*": "deny",
+      "* | tail*": "deny",
+      "sqlite3 -readonly *": "allow",
+      // Type-check and compile-verify — read-only, loop frequently.
+      "venv/bin/mypy *": "allow",
+      "./venv/bin/mypy *": "allow",
+      "venv/bin/python -m py_compile *": "allow",
+      "./venv/bin/python -m py_compile *": "allow",
+    },
+    // Edits to ~/.config/opencode/ are denied: it's a runtime mirror populated by salt
+    // (see AGENTS.md). All edits must land in workstation-salt and propagate via state.apply.
+    "edit": {
+      "*": "ask",
+      "~/.config/opencode/**": "deny"
+    },
+    // Allow read-only access to the user-level OpenCode config dir so agents can load
+    // AGENTS-*.md, STYLE-*.md, etc. on-demand without an external_directory prompt per file.
+    "external_directory": {
+      "*": "ask",
+      "~/.config/opencode/**": "allow"
+    },
+    "glob": "allow",
+    "grep": "allow",
+    "list": "allow",
+    "lsp": "allow",
+    "question": "allow",
+    "skill": "allow",
+    "task": "allow",
+    "todoread": "allow",
+    "todowrite": "allow",
+    "webfetch": "allow"
+  },
+  "agent": {
+    // Build mode: inherits global permissions, but allows edits without prompting.
+    // The ~/.config/opencode/** deny is preserved here — runtime edits must always go
+    // through workstation-salt regardless of agent.
+    "build": {
+      "permission": {
+        "edit": {
+          "*": "allow",
+          "~/.config/opencode/**": "deny"
+        }
+      }
+    }
+  }
+}

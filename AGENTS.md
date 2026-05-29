@@ -122,6 +122,12 @@ See `AGENTS-HINTS.md` for the derivation of the three-axis rule.
   `@general` to pin the tier — without the pin, forks from a T0 primary would silently run on Opus.
 - `@session-scan` — T2/Haiku 4.5. High-volume session-history scan for retrospectives. Used by
   `/session-end`. Does NOT reference `AGENTS-REASONING.md`.
+- `@committer` — T1/Sonnet 4.6. Narrow session-close commit subagent for autonomous chains.
+  Reads a session-contract summary + expected-files list from the orchestrator, stages exactly
+  those files, drafts a commit message in repo convention, commits. Refuses on scope drift,
+  empty diff, secret-shaped files, or hook failures — never improvises. Distinct from
+  `@git-editor` (which carries elevated history-rewriting permissions and is for interactive,
+  multi-step git work) and from `/commit` (which gates each step on user confirmation).
 
 **Built-in agents** (no definition file; available in any session):
 - `@review` — post-implementation code review on a diff/commit/branch.
@@ -292,7 +298,7 @@ guidance; test philosophy).
 
 ## Git conventions
 
-- Ask before creating or editing commits.
+- Ask before creating or editing commits. (Carve-out for autonomous chains: see below.)
 - Branch naming: `<user>/<project>-XXXX/descriptive-slug`.  If no ticket, eliminate
   `<project>-XXXX/`.
 - Commit title: `<project>-XXXX Concise description`.
@@ -301,3 +307,27 @@ guidance; test philosophy).
   commit body.
 - Keep commits separated by focus; squash fixup commits before finishing.
 - NEVER branches to a remote; NEVER commit `.env` / credential files.
+
+### Autonomous-chain carve-out
+
+The "ask before committing" rule above is written for interactive sessions where the user is the
+orchestrator. In autonomous chains — where a primary agent (e.g., `@plan-deep`, an orchestrating
+`@build`) dispatches implementation subagents whose work must compose into commit-shaped
+deliverables — the commit step is dispatched, not asked.
+
+The pattern:
+
+1. **Implementation subagents do not commit themselves.** They leave the working tree dirty with
+   green tests. Committing inside the implementation subagent pollutes the implementation
+   context with commit-discipline rules and risks improvised commit messages.
+2. **The orchestrator decides when the session contract is fulfilled.** This is the gate: tests
+   green, expected files modified, no scope drift.
+3. **The orchestrator dispatches `@committer`** with a session-contract summary and an
+   expected-files list. The committer stages exactly those files, drafts a message in the repo's
+   convention, commits — or refuses on drift / empty diff / secrets / hook failure. The
+   committer never improvises; refusal bounces the decision back to the orchestrator.
+4. **The orchestrator may then dispatch the next implementation subagent** in the chain.
+
+This carve-out applies only to subagent chains. Direct user invocation of `@build` continues to
+follow the "ask before committing" rule (or the user runs `/commit` explicitly). `@git-editor`
+retains its existing behaviour for interactive history-shaping work.

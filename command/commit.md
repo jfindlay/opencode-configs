@@ -5,6 +5,20 @@ description: "[jf] Inspect uncommitted changes, draft a conventional commit mess
 # No fork: commit flow is short and every step needs user confirmation # (split decision, message
 approval, secret check). Steering=YES throughout.
 
+## When to use which
+
+`/commit` is the **interactive** commit flow — the user is present, every step gates on
+confirmation, the session is short and steerable. This is the default for direct user-driven
+commit work.
+
+For **autonomous-chain commits** (orchestrating agents like `@plan-deep` or a long-running
+`@build` dispatching implementation subagents in sequence), use the `@committer` subagent
+instead. It takes a session-contract summary + expected-files list and either commits cleanly or
+refuses — no user-confirmation step, but stricter scope-drift refusal as compensation. See
+`agent/committer.md`.
+
+## What this command does
+
 Draft and create a commit for the current uncommitted changes, following user commit conventions.
 
 Scope hint from user (optional): $ARGUMENTS

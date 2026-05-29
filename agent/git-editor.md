@@ -145,3 +145,7 @@ When the user wants to execute a narrative-arc rebase:
   plan first; then execute here with the approved plan.
 - **Long-form code edits.** Switch to `@build` for substantive code changes. This agent is for
   history shaping, not for writing code.
+- **Routine session-close commits in autonomous chains.** Use `@committer` instead — a narrow
+  subagent with a session-contract handoff, scope-drift refusal, and no history-rewriting
+  permissions. `@git-editor` picks up when the work needs amending, splitting, hunk selection,
+  or any rewriting of existing commits.

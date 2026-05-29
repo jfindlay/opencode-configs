@@ -1,7 +1,7 @@
 ---
 description: "[jf] Plan-mode agent tuned for deep exploration and architectural tradeoff analysis. Uses Claude Opus 4.7 with low temperature. Enforces option-space exploration before committing to an approach."
 mode: primary
-model: anthropic/claude-opus-4-7
+model: anthropic/claude-opus-4-8
 temperature: 0.3
 ---
 

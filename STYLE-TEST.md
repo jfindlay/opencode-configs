@@ -60,11 +60,28 @@ the test-specific mechanical rules and (eventually) structuring principles. All 
   of the API, UI, and UX, stability of the application contract including controlled deprecation,
   and behavioral validation such as monotonically improved performance unless justified by new
   functionality.
+- **Test focus.**  Whether unit or integration, a test should generally not include much code or
+  complex code and should generally follow this pattern:
+  1. Setup mocks
+  2. Run app code
+  3. Assert
+
+  Any test case should be relentlessly focused on the single test it's created for.  If the 3 step
+  pattern is not immediately clear from reading the test case, consider simplifying.
+  - Use `@pytest.parameterize`
+  - Factor out complex logic to a fixture.  Even fixtures should not be doing complex work except in
+    extraordinary cases.
+  - Simplify test scope: generally narrower for unit tests or broader for integration tests,
+  - Consider it a signal to reevaluate app code with more legible API boundaries: internal API for
+    unit tests, external API for integration tests.
+  - Excessive mocking is also a signal.
+  - Extraordinary cases justifying some test case or fixture complexity: the app code cannot be
+    isolated otherwise; the app code is intricate, fragile, or load bearing
+- **Parameterization** should be preferred unless the parameteric is doing more work than the app
+  code it's covering.  Consider that a signal the parameterization is a forced symmetry.
 TODO:
 - When to mock vs. when to use a real collaborator
 - Fixture scope guidance (`function` / `class` / `module` / `session`)
-- Parametrize-vs-separate-test tradeoffs
-- What makes a test fragile
 - Naming conventions for test functions and parametrize ids.
 
 ## Structuring principles

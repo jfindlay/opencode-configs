@@ -291,6 +291,21 @@ safety net.
 Fact pattern is thin — two hangs in one day. Revise if the same failure appears in non-nested
 dispatches (rules out nesting as the cause) or a confirmed root cause lands in the opencode tracker.
 
+## Discoveries log: the operational mechanism for two-frame relativity
+
+In long-arc projects, the discoveries log (a section in the roadmap for action-frame findings that
+affect the static frame) is the operational mechanism that prevents both defocus and rigidity.
+Discoveries internal to a sub-track (e.g., "we need a different algorithm variant") can wait until
+the sub-track boundary for evaluation. Discoveries that affect cross-track contracts (e.g., "the
+substrate session got the interface wrong") deserve immediate static-frame review via a small Opus
+session. The discipline: the project's narrative document (PEDAGOGY.md or equivalent) is where the
+two frames meet — re-reading it at sub-track boundaries is the practice that catches both defocus
+and rigidity. "The plan was wrong about X" is a successful outcome of a session, not a failure.
+
+Full treatment of the two-frame relativity (static roadmap-view vs. action riding-the-wave-view)
+lives in `~/Documents/software/opencode-config/multi-session-planning.md`; this hint is the
+operational handle.
+
 ## Refactor ordering: doc, code, tests
 
 When a multi-phase cleanup includes both deduplicating/improving docs and splitting long functions

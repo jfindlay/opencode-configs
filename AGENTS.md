@@ -160,6 +160,10 @@ See `AGENTS-HINTS.md` for the derivation of the three-axis rule.
 - `/rebase-plan` — plan (not execute) a narrative-arc rebase; outputs a rebase script for review.
   Also carries the execution playbook that `@git-editor` follows when the user pastes an approved
   plan into a fresh session.
+- `/run-plan` — autonomously execute a session-sharded `docs/PLAN.md` as a 1:1 session:commit
+  chain. `@plan-deep` orchestrates; dispatches `@build`/`@general`/`@explore` per session entry,
+  verifies the session contract, commits via `@committer`. Halts at Opus inflection points,
+  contract-violating discoveries, or committer refusal. State lives in the PLAN.md ledger.
 - `/session-end` — end-of-session retrospective via `@session-scan`; proposes captures for approval.
 - `/test-loop` — run tests, fix failures iteratively, stop when green or loop stalls.
 - `/tier-retrospective` — gather tier-appropriate feedback on the AGENTS/REASONING layout from each

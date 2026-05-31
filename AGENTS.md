@@ -148,9 +148,11 @@ See `AGENTS-HINTS.md` for the derivation of the three-axis rule.
   observations; STUB.
 - `/commit` — inspect uncommitted changes, draft a user-conventional commit message, and gate on
   user approval before committing.
-- `/config-retrospective` — three-thread audit of the OpenCode user-level infrastructure against the
-  session store; Threads 1+2 fork `@explore`, Thread 3 hands off to a fresh `@plan-deep` session.
-  On-demand only.
+- `/config-retrospective` — single-session `@plan-deep` audit of the OpenCode user-level
+  infrastructure against the session store, scored against a relentless-simplicity lens. Forks
+  `@explore` for permission-flow + usage-pattern data; the cohesion review is the orchestrator's own
+  spine; approved changes are actioned by forked `@build`/`@general` and committed via the
+  `/update-config` convention. On-demand only.
 - `/explore` — fork a parameterized `@explore` subagent with a structured investigation prompt.
 - `/format-check` — run the project's format-check target and fix all failures.
 - `/format-loop` — iterative format + fix loop until clean or convergence fails.

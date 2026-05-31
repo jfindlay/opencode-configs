@@ -1,116 +1,99 @@
 ---
-description: "[jf] Three-thread audit of OpenCode user-level infrastructure (~/.config/opencode/) against session-store data. Threads 1+2 (permission flow + usage patterns) run from this Sonnet primary session via an @explore fork; Thread 3 (configuration cohesion) is a manual hand-off to a fresh @plan-deep session. On-demand only — no cadence imposed."
+description: "[jf] Single-session @plan-deep audit of the OpenCode user-level infrastructure against the session store. Forks @explore for permission-flow + usage-pattern data; the cohesion review (does the file family stay relentlessly simple?) is the spine. Approved changes are actioned by forked @build/@general subagents and committed via the /update-config convention. On-demand only."
 ---
 
 # /config-retrospective
 
-Audit pass over the OpenCode user-level infrastructure: permission rules, agent files, command
-files, and the user's own usage patterns. Source of truth at `opencode-config/`; runtime mirror at
-`~/.config/opencode/`.
+Audit the OpenCode user-level infrastructure — permission rules, agent files, command files, doc
+files — against the user's actual session-store usage, then action the changes worth making. Source
+of truth at `opencode-config/`; runtime mirror at `~/.config/opencode/`.
 
-The audit is structured in three threads. Threads 1+2 share schema-discovery work and run together
-in this session via an `@explore` fork. Thread 3 is judgment-heavy architectural synthesis that must
-run in a fresh `@plan-deep` session — primary-session transitions cannot be forked, so the hand-off
-is manual.
+This command runs end-to-end in **one `@plan-deep` session**. There is no cross-session hand-off and
+no workspace-transient carrier file: the orchestrator forks read-only `@explore` subagents to mine
+the session store (high context-pollution, parallelizable, non-steerable — a textbook fork), holds
+the findings in its own context, surfaces decisions to the user, and dispatches `@build`/`@general`
+subagents to action approved changes. The judgment work — the cohesion review — stays in the Opus
+primary, which is why the command is T0.
+
+## The lens: relentless simplicity
+
+Every finding is scored against one bar, not against telemetry for its own sake:
+
+- **Fewest files.** Does each file earn its keep? A file that is rarely loaded, never invoked, or
+  duplicates another's content is a deletion or merge candidate.
+- **Minimal content.** Within each file, is every section necessary? Verbose ceremony, duplicated
+  constraints, and re-derivable exposition are cut candidates.
+- **Coherent disposition.** Is the file family intuitive — right content in the right file, load
+  rules accurate, register clean (transactional / activational / referential not bleeding)?
+
+Telemetry (Threads 1+2) is evidence *for* this lens, not an end in itself. "Data-driven" can
+mislead, but the data reveals where usage and config **diverge** — a command defined but never run,
+a permission rule that never fires, an agent doing work its tier shouldn't. Divergence is the
+signal; simplicity is the verdict.
 
 ## Schema crib (re-derivation tax)
 
-Every audit re-discovers the same store layout from scratch. Pin the durable facts here.
+Every audit re-discovers the same store layout. Pin the durable facts here so the `@explore` fork
+starts from accurate ground. If a fork reports drift from this crib, update the crib (via
+`/update-config`) before completing the audit.
 
-**Store location.** `~/.local/share/opencode/opencode.db`. Read-only access: `sqlite3 -readonly
+**Store location.** `~/.local/share/opencode/opencode.db`. Read-only: `sqlite3 -readonly
 ~/.local/share/opencode/opencode.db '<query>'`. WAL files (`opencode.db-wal`, `opencode.db-shm`)
-live alongside; do not copy or modify them.
+live alongside; never copy or modify them.
 
 **Tables.** `session`, `message`, `part`. Foreign-key chain: `session` → `message` → `part`.
 
-**`part.data` is JSON.** Use `json_extract(data, '$.<key>')` to read fields. Common shapes:
+**`part.data` is JSON.** Use `json_extract(data, '$.<key>')`:
 - `json_extract(data, '$.type')` — `text`, `tool`, `compaction`, others. Tool-call rows are
   `'$.type' = 'tool'`.
-- The body of a user message is a `text` part where `data` contains the prompt verbatim. Slash
-  commands (`/q`, `/note`, etc.) are expanded *client-side* before storage — the store sees the
-  expanded prompt body, not the slash-command name. Discriminate by full-text match against the
-  command's signature opening line.
+- A user message body is a `text` part whose `data` holds the prompt verbatim. Slash commands are
+  expanded *client-side* before storage — the store sees the expanded body, not the slash name.
+  Discriminate by full-text match against the command's signature opening line.
 
-**Time encoding.** `time_created` and `time_updated` are integer **millisecond-epoch**, not seconds.
-To bin by day: `date(time_created/1000, 'unixepoch')`. To filter the last 14 days: `time_created >=
-(strftime('%s', 'now', '-14 days') * 1000)`.
+**Time encoding.** `time_created` / `time_updated` are integer **millisecond-epoch**. Bin by day:
+`date(time_created/1000, 'unixepoch')`. Last 14 days: `time_created >= (strftime('%s', 'now', '-14
+days') * 1000)`.
 
-**Session-level overrides.** `session.permission` column holds session-level permission JSON when
-agent prompts override the global rules. Examples seen historically:
-- `todowrite/todoread/task` deny: forks where the agent prompt suppresses these tools.
-- `plan_enter/plan_exit/question` deny: `@rebase` configuration.  These are configured behaviour,
-  not anomalies.
+**Session-level overrides.** `session.permission` holds session-level permission JSON when an agent
+prompt overrides the global rules (e.g. `todowrite`/`task` deny on forks, `plan_enter`/`question`
+deny on rebase config). These are configured behaviour, not anomalies.
 
-**Compaction events.** The `time_compacting` column on `session` is unused by current OpenCode
-builds. Compaction events live as `part` rows where `json_extract(data, '$.type') = 'compaction'`.
-Count compactions per session by joining and grouping.
+**Compaction events.** The `time_compacting` column is unused by current builds. Compactions live as
+`part` rows where `json_extract(data, '$.type') = 'compaction'`. Count per session by join + group.
 
-## Thread 1 — permission-flow audit
+## Threads
 
-**Audit questions.**
-1. Which tool invocations triggered permission prompts most often, grouped by pattern?
-2. Which prompts fired even though a permission rule should cover them? (Reconstruct by replaying
-   current `opencode.json` against historical args; rule-side data isn't in the store.)
-3. New tool-invocation patterns this week / month?
-4. For each pattern: allow vs. deny ratio.
-5. Per-agent breakdown — does `@plan-deep` trigger different prompts than `@build`?
+The three threads run in one session. Threads 1+2 are forked to `@explore` together (shared
+schema-discovery work, independent queries). Thread 3 is the orchestrator's own judgment work and
+consumes the fork's output.
 
-**Output.** Proposed `opencode.json` permission-rule additions or changes, ordered by frequency ×
-ease-of-decision. Pre-approve high-frequency safe patterns; tighten or relax borderline ones; add
-coverage for novel patterns.
+**Thread 1 — permission-flow.** Which tool invocations triggered prompts most often, by pattern?
+Which fired despite a rule that should cover them (replay current `opencode.json` against historical
+args)? Novel patterns this period? Allow/deny ratio per pattern. Per-agent breakdown — does
+`@plan-deep` trigger different prompts than `@build`?
 
-## Thread 2 — usage-pattern audit
+**Thread 2 — usage-pattern.** Agent distribution: which invoked, how often, for what work? Commands
+defined under `command/` but never invoked, or invoked once? Session-shape: median length,
+compaction distribution, agent-switch frequency. Divergence between intended and actual use — is
+`@plan-deep` (Opus) doing `@build` (Sonnet) work? Are forks on the right axis (the three-axis test
+in AGENTS.md `## Subagent strategy`)? Is `/q` used, and when it shouldn't be?
 
-**Audit questions.**
-1. Agent distribution: which agents invoked, how often, for what kinds of work?
-2. Command distribution: any commands defined under `command/` but never invoked, or invoked only
-   once?
-3. Session-shape stats: median length in messages, compaction count distribution, agent-switch
-   frequency within a session.
-4. Drift between intended and actual usage — examples:
-   - Is `@plan-deep` (Opus) doing work that `@build` (Sonnet) should be doing?
-   - Are subagent forks happening on the right axis (the three-axis test in AGENTS.md `## Subagent
-     strategy`)?
-   - Is `/q` ever used? Is it used when it shouldn't be?
-5. User-side patterns. Example: starting fresh sessions when a previous one was still coherent;
-compacting too many times instead of splitting.
-
-**Output.** A usage-pattern report with concrete observations — bulleted findings, each backed by a
-specific query result. Distinguish "agent is configured wrong" findings from "user should change
-behaviour" findings.
-
-## Thread 3 — configuration cohesion audit (deferred to a separate session)
-
-**Audit questions.**
-1. Does the file family hang together coherently? Is the load-rules dispatch table in `AGENTS.md`
-   correct against actual usage (cross-check via Read tool-call rows in the store, e.g.
-   `json_extract(data, '$.type') = 'tool' AND data LIKE '%STYLE-CODE.md%'` for STYLE-CODE.md
-   firings)?
-2. Does each agent file earn its keep? Cross-check against Thread 2's invocation distribution.
-3. Does each command file earn its keep? Cross-check against Thread 2 again.
-4. What's missing? Gaps in agent/command coverage that Threads 1+2 reveal.
-5. Architectural questions deferred from prior sessions (e.g., "should AGENTS-LENSES.md become a
-   skill?").
-
-**Output.** Architectural assessment with proposed file-family changes — adds, removes, splits,
-merges, scope adjustments. Flag any candidates for the AGENTS-HINTS three-axis capture test.
+**Thread 3 — cohesion (the spine, orchestrator's own).** Does the file family hang together? Is the
+load-rules dispatch table in `AGENTS.md` accurate against actual Read firings (`json_extract(data,
+'$.type') = 'tool' AND data LIKE '%STYLE-CODE.md%'`, etc.)? Does each agent file earn its keep
+(cross-check Thread 2's distribution)? Each command file? Each doc file — is any content
+re-derivable, duplicated, or verbose ceremony? What's missing that Threads 1+2 reveal? Carry-over
+architectural questions (e.g. "should AGENTS-LENSES.md become a skill?"). Score every candidate
+against the relentless-simplicity lens above.
 
 ## Steps
 
-1. **Confirm session tier.** This command must run from a T1/Sonnet primary (`@build` or
-   `@plan-deep` running cheap work). If you are not on Sonnet, tell the user and stop — Threads 1+2
-   don't need T0 reasoning, and the `@explore` fork inherits the wrong cost class if the caller is
-   misallocated.
+1. **Confirm tier.** This command runs on T0/Opus (`@plan-deep`). The cohesion review is
+   tradeoff-analysis register; the data-mining is delegated to a Sonnet fork. If you are not on
+   Opus, tell the user and stop.
 
-2. **Open the workspace-transient plan file.** Create or open `~/PLAN-opencode-audit.md` Write the
-   three-thread charter to it (this command's body is the canonical text; copy the audit-question
-   sections verbatim). The file is transient and deleted at audit completion.
-
-3. **Fork `@explore` for Threads 1+2.** Pass the schema crib above plus the audit-question lists for
-   Threads 1 and 2 verbatim. The fork is appropriate: high context-pollution (many SQL queries,
-   large result sets), high parallelizability (queries independent), no steering mid-task.
-
-   Fork-prompt template:
+2. **Fork `@explore` for Threads 1+2.** Pass the schema crib and the Thread 1+2 descriptions
+   verbatim. Fork prompt:
 
    ```
    Working directory: <opencode-config-repo-root>
@@ -118,77 +101,76 @@ merges, scope adjustments. Flag any candidates for the AGENTS-HINTS three-axis c
    Read-only: YES. DO NOT EDIT ANY FILES. Do not run state-changing commands.
 
    GOAL
-   Audit the OpenCode user-level infrastructure against the session store at
-   ~/.local/share/opencode/opencode.db. Two threads: Thread 1 (permission-flow) and Thread 2
-   (usage-pattern). Do NOT attempt Thread 3 — that runs in a separate session.
+   Mine the OpenCode session store at ~/.local/share/opencode/opencode.db for permission-flow
+   (Thread 1) and usage-pattern (Thread 2) evidence. Do NOT attempt the cohesion review — that
+   stays in the calling session.
 
    SCHEMA CRIB
-   <paste the schema crib section verbatim>
+   <paste the schema crib verbatim>
 
-   THREAD 1 QUESTIONS
-   <paste Thread 1 audit questions verbatim>
-
-   THREAD 2 QUESTIONS
-   <paste Thread 2 audit questions verbatim>
+   THREAD 1 + THREAD 2
+   <paste the Thread 1 and Thread 2 descriptions verbatim>
 
    INVESTIGATION TASKS
-   1. Validate the schema crib by sampling rows from each table. Note any drift from the crib (new
-      columns, encoding changes, table renames). Drift is the most important finding; surface it
-      before continuing.
-   2. Run Thread 1 queries. Group rejected tool calls by category. Cross-reference current
-      opencode.json (read it from <opencode-config-repo-root>/opencode.json) to identify rules that
-      should cover historical rejections.
-   3. Run Thread 2 queries. Compute distributions; flag drift between intended and actual usage.
+   1. Validate the schema crib by sampling each table. Surface any drift FIRST — it is the most
+      important finding.
+   2. Run Thread 1 queries. Group rejected calls by category. Cross-reference current opencode.json
+      (read it from <repo-root>/opencode.json) to find rules that should cover historical rejections.
+   3. Run Thread 2 queries. Compute distributions; flag every usage/config divergence.
 
    OUTPUT FORMAT
-   Two sections, one per thread, with findings as bulleted observations each backed by a specific
-   query and result. Distinguish factual observations (counts, distributions) from interpretive
-   findings (drift, recommendations). Cap reported queries at the most informative ~10 per thread;
-   you can still rely on others to derive the findings.
+   Two sections, one per thread. Findings as bulleted observations, each backed by a specific query
+   + result. Separate factual observations (counts) from interpretive findings (divergence).
+   Include the SQL verbatim for the ~10 most informative queries per thread so the next audit does
+   not re-derive them. Flag drift from the schema crib explicitly.
    ```
 
-4. **Capture the subagent's report into PLAN-opencode-audit.md.** Append the report under a `##
-   Threads 1 + 2 results (Sonnet session, <date>)` heading. Include the SQL queries verbatim so the
-   next audit doesn't re-derive them.
+   This is the only non-steerable phase. If you need to mine very different question sets that are
+   themselves parallelizable, fork more than one `@explore`.
 
-5. **Surface decisions to the user.** For each finding the report flags as actionable, ask via the
-   Question tool: accept (record decision and pass to Thread 3), defer (note it but don't act),
-   reject (drop). Record decisions in PLAN-opencode-audit.md under a `## User decisions` table.
-   This is the only steerable phase — the subagent fork was non-steerable.
+3. **Run Thread 3 yourself.** With the fork's output in context, read the config files that Threads
+   1+2 implicate and judge the whole family against the relentless-simplicity lens. Produce a ranked
+   list of candidate changes: deletes, merges, splits, scope adjustments, content cuts, permission
+   edits, missing coverage. Rank by (impact on simplicity) × (ease/safety of the change).
 
-6. **Hand off to Thread 3.** End this session with a one-line instruction:
+4. **Surface decisions to the user.** For each candidate, use the Question tool: **accept** (queue
+   for action), **defer** (note it, don't act), **reject** (drop). This is the steerable gate — do
+   not action anything before it. Flag any durable framing against the AGENTS.md three-axis capture
+   test.
 
-   > Switch to a fresh `@plan-deep` session and run Thread 3 against
-   > `~/PLAN-opencode-audit.md`.
+5. **Action accepted changes via subagents.** For each accepted change, dispatch a subagent against
+   the **opencode-config repo** (never the runtime mirror):
+   - Mechanical, well-scoped edits (file delete, content cut, section move, permission-rule edit) →
+     `@build`.
+   - Heterogeneous multi-file changes (a merge that touches several files plus the AGENTS.md roster)
+     → `@general`.
+   Subagents apply edits and leave the tree dirty with the change complete. They do NOT commit —
+   commit discipline stays with the orchestrator.
 
-   Thread 3 is judgment-heavy architectural synthesis: it consumes Threads 1+2 outputs plus user
-   decisions, executes mechanical actions (renames, permission edits, agent instantiations), and
-   surfaces remaining architectural questions for user judgment. It must run on Opus because the
-   cohesion review (does the file family still hang together post-changes?) is exactly the
-   tradeoff-analysis register that justifies T0 cost.
+6. **Commit via the `/update-config` convention.** Once accepted changes are applied, commit through
+   the blessed config path: stage exactly the changed files, draft a conventional message, and gate
+   the commit on user approval (the human gate `/update-config` deliberately keeps). One commit per
+   coherent change, or one squashed commit for the audit if the user prefers. Never push.
 
-7. **At completion (Thread 3 finished, all proposals actioned).** Delete `PLAN-opencode-audit.md`.
-   The file is workspace-transient by design: its job is to carry findings between Threads 1+2 and
-   Thread 3 across the session boundary. Add a dated entry to `~/.config/opencode/AGENTS-LOG.md`
-   summarising what changed and why.
+7. **Log the audit.** Append a dated entry to `AGENTS-LOG.md` (in the repo): what changed, why, what
+   the alternative was. This is the institutional memory that keeps the next audit from re-deriving
+   the rationale — a legitimate durable changelog write, not a transient scratch file.
 
 ## Constraints
 
-- The `PLAN-opencode-audit.md` file lives at the **user home dir**, NOT under `opencode-config/`.
-  The latter repo is propagated to `~/.config/opencode/` runtime by salt-call.  Workspace-transient
-  means transient to the workspace, not to the runtime config.
-- Read-only against the SQLite store. Use `sqlite3 -readonly`. Never write to `.db` /`.db-wal` /
-  `.db-shm` files; never run `VACUUM` or schema migrations.
-- The schema crib is the canonical text. If a future audit discovers schema drift, update the crib
-  in this command file (via `/update-config`) before completing the audit, so the next run starts
-  from accurate facts.
-- Thread 3 runs in a separate session with a different model. Do NOT attempt to do Thread 3 from
-  this Sonnet session — the cohesion review's value depends on T0 reasoning depth.
-- The audit produces capture candidates (durable framings worth promoting to AGENTS-HINTS.md or
-  AGENTS-LOG.md). Surface them per the AGENTS.md three-axis test; do not auto-write.
+- All edits target the **opencode-config repo**, never `~/.config/opencode/` (the salt/symlink
+  mirror). Subagents must be told this explicitly in their fork prompt.
+- Read-only against the SQLite store: `sqlite3 -readonly`. Never write `.db` / `.db-wal` / `.db-shm`;
+  never `VACUUM` or migrate.
+- The schema crib is canonical. On discovered drift, update it via `/update-config` before
+  completing the audit.
+- The command must model what it audits: keep it relentlessly simple. Resist re-growing the
+  cross-session ceremony this rework removed.
 
 ## Exit report
 
-- PLAN-opencode-audit.md path and last-touched section.
-- Threads 1+2 finding count, decisions logged.
-- Hand-off instruction for Thread 3 (verbatim, copy-pasteable).
+- Threads 1+2 finding count; schema drift (if any).
+- Accepted / deferred / rejected counts; files changed and the commit hash (or "uncommitted —
+  pending user approval").
+- AGENTS-LOG.md entry written (yes/no).
+- Any CAPTURE-CANDIDATE framings surfaced.

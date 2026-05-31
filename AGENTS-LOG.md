@@ -210,6 +210,37 @@ note is more confusing than useful, and this changelog carries the audit trail.
 
 ---
 
+## 2026-05-31 — /config-retrospective collapsed to a single-session, simplicity-led audit
+
+The command was a three-thread machine: Threads 1+2 (permission-flow + usage-pattern) ran from a
+Sonnet primary via an `@explore` fork, Thread 3 (configuration cohesion) was a *manual hand-off* to
+a fresh `@plan-deep` session, and a workspace-transient `~/PLAN-opencode-audit.md` file bridged the
+session boundary. Reworked into one `@plan-deep` session that forks `@explore` for the data-mining,
+runs the cohesion review in-context, gates changes through the Question tool, and dispatches
+`@build`/`@general` to action approved edits — committed via the existing `/update-config`
+convention.
+
+**Why.** Three coupled problems. (1) The home-dir carrier file existed *only* to bridge the
+primary-session transition, which can't be forked. Collapsing to one session deletes the file and
+its lifecycle ceremony outright. (2) Thread 3 — the judgment about whether the file family stays
+coherent and minimal — was the genuinely valuable thread, yet it was deferred and under-specified.
+Promoting it to the spine, with Threads 1+2 demoted to evidence feeding it, puts the Opus reasoning
+where the cost-of-wrong actually lives. (3) The command should model what it audits; it dropped from
+194 to ~130 lines by cutting the cross-session bridge and duplicated constraint blocks.
+
+**The relentless-simplicity lens is now explicit:** fewest files, minimal content, coherent
+disposition. Telemetry is kept (not dropped) because usage/config *divergence* — a command never
+invoked, a permission rule that never fires, an agent doing the wrong tier's work — is the signal
+that tells you a file has stopped earning its keep. The verdict is simplicity; the data is evidence
+for it, not an end in itself.
+
+**Alternatives weighed.** Dropping telemetry entirely (rejected — loses the divergence signal);
+keeping the two-session split (rejected — the carrier file and hand-off ceremony were the main
+cost); full autonomous-chain `@committer` commits (rejected — reuses the human-gated `/update-config`
+path rather than inventing a parallel autonomous-commit chain for config files).
+
+---
+
 ## Absorption records — content moved into canonical homes
 
 - **Scale-adaptive rendering with collapse manifest** (2026-04-23 to 2026-04-26 in HINTS) →

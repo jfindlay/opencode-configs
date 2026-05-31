@@ -101,6 +101,13 @@
       "*": "ask",
       "~/.config/opencode/**": "deny"
     },
+    // Writes to ~/.config/opencode/ are denied for the same reason as edits: it's a runtime
+    // mirror populated by salt. Without this, `write` falls through to the global `ask` and a
+    // new file can be created in the mirror (observed once: a build agent wrote run-plan.md there).
+    "write": {
+      "*": "ask",
+      "~/.config/opencode/**": "deny"
+    },
     // Allow read-only access to the user-level OpenCode config dir so agents can load
     // AGENTS-*.md, STYLE-*.md, etc. on-demand without an external_directory prompt per file.
     "external_directory": {
@@ -125,6 +132,10 @@
     "build": {
       "permission": {
         "edit": {
+          "*": "allow",
+          "~/.config/opencode/**": "deny"
+        },
+        "write": {
           "*": "allow",
           "~/.config/opencode/**": "deny"
         }

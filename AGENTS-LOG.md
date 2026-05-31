@@ -241,6 +241,56 @@ path rather than inventing a parallel autonomous-commit chain for config files).
 
 ---
 
+## 2026-05-31 — Config audit (theme: autonomous multi-sessions)
+
+A `/config-retrospective` run themed on "how are the autonomous multi-sessions going?" Two read-only
+`@explore` forks mined the session store; the cohesion review stayed in the Opus primary.
+
+**Headline finding (kept, not changed):** the autonomous-chain machinery works and was exercised
+under real load. Two `/run-plan` invocations (both 2026-05-30, `image-annotator`); the larger drove
+a 12-session / 10-commit chain (S0–S11) to completion in ~7.5h with zero unplanned halts, 259 tests
+green, mypy strict clean. All 14 `@committer` sessions committed, zero refusals, zero scope drift.
+`run-plan.md`, `committer.md`, and the autonomous-chain carve-out are earning their keep — not
+aspirational dead weight. Opus orchestration was 43% of chain cost ($14.22 of $32.91), defensible
+given the verify-between-dispatches work but the number to watch if chains lengthen.
+
+**Changes made:**
+
+1. **opencode.json — closed the `write` deny gap for `~/.config/opencode/**`.** The `edit` block
+   denied the runtime mirror but `write` had no rule and fell through to the global `ask`; the store
+   showed a build agent had actually *written* `run-plan.md` into the mirror. Added a `write` deny
+   mirroring `edit`, globally and in the build override. Alternative weighed: rely on the `ask`
+   prompt (rejected — a silent gap that already fired once).
+
+2. **AGENTS.md — registered `multi-session-planning.md` in the load-rules table.** The 340-line
+   field manual underpinning `/run-plan` was orphaned from dispatch (read only twice, both
+   plan-deep, not in the table). Registered rather than absorbed or deleted: the content is durable
+   and the two-frame model has no better home. Alternative weighed: fold into `run-plan.md`
+   (rejected — loses the field-manual register).
+
+3. **command/config-retrospective.md — rewrote the stale schema crib.** The crib omitted
+   `session.agent/model/parent_id/cost` (the columns that made this very audit's theme analysis
+   possible) and *wrongly implied permission events are stored*. They are not: the standalone
+   `permission` table is empty and no permission `part` rows exist — only rule-denied / user-rejected
+   residue survives in tool-part `status`. Corrected the crib so the next audit doesn't re-pay the
+   re-derivation tax or chase phantom permission logs.
+
+4. **Deleted command/format-check.md.** A redundancy fork found it a strict subset of
+   `/format-loop` (same detect→fix→rerun loop and convergence guard; it escalates to the full
+   `format` target anyway, making "check" cosmetic). Removed its roster row and extended
+   `/format-loop`'s entry to note check-only via arguments. Alternative weighed: keep for the
+   check-only entry point (rejected — the affordance survives as a `/format-loop` argument).
+
+**Deliberately NOT changed:** the over-broad `grep`/`rg` bash denies (a documented, intentional
+conservative tradeoff — the matcher is glob-prefix-anchored and the comment already says so); the
+two `style-audit-*` STUBs (incomplete, not redundant — they have a defined future role under
+`/style-audit`); the dozen rare-occasion commands with zero invocations (frequency is the wrong
+metric — they earn their keep by existing when the occasion arrives). A one-off `session-scan` read
+of a T0/T1 doc and duplicate session-level deny rules were fork-prompt/runtime artifacts, not
+file-family defects, so no config change.
+
+---
+
 ## Absorption records — content moved into canonical homes
 
 - **Scale-adaptive rendering with collapse manifest** (2026-04-23 to 2026-04-26 in HINTS) →

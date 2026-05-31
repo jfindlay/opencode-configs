@@ -41,11 +41,31 @@ starts from accurate ground. If a fork reports drift from this crib, update the 
 ~/.local/share/opencode/opencode.db '<query>'`. WAL files (`opencode.db-wal`, `opencode.db-shm`)
 live alongside; never copy or modify them.
 
-**Tables.** `session`, `message`, `part`. Foreign-key chain: `session` → `message` → `part`.
+**Tables.** The analytic chain is `session` → `message` → `part` (FK-linked, cascade delete). The
+store also carries `permission`, `todo`, `event`, `event_sequence`, `session_message`, `workspace`,
+`project`, `account*`, `data_migration`, `session_share`, `__drizzle_migrations` — most are empty or
+irrelevant to this audit. Notably the standalone `permission` table (keyed by `project_id`, JSON
+`data`) is **empty in current builds** and the `event` / `session_message` tables are empty too.
+
+**`session` analytic columns (the high-value ones — exploit directly, do not infer from bodies).**
+The crib historically listed only the FK chain; these columns make agent/model/chain attribution a
+direct query:
+- `session.agent` (text) — owning agent: `build`, `explore`, `plan-deep`, `general`, `committer`,
+  `session-scan`, or NULL for pre-agent-column sessions (before ~2026-04-12).
+- `session.model` (text) — JSON, e.g. `{"id":"claude-sonnet-4-6","providerID":"anthropic",...}`.
+  Tier-check with `json_extract(model, '$.id')`.
+- `session.parent_id` (text) — parent session for a forked subagent; NULL for top-level. **This is
+  how fork trees / `/run-plan` chains are reconstructed** (a plan-deep parent with build/general/
+  explore/committer children ordered by `time_created`).
+- `session.cost` (real) and `session.tokens_input/output/reasoning/cache_read/cache_write` (integer)
+  — per-session economics, for chain-vs-standalone cost and Opus-overhead analysis.
+- `session.title`, `session.slug`, `session.directory` — human-readable session identity.
 
 **`part.data` is JSON.** Use `json_extract(data, '$.<key>')`:
-- `json_extract(data, '$.type')` — `text`, `tool`, `compaction`, others. Tool-call rows are
-  `'$.type' = 'tool'`.
+- `json_extract(data, '$.type')` is one of: `tool`, `step-start`, `step-finish`, `text`,
+  `reasoning`, `patch`, `compaction`, `agent`. Tool-call rows are `'$.type' = 'tool'`; the tool name
+  is `'$.tool'` and its outcome is `'$.state.status'` (`completed` / `error` / `aborted` /
+  `pending` / `running`) with `'$.state.input.<arg>'` and `'$.state.error'` beneath.
 - A user message body is a `text` part whose `data` holds the prompt verbatim. Slash commands are
   expanded *client-side* before storage — the store sees the expanded body, not the slash name.
   Discriminate by full-text match against the command's signature opening line.
@@ -54,9 +74,18 @@ live alongside; never copy or modify them.
 `date(time_created/1000, 'unixepoch')`. Last 14 days: `time_created >= (strftime('%s', 'now', '-14
 days') * 1000)`.
 
-**Session-level overrides.** `session.permission` holds session-level permission JSON when an agent
-prompt overrides the global rules (e.g. `todowrite`/`task` deny on forks, `plan_enter`/`question`
-deny on rebase config). These are configured behaviour, not anomalies.
+**Permission decisions are NOT logged.** This is the crib's most dangerous historical error.
+Permission allow/deny/ask *outcomes* are not recorded anywhere — the standalone `permission` table
+is empty and there are no permission-typed `part` rows. Thread 1 can only observe the residue in
+tool-part status: (a) rule-denied calls (`'$.state.status' = 'error'` with `'$.state.error'` LIKE
+`%user has specified a rule%`), and (b) user-rejected calls (error LIKE `%user rejected
+permission%`). An *approved* ask is stored as `completed`, indistinguishable from a pre-allowed
+call — so allow/ask ratios are unrecoverable.
+
+**Session-level overrides.** `session.permission` (distinct from the empty `permission` table) holds
+session-level permission JSON when a fork prompt overrides the global rules (e.g. `edit: * -> deny`
+on read-only explore forks, `todowrite`/`task` deny on subagent forks). These are configured
+behaviour, not anomalies.
 
 **Compaction events.** The `time_compacting` column is unused by current builds. Compactions live as
 `part` rows where `json_extract(data, '$.type') = 'compaction'`. Count per session by join + group.

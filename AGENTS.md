@@ -72,6 +72,9 @@ the judgment register for. T0/T1 agents follow the trigger directly.
 |                           | import-graph, call-graph, coverage, or test analysis      |       |
 | AGENTS-LOG.md             | During meta-restructuring sessions only (config audits,   | T0    |
 |                           | doc reorganisations)                                      |       |
+| multi-session-planning.md | When planning or executing long-arc multi-session work    | T0    |
+|                           | (the two-frame model, commit-shaped session, contract     |       |
+|                           | taxonomy); before/during a /run-plan chain                |       |
 
 ## Subagent strategy (sideways allocation)
 
@@ -154,8 +157,8 @@ See `AGENTS-HINTS.md` for the derivation of the three-axis rule.
   spine; approved changes are actioned by forked `@build`/`@general` and committed via the
   `/update-config` convention. On-demand only.
 - `/explore` — fork a parameterized `@explore` subagent with a structured investigation prompt.
-- `/format-check` — run the project's format-check target and fix all failures.
-- `/format-loop` — iterative format + fix loop until clean or convergence fails.
+- `/format-loop` — iterative format + fix loop until clean or convergence fails; pass a scope in
+  `$ARGUMENTS` to narrow it, or ask for check-only when you don't want fixes applied.
 - `/note` — capture a CAPTURE-CANDIDATE into a target docs file with per-item approval.
 - `/update-config` — edit OpenCode config edits in the salt-managed source of truth.
 - `/q` — force a terse one-turn answer; suspends reasoning-register rules for that turn only.

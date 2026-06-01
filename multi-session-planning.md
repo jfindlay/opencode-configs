@@ -227,6 +227,38 @@ updates (revised roadmap, revised contracts, revised sub-track ordering). Treati
 a status report misses its actual function. It is the moment where the coordinate transform is
 performed.
 
+   An inflection review can be *paged* (a forked subagent invoked at the juncture) rather than
+   *resident* (a continuously-running Opus context), provided the action-frame texture is fed in as
+   a written digest — because a forked subagent sees only what is written down, not what was
+   experienced. The digest is the externalized action frame: not a transcript, but the minimum
+   texture the juncture adjudicator needs that the static ledger rows don't capture. A paged
+   inflection review returns one-shot (forks cannot hold an interactive loop); anything needing
+   human sign-off is returned as a recommendation and surfaced by whoever paged the fork.
+
+### Who holds the frame
+
+The coordinate-transform judgment requires someone holding the action frame — what was learned, what
+flexed, what the next few sessions need to know that isn't written in the plan. There are two ways
+to provide this:
+
+- **Resident context:** a continuously-running Opus session accumulates the action frame organically
+  as the chain runs. The transform is high quality because nothing is lost. Cost: the expensive tier
+  is present for every mechanical iteration, not just junctures.
+- **Externalized digest + paged fork:** a cheap driver runs the mechanical loop and maintains a
+  durable "action-frame digest" in the plan file — appended on non-trivial iterations (discoveries,
+  contract flexes, notable texture). At each juncture, the digest is fed into a cold-forked Opus
+  invocation. Cost: the digest is lossier than a live context; the fork's adjudication is only as
+  good as what was written down.
+
+The choice is a cost/quality tradeoff. For long chains (>20 sessions), the token cost of a resident
+Opus context is substantial; the externalized digest is the practical option. For short or
+high-stakes chains, resident context is worth the cost.
+
+In either case, the mechanical steps — running tests, grepping for KATs, diffing files, writing
+ledger rows — are frame-free and belong at the cheapest competent tier, not with the adjudicator.
+Fusing mechanical gating with coordinate-transform judgment is the failure mode that makes the
+expensive tier run every iteration to access judgment needed only at junctures.
+
 ### Practical implications
 
 - **Maintain both documents.** A long-arc roadmap (durable; lives for the project's life) and a

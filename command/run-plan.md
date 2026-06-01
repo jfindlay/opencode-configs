@@ -1,6 +1,6 @@
 ---
-description: "[jf] Autonomously execute a session-sharded plan file as a 1:1 session:commit chain. @plan-deep orchestrates; dispatches @build/@general/@explore per session entry, verifies the session contract (green checks + KAT present + expected files, no scope drift), commits the session then commits the ledger update. Halts only at marked Opus inflection points, contract-violating discoveries, or committer refusal. State lives in the committed plan ledger, not context. Args: [plan-path] [may-reshard|halt-at-boundaries|fully-autonomous]. Plan path defaults to docs/PLAN.md."
-agent: plan-deep
+description: "[jf] Autonomously execute a session-sharded plan file as a 1:1 session:commit chain. @plan-admin (T1) orchestrates the mechanical loop; dispatches @build/@general/@explore per session entry, @committer for commits, and pages a forked @plan-deep (T0) only at inflection points, contract-invalidating discoveries, and sub-track boundaries. State lives in the committed plan ledger. Args: [plan-path] [may-reshard|halt-at-boundaries|fully-autonomous]. Plan path defaults to docs/PLAN.md."
+agent: plan-admin
 subtask: false
 ---
 
@@ -12,11 +12,12 @@ category, tier, expected files, and consumed contracts) per `multi-session-plann
 This command does NOT shard a plan — that is a `@plan-deep` interactive task. It EXECUTES
 an already-sharded one.
 
-This command runs from `@plan-deep` (T0). The orchestration judgment — is the session
-contract fulfilled? does this discovery invalidate a downstream contract? — is exactly
-the T0 register. Implementation is dispatched down-tier to `@build`/`@general`; research
-to `@explore`. If invoked from a non-`plan-deep` session, stop and tell the user to
-switch.
+This command runs from `@plan-admin` (T1). The mechanical loop — select, dispatch, gate,
+commit, ledger — is entirely the driver's work. T0 judgment (discovery adjudication,
+inflection-point interface design, sub-track boundary coordinate-transform) is paged in by
+forking `@plan-deep` at the three junctures only. Implementation is dispatched down-tier to
+`@build`/`@general`; research to `@explore`. If invoked from a non-`plan-admin` session,
+stop and tell the user to switch.
 
 User input: $ARGUMENTS
 
@@ -24,7 +25,7 @@ User input: $ARGUMENTS
 
 Resolved ONCE before the loop, then referenced throughout. These turn the project-specific
 facts the command used to hardcode (`docs/PLAN.md`, `make`) into discovered values, so the
-orchestrator never has to override a false precondition mid-run.
+driver never has to override a false precondition mid-run.
 
 1. **Bind PLAN — the plan file path.** Parse `$ARGUMENTS`: the first path-like token
    (ending `.md`, or any explicit path) is PLAN. Default `PLAN = docs/PLAN.md`. Remaining
@@ -45,25 +46,29 @@ orchestrator never has to override a false precondition mid-run.
 
 ## Invariant: state lives on disk, not in context
 
-Every loop iteration re-derives its state from PLAN (session list + ledger). The
-orchestrator must be able to resume cold from the ledger alone. Do NOT rely on in-context
-memory of prior iterations for correctness — between any two iterations the context may
-have compacted. After each committed session, the ledger is the source of truth for
-"what's done and what contracts are now frozen."
+Every loop iteration re-derives its state from PLAN (session list + ledger + action-frame
+digest). The driver must be able to resume cold from the ledger alone. Do NOT rely on
+in-context memory of prior iterations for correctness — between any two iterations the
+context may have compacted. After each committed session, the ledger is the source of truth
+for "what's done and what contracts are now frozen;" the action-frame digest is the source
+of truth for "what was learned."
 
-This invariant is enforced mechanically: every iteration ends with both a session commit
-AND a ledger commit (step 6b), so the tree is clean and the committed ledger exactly
-matches the last committed session. A cold resume never has to reconcile uncommitted
-ledger state against the code.
+This invariant is enforced mechanically: every iteration ends with both a session commit AND
+a ledger commit (step 6b), so the tree is clean and the committed ledger+digest exactly
+matches the last committed session. A cold resume never has to reconcile uncommitted state
+against the code.
 
 ## Preconditions (refuse and stop if any fail)
 
-1. Running from `@plan-deep`. Else: stop, tell the user to switch.
+1. Running from `@plan-admin`. Else: stop, tell the user to switch.
 2. PLAN (bound in Preflight) exists and contains a `## Session list` table and a
    `## Cross-session contracts` section.
 3. PLAN contains a `## Progress ledger` table (see Ledger spec). If absent, stop and tell
    the user to add it (one-time upgrade from the prose Progress section).
-4. Working tree is clean at loop start — including PLAN. Because each iteration commits its
+4. PLAN contains a `## Action-frame digest` section (may be empty at chain start). If absent,
+   add it as an empty section and commit via `@committer` ("Initialize PLAN digest") before
+   starting the loop.
+5. Working tree is clean at loop start — including PLAN. Because each iteration commits its
    own ledger update (step 6b), a clean tree is the invariant between iterations; ANY dirty
    file at loop start means a prior session or ledger commit didn't land cleanly — refuse
    and surface, do not stomp uncommitted work.
@@ -71,7 +76,7 @@ ledger state against the code.
      ledger-initialized and has never been committed, commit it first via `@committer`
      ("Initialize PLAN ledger") before starting the loop. This establishes the clean
      baseline rather than demanding one that doesn't exist yet.
-5. VERIFY commands (bound in Preflight) are resolved. The verify gate depends on them.
+6. VERIFY commands (bound in Preflight) are resolved. The verify gate depends on them.
 
 ## The loop
 
@@ -85,15 +90,23 @@ Repeat until all session-list rows are `done` in the ledger, or a halt condition
   surface the offending rows.
 - If none remain → the chain is complete; go to Completion.
 
-### 2. Check for a halt-before marker
+### 2. Check for a halt-before marker (inflection point — page Opus)
 
-- If the selected session is marked **Opus inflection point** in the plan: this session's
-  *design* is done by the orchestrator itself, not dispatched. Do the interface/substrate
-  design in this `@plan-deep` context, write the resolved interface into the relevant
-  `## Cross-session contracts` subsection, then **HALT for human sign-off** before
-  dispatching the implementation. Resume on approval.
-  - Rationale: substrate interfaces are consumed by many downstream sessions; reworking
-    them later is the expensive failure mode the inflection point exists to prevent.
+If the selected session is marked **Opus inflection point** in the plan:
+
+- Fork `@plan-deep` (subagent) with the juncture fork template (see below), type
+  `inflection-design`. Include the inflection session entry, the contracts it consumes/produces,
+  and the full current `## Action-frame digest`.
+- The fork designs the substrate interface and writes the resolved design into PLAN's relevant
+  `## Cross-session contracts` subsection, then returns a one-paragraph summary.
+- **HALT for human sign-off.** Surface the returned design. Do not dispatch implementation until
+  the user approves.
+- On approval, resume at step 3 for this session (dispatch `@build` to implement the design the
+  fork just wrote).
+
+Rationale: substrate interfaces are consumed by many downstream sessions; reworking them later is
+the expensive failure mode the inflection point exists to prevent. The fork produces the design
+one-shot; the human loop lives here in the driver.
 
 ### 3. Classify and dispatch the session
 
@@ -105,15 +118,15 @@ Read the session entry's category:
   `@build`. Scoped prompt (see Dispatch template) — names ONLY this session's entry plus
   the contracts it consumes; instructs the subagent NOT to read the Roadmap appendix or
   any other session. Subagent leaves the tree dirty with green tests; does NOT commit.
-- **Code-change, Category A (substrate)** not flagged Opus: the orchestrator may design
-  the interface inline (cheap cases) then dispatch `@build` to implement, or dispatch
+- **Code-change, Category A (substrate)** not flagged Opus: the driver dispatches `@build`
+  directly (cheap cases where the interface is already written into contracts), or dispatches
   `@general` for heterogeneous setup work (e.g. S0 skeleton). Use judgment.
 
 One session = one dispatch = one commit. Never batch two session rows into one dispatch.
 
-### 4. Verify the session contract (the core gate)
+### 4. Verify the session contract (mechanical gate — driver only, no Opus)
 
-After the implementation subagent returns, the orchestrator — NOT the subagent —
+After the implementation subagent returns, the driver — NOT a paged Opus fork —
 verifies, mechanically:
 
 a. **Tests green.** Run VERIFY_TEST. Red → go to Fix-loop (step 4f).
@@ -130,24 +143,24 @@ d. **Expected files match.** `git status` modified/added set vs. the entry's exp
    in step 6b. Any other unexpected file → potential scope drift; inspect. If the extra
    file is plainly part of the unit (e.g. an `__init__.py`), allow and note it in the
    ledger; if it touches another session's surface → halt (`BLOCKED: scope drift`).
-e. **Discovery check.** Did the subagent report a discovery that contradicts a
-   *downstream* contract (a frozen interface, a KAT, a named prose invariant)?
-   - Downstream-contract-invalidating → default is **HALT**
-     (`HALT: coordinate-transform needed`). This is the one place the manual reserves for
-     re-sharding. Surface the discovery, the affected contract, and the affected downstream
-     sessions.
-     - If the run was invoked with `may-reshard` AND the needed change is *additive*
-       (insert a new session; widen a not-yet-frozen contract), the orchestrator may
-       re-shard the downstream session list, record the re-shard in `## Discoveries`, and
-       continue.
-     - *Destructive* changes — altering a FROZEN contract (see the ledger's Frozen
-       contracts list), or deleting/reordering already-committed sessions — ALWAYS HALT,
-       regardless of `may-reshard`. Autonomous destructive re-shard is never permitted.
-   - Internal to the current sub-track → append to `## Discoveries & risks`, continue.
+e. **Discovery check — page Opus when flagged.** Did the subagent report a discovery that
+   contradicts a *downstream* contract (a frozen interface, a KAT, a named prose invariant)?
+   - **No discovery flagged:** continue to step 5.
+   - **Discovery flagged:** fork `@plan-deep` (subagent) with juncture type
+     `discovery-adjudication`. Include the discovery, the affected contract(s), the affected
+     downstream sessions, and the full current `## Action-frame digest`. Await the fork's
+     one-shot verdict:
+     - `internal-continue`: append to `## Discoveries & risks` in PLAN; continue to step 5.
+     - `additive-reshard <spec>`: honoured ONLY if run was invoked with `may-reshard` AND the
+       change is *additive* (insert a new session; widen a not-yet-frozen contract). Re-shard
+       the downstream session list per the spec, record in `## Discoveries`, continue.
+     - `destructive-HALT`: ALWAYS HALT regardless of `may-reshard`. Surface the discovery,
+       the affected contract, and the affected downstream sessions. Autonomous destructive
+       re-shard is never permitted.
+   Also append a digest entry for this iteration (non-trivial — a discovery was flagged).
 f. **Fix-loop.** On red tests/types: dispatch one `@build` fix subagent with the failure
    output. Re-verify. Cap at 2 fix iterations; on the 3rd failure → halt
-   (`BLOCKED: session does not converge`). Do not let the fix-loop run unbounded — that
-   is the classic autonomous-chain runaway.
+   (`BLOCKED: session does not converge`). Do not let the fix-loop run unbounded.
 
 ### 5. Commit the session via @committer
 
@@ -166,16 +179,29 @@ AGENTS.md with:
   from 4a, re-commit. This is part of the Fix-loop budget (cap 2).
 - `secret risk` → HALT immediately, surface, never bypass.
 
-### 6. Update the ledger
+### 6. Update the ledger and digest
 
-On a successful session commit, write to PLAN's `## Progress ledger`:
-- Mark the session row `done`, record the commit short-hash.
-- Mark any contracts the session FROZE (substrate interfaces, KAT additions) as frozen,
-  so later iterations treat them as fixed.
-- Note any allowed scope extras and any logged discoveries.
+On a successful session commit:
 
-This write goes through the orchestrator's normal rolling-context write permission (PLAN
-is a rolling-context file).
+a. **Ledger:** write to PLAN's `## Progress ledger`:
+   - Mark the session row `done`, record the commit short-hash.
+   - Mark any contracts the session FROZE (substrate interfaces, KAT additions) as frozen,
+     so later iterations treat them as fixed.
+   - Note any allowed scope extras and any logged discoveries.
+
+b. **Action-frame digest:** if this was a non-trivial iteration (discovery flagged, contract
+   flexed, or meaningful texture), append one block to `## Action-frame digest`:
+   ```
+   ### <session-id> — <date>
+   Discovery/flex: <one sentence>
+   Affected: <contract name or "none">
+   Deferred: <yes/no — if yes, what the next juncture adjudicator should re-examine>
+   Texture: <one sentence, or omit>
+   ```
+   Trivial iterations (clean green run, no surprises) produce no digest entry.
+
+Both writes go through the driver's normal rolling-context write permission (PLAN is a
+rolling-context file).
 
 ### 6b. Commit the ledger update
 
@@ -184,21 +210,26 @@ of the form `Ledger: <session-id> done, freeze <contract>` (or just `Ledger: <se
 done` when no new contract is frozen). This is a separate rolling-context commit — never
 folded into the session commit (step 5).
 
-On success the tree is clean again and the committed ledger exactly matches the last
+On success the tree is clean again and the committed ledger+digest exactly matches the last
 committed session. This is what makes the "state lives on disk" invariant literally true:
 a cold resume reads only committed state and never has to reconcile an uncommitted ledger
 against the code.
 
-### 7. Sub-track boundary (◆)
+### 7. Sub-track boundary (◆) — page Opus for the coordinate transform
 
 If the just-completed session is the last in a sub-track (marked ◆ in the plan):
-- Re-read the `## Purpose (design intent)` and verify the work still tracks it
-  (anti-defocus check).
-- Reconcile the ledger's frozen contracts against the plan's stated contracts; note
-  drift in the ledger.
-- Per this plan's size (see Boundary policy), self-review and continue by default —
-  do NOT halt for human sign-off at ◆ unless the run config says otherwise or a
-  downstream contract was invalidated.
+
+- Fork `@plan-deep` (subagent) with juncture type `boundary-transform`. Include the
+  `## Purpose (design intent)`, the frozen-contract list, and the full current
+  `## Action-frame digest`.
+- The fork returns: `still-on-intent <notes>` or `drift-HALT <what changed and why>`.
+- If `still-on-intent`: reconcile the ledger's frozen contracts against the plan's stated
+  contracts, note drift in the ledger, and continue per Boundary policy.
+- If `drift-HALT`: halt for human sign-off with the fork's output.
+
+Per the Boundary policy below, self-continue by default (the fork is the "self-review") — do
+NOT halt for human sign-off at ◆ unless the fork returns `drift-HALT` or the run config says
+`halt-at-boundaries`.
 
 Then return to step 1.
 
@@ -207,18 +238,16 @@ Then return to step 1.
 The review cadence scales with **sub-track count, not session count**. Boundaries are
 where the human-relevant coordinate-transform happens; sessions are not. Default policy:
 
-- **Halt-for-human:** Opus inflection points (step 2), contract-violating discoveries
-  (4e), committer secret/refusal (step 5), non-convergence (4f), dependency deadlock.
-- **Self-review-and-continue:** ◆ sub-track boundaries (step 7), unless overridden.
+- **Halt-for-human:** Opus inflection points (step 2 — after fork returns design for sign-off),
+  `drift-HALT` from a boundary fork (step 7), `destructive-HALT` from a discovery fork (4e),
+  committer secret/refusal (step 5), non-convergence (4f), dependency deadlock.
+- **Self-review-and-continue:** ◆ sub-track boundaries when fork returns `still-on-intent`
+  (step 7), unless overridden by `halt-at-boundaries`.
 
-For the image-annotator plan specifically: 2 sub-tracks, so ~1 human touch (S1 inflection
-point) on the happy path; S8's ◆ boundary self-reviews. A larger many-sub-track plan
-would surface more boundaries and so more touches, without any change to this command.
-
-A run may be invoked with `halt-at-boundaries` to force human sign-off at every ◆ (use
-for the FIRST run of a new project, before the shard pattern is proven), or
-`fully-autonomous` to also self-review inflection points (use only once a project's
-substrate is known-good).
+A run may be invoked with `halt-at-boundaries` to force human sign-off at every ◆ (use for
+the FIRST run of a new project, before the shard pattern is proven), or `fully-autonomous`
+to also self-continue inflection points (use only once a project's substrate is known-good,
+and only when inflection design is expected to be straightforward).
 
 ## Dispatch template (code-change session)
 
@@ -248,26 +277,68 @@ DONE WHEN
 - Exactly these files are modified: <expected files>.
 ```
 
+## Juncture fork template (@plan-deep subagent)
+
+```
+Working directory: <project root>
+Thoroughness: very thorough
+Read-only: YES (except inflection-design forks, which write to PLAN's contracts section only).
+
+JUNCTURE TYPE: <inflection-design | discovery-adjudication | boundary-transform>
+
+PLAN FILE: <PLAN path>
+SESSION ENTRY: <entry N verbatim>
+FROZEN CONTRACTS (do not break these):
+<relevant frozen-contracts list from ledger>
+
+ACTION-FRAME DIGEST (feed to juncture adjudicator):
+<full ## Action-frame digest section verbatim>
+
+JUNCTURE QUESTION:
+<one of:>
+  Inflection: Design the substrate interface for session <N>. Write the resolved interface
+  into PLAN's ## Cross-session contracts subsection <X>. Return a one-paragraph summary of
+  what you wrote and any over-specified methods you recommend carrying forward.
+
+  Discovery: The subagent reported: "<discovery>". Does this invalidate a frozen downstream
+  contract? Return one of: internal-continue / additive-reshard <spec> / destructive-HALT,
+  with one paragraph of reasoning and the affected contract(s) named.
+
+  Boundary: Re-read ## Purpose (design intent) and the frozen-contract list. Are we still
+  tracking the design intent? Return: still-on-intent <notes> OR drift-HALT <what changed
+  and why it needs sign-off>.
+
+CONSTRAINTS:
+- Return one-shot. Do not ask the user anything — anything needing human sign-off comes back
+  as a flagged recommendation in your return; the driver surfaces it.
+- Do NOT implement. Do NOT dispatch subagents.
+- Write to PLAN's ## Cross-session contracts ONLY if this is an inflection-design juncture.
+```
+
 ## Constraints
 
-- Runs from `@plan-deep` only. Implementation is always dispatched down-tier.
+- Runs from `@plan-admin` only. Implementation is always dispatched down-tier.
+- `@plan-deep` is paged as a subagent only at the three junctures (inflection design,
+  discovery adjudication, sub-track boundary). It is never resident for the loop.
 - One session-list row → one session commit + one ledger commit. No batching.
-- The orchestrator verifies; subagents implement and never self-commit; `@committer`
-  commits and never verifies. Roles stay separate (per AGENTS.md autonomous-chain
-  carve-out).
+- The driver gates mechanically (4a–4d); Opus adjudicates discoveries (4e fork); subagents
+  implement and never self-commit; `@committer` commits and never verifies. Roles stay
+  separate (per AGENTS.md autonomous-chain carve-out).
 - The Fix-loop is capped (2 iterations) — non-convergence halts, never grinds.
-- The four halt classes (inflection point, contract-violating discovery, committer
+- The four halt classes (inflection sign-off, contract-violating discovery, committer
   secret/refusal, non-convergence/deadlock) are the ONLY autonomous stops on the happy
   path. Everything else continues.
 - PLAN is committed only as its own rolling-context commit (step 6b), never folded into a
-  session commit. After each full iteration the tree is clean and the committed ledger
-  matches the last committed session — this is the resumability invariant precondition 4
-  enforces.
+  session commit. After each full iteration the tree is clean and the committed
+  ledger+digest matches the last committed session — this is the resumability invariant
+  precondition 5 enforces.
 - This command does not push, does not rewrite history, does not edit source itself.
 
 ## Exit report
 
 - Sessions completed this run (with commit hashes), sessions remaining.
+- Juncture fork count: how many times `@plan-deep` was paged (inflection / discovery /
+  boundary), and the verdict from each.
 - Any halt: class, the surfaced detail, and the resume instruction.
 - Ledger path and last-updated row.
 - Capture candidates surfaced during the run (per AGENTS.md three-axis test).

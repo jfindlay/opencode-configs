@@ -105,15 +105,25 @@ See `AGENTS-HINTS.md` for the derivation of the three-axis rule.
 **Primary agents** (invoked by `@name` or set as startup agent):
 - `@plan-deep` — T0/Opus 4.7. Deep exploration, architectural tradeoffs, cross-cutting audits.
   Rolling-context writes allowed; all other writes require user approval. References
-  `AGENTS-REASONING.md` in full including the T0-only section.
+  `AGENTS-REASONING.md` in full including the T0-only section. Also forkable as a subagent —
+  see Subagents below.
 - `@build` — T1/Sonnet 4.6. Default implementation: coding, refactors, test fixes, review-address
   cycles. References `AGENTS-REASONING.md` up to the T0-only marker.
+- `@plan-admin` — T1/Sonnet 4.6. Autonomous-chain driver for `/run-plan`. Runs the mechanical
+  loop (select, dispatch, gate, commit, ledger); pages a forked `@plan-deep` only at the three T0
+  junctures (inflection design, discovery adjudication, sub-track boundary). Never implements;
+  never adjudicates discoveries itself.
 - `@git-editor` — T1/Sonnet 4.6. General git work: rebases, commits, cherry-picks, amends,
   branch/tag cleanup. Elevated git permissions; rewrites local history only and never pushes. For
   narrative-arc rebase work, paired with `/rebase-plan` which carries both the planning steps and
   the execution playbook.
 
 **Subagents** (forked via the Task tool):
+- `@plan-deep` — T0/Opus 4.7. Also listed under Primary agents. When forked by `@plan-admin`,
+  acts as a juncture adjudicator: inflection-point interface design, discovery adjudication (does
+  this finding invalidate a frozen downstream contract?), and sub-track boundary coordinate-transform.
+  One-shot return; does not implement; writes only to PLAN's `## Cross-session contracts` on
+  inflection design. See `agent/plan-deep.md` §"When forked as a juncture adjudicator".
 - `@explore` — T1/Sonnet 4.6. Code-structure surveys, needle-finding in large trees, open-ended
   codebase questions. Default fork choice for read-only exploration. Overrides built-in `@explore`
   to prevent silent Opus inheritance when forked from `@plan-deep`.
@@ -166,10 +176,10 @@ See `AGENTS-HINTS.md` for the derivation of the three-axis rule.
   Also carries the execution playbook that `@git-editor` follows when the user pastes an approved
   plan into a fresh session.
 - `/run-plan` — autonomously execute a session-sharded `docs/PLAN.md` as a 1:1 session:commit
-  chain. `@plan-deep` orchestrates; dispatches `@build`/`@general`/`@explore` per session entry,
-  verifies the session contract, commits via `@committer`. Halts at Opus inflection points,
-  contract-violating discoveries, or committer refusal. State lives in the PLAN.md ledger.
-  Args: `[plan-path] [may-reshard|halt-at-boundaries|fully-autonomous]`.
+  chain. `@plan-admin` (T1) orchestrates the mechanical loop; dispatches `@build`/`@general`/
+  `@explore` per session entry, `@committer` for commits, and pages a forked `@plan-deep` (T0)
+  only at inflection points, contract-invalidating discoveries, and sub-track boundaries. State
+  lives in the PLAN.md ledger. Args: `[plan-path] [may-reshard|halt-at-boundaries|fully-autonomous]`.
 - `/session-end` — end-of-session retrospective via `@session-scan`; proposes captures for approval.
 - `/test-loop` — run tests, fix failures iteratively, stop when green or loop stalls.
 - `/tier-retrospective` — gather tier-appropriate feedback on the AGENTS/REASONING layout from each

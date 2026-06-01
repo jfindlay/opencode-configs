@@ -12,13 +12,13 @@ four-step abductive decomposition are targetd to T0-only.
 the immediate context, explain the reasoning before implementing — understanding the why is part of
 the work.
 
-## OpenCode config files (salt-managed)
+## OpenCode config files
 
-- **Never edit `~/.config/opencode/` directly.**.
-- Use `/update-config` for routed edits.
-- Runtime artifacts (`bun.lock`, `package.json`, etc.) live only in runtime and must NOT be added to
-  the opencode-config repo.
-- Agents never run salt-call themselves.
+The authoritative source is the `opencode-config/` git repo. `~/.config/opencode/` is a
+**symlink** to that repo, so edits are live immediately — no apply step. Use `/update-config`
+for routed edits (it handles the correct repo path and commits). Runtime artifacts (`bun.lock`,
+`package.json`, `node_modules/`, etc.) are managed by OpenCode itself and must NOT be committed
+to the repo — they exist only at the symlink target and are covered by `.gitignore`.
 
 ## Model tier hierarchy
 
@@ -160,7 +160,7 @@ See `AGENTS-HINTS.md` for the derivation of the three-axis rule.
 - `/format-loop` — iterative format + fix loop until clean or convergence fails; pass a scope in
   `$ARGUMENTS` to narrow it, or ask for check-only when you don't want fixes applied.
 - `/note` — capture a CAPTURE-CANDIDATE into a target docs file with per-item approval.
-- `/update-config` — edit OpenCode config edits in the salt-managed source of truth.
+- `/update-config` — edit OpenCode config files in the `opencode-config/` repo (symlinked to `~/.config/opencode/`; edits are live immediately).
 - `/q` — force a terse one-turn answer; suspends reasoning-register rules for that turn only.
 - `/rebase-plan` — plan (not execute) a narrative-arc rebase; outputs a rebase script for review.
   Also carries the execution playbook that `@git-editor` follows when the user pastes an approved
@@ -169,6 +169,7 @@ See `AGENTS-HINTS.md` for the derivation of the three-axis rule.
   chain. `@plan-deep` orchestrates; dispatches `@build`/`@general`/`@explore` per session entry,
   verifies the session contract, commits via `@committer`. Halts at Opus inflection points,
   contract-violating discoveries, or committer refusal. State lives in the PLAN.md ledger.
+  Args: `[plan-path] [may-reshard|halt-at-boundaries|fully-autonomous]`.
 - `/session-end` — end-of-session retrospective via `@session-scan`; proposes captures for approval.
 - `/test-loop` — run tests, fix failures iteratively, stop when green or loop stalls.
 - `/tier-retrospective` — gather tier-appropriate feedback on the AGENTS/REASONING layout from each

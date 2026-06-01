@@ -1,5 +1,7 @@
 ---
 description: "[jf] Autonomously execute a session-sharded plan file as a 1:1 session:commit chain. @plan-deep orchestrates; dispatches @build/@general/@explore per session entry, verifies the session contract (green checks + KAT present + expected files, no scope drift), commits the session then commits the ledger update. Halts only at marked Opus inflection points, contract-violating discoveries, or committer refusal. State lives in the committed plan ledger, not context. Args: [plan-path] [may-reshard|halt-at-boundaries|fully-autonomous]. Plan path defaults to docs/PLAN.md."
+agent: plan-deep
+subtask: false
 ---
 
 # /run-plan

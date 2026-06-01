@@ -315,3 +315,10 @@ establishes the quality bar that the refactor maintains. Reverse order (refactor
 means re-writing docstrings twice: once to match the old structure, then again to match the new one.
 Finally, test code is downstream of both and can be refactored and rescoped once after the others
 are done.
+
+## Command `agent:` frontmatter means "run AS", not "dispatch TO"
+
+2026-06-01: If OpenCode decides (via an unknown mechanism), a command's `agent:` is a `mode:
+subagent`, OpenCode appends an auto-dispatch directive ("call the task tool with subagent: <X>") to
+the rendered prompt.  This must be preempted by defensively specifying the `agent: `, for example,
+`plan-deep` in the frontmatter.

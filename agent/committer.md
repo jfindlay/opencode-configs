@@ -1,8 +1,8 @@
 ---
 description: "[jf] Narrow session-close commit subagent for autonomous chains. Reads a session-contract summary + expected-files list from the orchestrator, stages exactly those files, drafts a commit message in repo convention, commits. Refuses on scope drift, empty diff, secret-shaped files, or hook failures."
 mode: subagent
-model: anthropic/claude-sonnet-4-6
-temperature: 0.2
+model: anthropic/claude-haiku-4-5
+temperature: 0.1
 permission:
   bash:
     "*": "deny"

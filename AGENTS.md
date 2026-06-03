@@ -105,12 +105,11 @@ See `AGENTS-HINTS.md` for the derivation of the three-axis rule.
 **Primary agents** (invoked by `@name` or set as startup agent):
 - `@plan-deep` — T0/Opus 4.7. Deep exploration, architectural tradeoffs, cross-cutting audits.
   Rolling-context writes allowed; all other writes require user approval. References
-  `AGENTS-REASONING.md` in full including the T0-only section. Also forkable as a subagent —
-  see Subagents below.
+  `AGENTS-REASONING.md` in full including the T0-only section.
 - `@build` — T1/Sonnet 4.6. Default implementation: coding, refactors, test fixes, review-address
   cycles. References `AGENTS-REASONING.md` up to the T0-only marker.
 - `@plan-admin` — T1/Sonnet 4.6. Autonomous-chain driver for `/run-plan`. Runs the mechanical
-  loop (select, dispatch, gate, commit, ledger); pages a forked `@plan-deep` only at the three T0
+  loop (select, dispatch, gate, commit, ledger); pages a forked `@plan-juncture` only at the three
   junctures (inflection design, discovery adjudication, sub-track boundary). Never implements;
   never adjudicates discoveries itself.
 - `@git-editor` — T1/Sonnet 4.6. General git work: rebases, commits, cherry-picks, amends,
@@ -119,11 +118,11 @@ See `AGENTS-HINTS.md` for the derivation of the three-axis rule.
   the execution playbook.
 
 **Subagents** (forked via the Task tool):
-- `@plan-deep` — T0/Opus 4.7. Also listed under Primary agents. When forked by `@plan-admin`,
-  acts as a juncture adjudicator: inflection-point interface design, discovery adjudication (does
-  this finding invalidate a frozen downstream contract?), and sub-track boundary coordinate-transform.
-  One-shot return; does not implement; writes only to PLAN's `## Cross-session contracts` on
-  inflection design. See `agent/plan-deep.md` §"When forked as a juncture adjudicator".
+- `@plan-juncture` — T1/Sonnet 4.6. Juncture adjudicator for `/run-plan` chains. Paged by
+  `@plan-admin` at inflection-point interface design, discovery adjudication (does this finding
+  invalidate a frozen downstream contract?), and sub-track boundary coordinate-transform. One-shot
+  return; does not implement; writes only to PLAN's `## Cross-session contracts` on inflection
+  design.
 - `@explore` — T1/Sonnet 4.6. Code-structure surveys, needle-finding in large trees, open-ended
   codebase questions. Default fork choice for read-only exploration. Overrides built-in `@explore`
   to prevent silent Opus inheritance when forked from `@plan-deep`.
@@ -135,7 +134,7 @@ See `AGENTS-HINTS.md` for the derivation of the three-axis rule.
   `@general` to pin the tier — without the pin, forks from a T0 primary would silently run on Opus.
 - `@session-scan` — T2/Haiku 4.5. High-volume session-history scan for retrospectives. Used by
   `/session-end`. Does NOT reference `AGENTS-REASONING.md`.
-- `@committer` — T1/Sonnet 4.6. Narrow session-close commit subagent for autonomous chains.
+- `@committer` — T2/Haiku 4.5. Narrow session-close commit subagent for autonomous chains.
   Reads a session-contract summary + expected-files list from the orchestrator, stages exactly
   those files, drafts a commit message in repo convention, commits. Refuses on scope drift,
   empty diff, secret-shaped files, or hook failures — never improvises. Distinct from
@@ -177,7 +176,7 @@ See `AGENTS-HINTS.md` for the derivation of the three-axis rule.
   plan into a fresh session.
 - `/run-plan` — autonomously execute a session-sharded `docs/PLAN.md` as a 1:1 session:commit
   chain. `@plan-admin` (T1) orchestrates the mechanical loop; dispatches `@build`/`@general`/
-  `@explore` per session entry, `@committer` for commits, and pages a forked `@plan-deep` (T0)
+  `@explore` per session entry, `@committer` for commits, and pages a forked `@plan-juncture` (T1)
   only at inflection points, contract-invalidating discoveries, and sub-track boundaries. State
   lives in the PLAN.md ledger. Args: `[plan-path] [may-reshard|halt-at-boundaries|fully-autonomous]`.
 - `/session-end` — end-of-session retrospective via `@session-scan`; proposes captures for approval.

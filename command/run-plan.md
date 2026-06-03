@@ -1,5 +1,5 @@
 ---
-description: "[jf] Autonomously execute a session-sharded plan file as a 1:1 session:commit chain. @plan-admin (T1) orchestrates the mechanical loop; dispatches @build/@general/@explore per session entry, @committer for commits, and pages a forked @plan (T1) only at inflection points, contract-invalidating discoveries, and sub-track boundaries. State lives in the committed plan ledger. Args: [plan-path] [may-reshard|halt-at-boundaries|fully-autonomous]. Plan path defaults to docs/PLAN.md."
+description: "[jf] Autonomously execute a session-sharded plan file as a 1:1 session:commit chain. @plan-admin (T1) orchestrates the mechanical loop; dispatches @build/@general/@explore per session entry, @committer for commits, and pages a forked @plan-juncture (T1) only at inflection points, contract-invalidating discoveries, and sub-track boundaries. State lives in the committed plan ledger. Args: [plan-path] [may-reshard|halt-at-boundaries|fully-autonomous]. Plan path defaults to docs/PLAN.md."
 agent: plan-admin
 subtask: false
 ---
@@ -9,11 +9,11 @@ subtask: false
 Drive a session-sharded plan file to completion as an autonomous chain. The plan must already be in
 session-list form (one commit-shaped session per row, each with a title, category, tier, expected
 files, and consumed contracts) per `multi-session-planning.md`.  This command does NOT shard a plan
-— that is a `@plan` interactive task. It EXECUTES an already-sharded one.
+— that is a `@plan-deep` interactive task. It EXECUTES an already-sharded one.
 
 This command runs from `@plan-admin` (T1). The mechanical loop — select, dispatch, gate, commit,
 ledger — is entirely the driver's work. T1 judgment (discovery adjudication, inflection-point
-interface design, sub-track boundary coordinate-transform) is paged in by forking `@plan` at the
+interface design, sub-track boundary coordinate-transform) is paged in by forking `@plan-juncture` at the
 three junctures only. Implementation is dispatched down-tier to `@build`/`@general`; research to
 `@explore`. If invoked from a non-`plan-admin` session, stop and tell the user to switch.
 
@@ -88,7 +88,7 @@ Repeat until all session-list rows are `done` in the ledger, or a halt condition
 
 If the selected session is marked **`@plan` inflection point** in the plan:
 
-- Fork `@plan` (subagent) with the juncture fork template (see below), type `inflection-design`.
+- Fork `@plan-juncture` (subagent) with the juncture fork template (see below), type `inflection-design`.
   Include the inflection session entry, the contracts it consumes/produces, and the full current `##
   Action-frame digest`.
 - The fork designs the substrate interface and writes the resolved design into PLAN's relevant `##
@@ -118,9 +118,9 @@ Read the session entry's category:
 
 One session = one dispatch = one commit. Never batch two session rows into one dispatch.
 
-### 4. Verify the session contract (mechanical gate — driver only, no `@plan`)
+### 4. Verify the session contract (mechanical gate — driver only, no `@plan-juncture`)
 
-After the implementation subagent returns, the driver — NOT a paged `@plan` fork — verifies,
+After the implementation subagent returns, the driver — NOT a paged `@plan-juncture` fork — verifies,
 mechanically:
 
 a. **Tests green.** Run VERIFY_TEST. Red → go to Fix-loop (step 4f).  b. **Types clean.** Run
@@ -134,11 +134,11 @@ be dirty here if an inflection-point design write (step 2) preceded the dispatch
 of the session commit (step 5) and is committed separately in step 6b. Any other unexpected file →
 potential scope drift; inspect. If the extra file is plainly part of the unit (e.g. an
 `__init__.py`), allow and note it in the ledger; if it touches another session's surface → halt
-(`BLOCKED: scope drift`).  e. **Discovery check — page `@plan` when flagged.** Did the subagent
+(`BLOCKED: scope drift`).  e. **Discovery check — page `@plan-juncture` when flagged.** Did the subagent
 report a discovery that contradicts a *downstream* contract (a frozen interface, a KAT, a named
 prose invariant)?
    - **No discovery flagged:** continue to step 5.
-   - **Discovery flagged:** fork `@plan` (subagent) with juncture type `discovery-adjudication`.
+   - **Discovery flagged:** fork `@plan-juncture` (subagent) with juncture type `discovery-adjudication`.
      Include the discovery, the affected contract(s), the affected downstream sessions, and the full
      current `## Action-frame digest`. Await the fork's one-shot verdict:
      - `internal-continue`: append to `## Discoveries & risks` in PLAN; continue to step 5.
@@ -204,11 +204,11 @@ On success the tree is clean again and the committed ledger+digest exactly match
 committed session. This is what makes the "state lives on disk" invariant literally true: a cold
 resume reads only committed state and never has to reconcile an uncommitted ledger against the code.
 
-### 7. Sub-track boundary (◆) — page `@plan` for the coordinate transform
+### 7. Sub-track boundary (◆) — page `@plan-juncture` for the coordinate transform
 
 If the just-completed session is the last in a sub-track (marked ◆ in the plan):
 
-- Fork `@plan` (subagent) with juncture type `boundary-transform`. Include the `## Purpose (design
+- Fork `@plan-juncture` (subagent) with juncture type `boundary-transform`. Include the `## Purpose (design
   intent)`, the frozen-contract list, and the full current `## Action-frame digest`.
 - The fork returns: `still-on-intent <notes>` or `drift-HALT <what changed and why>`.
 - If `still-on-intent`: reconcile the ledger's frozen contracts against the plan's stated contracts,
@@ -226,7 +226,7 @@ Then return to step 1.
 The review cadence scales with **sub-track count, not session count**. Boundaries are where the
 human-relevant coordinate-transform happens; sessions are not. Default policy:
 
-- **Halt-for-human:** `@plan` inflection points (step 2 — after fork returns design for sign-off),
+- **Halt-for-human:** `@plan-juncture` inflection points (step 2 — after fork returns design for sign-off),
   `drift-HALT` from a boundary fork (step 7), `destructive-HALT` from a discovery fork (4e),
   committer secret/refusal (step 5), non-convergence (4f), dependency deadlock.
 - **Self-review-and-continue:** ◆ sub-track boundaries when fork returns `still-on-intent` (step 7),
@@ -264,7 +264,7 @@ DONE WHEN
 - Exactly these files are modified: <expected files>.
 ```
 
-## Juncture fork template (`@plan` subagent)
+## Juncture fork template (`@plan-juncture` subagent)
 
 ```
 Working directory: <project root>
@@ -304,10 +304,10 @@ CONSTRAINTS:
 ## Constraints
 
 - Runs from `@plan-admin` only. Implementation is always dispatched down-tier.
-- `@plan` is paged as a subagent only at the three junctures (inflection design, discovery
+- `@plan-juncture` is paged as a subagent only at the three junctures (inflection design, discovery
   adjudication, sub-track boundary). It is never resident for the loop.
 - One session-list row → one session commit + one ledger commit. No batching.
-- The driver gates mechanically (4a–4d); `@plan` adjudicates discoveries (4e fork); subagents
+- The driver gates mechanically (4a–4d); `@plan-juncture` adjudicates discoveries (4e fork); subagents
   implement and never self-commit; `@committer` commits and never verifies. Roles stay separate (per
   AGENTS.md autonomous-chain carve-out).
 - The Fix-loop is capped (2 iterations) — non-convergence halts, never grinds.
@@ -322,7 +322,7 @@ CONSTRAINTS:
 ## Exit report
 
 - Sessions completed this run (with commit hashes), sessions remaining.
-- Juncture fork count: how many times `@plan` was paged (inflection / discovery / boundary), and the
+- Juncture fork count: how many times `@plan-juncture` was paged (inflection / discovery / boundary), and the
   verdict from each.
 - Any halt: class, the surfaced detail, and the resume instruction.
 - Ledger path and last-updated row.

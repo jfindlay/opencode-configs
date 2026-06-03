@@ -252,7 +252,11 @@ to provide this:
 
 The choice is a cost/quality tradeoff. For long chains (>20 sessions), the token cost of a resident
 `@plan` context is substantial; the externalized digest is the practical option. For short or
-high-stakes chains, resident context is worth the cost.
+high-stakes chains, resident context is worth the cost. When using the externalized-digest path, the
+paged adjudicator need not be the same tier as the interactive plan-deriver — the digest and the
+`destructive-HALT` invariant (always halts regardless of the fork's opinion) bound the downside of a
+cheaper adjudicator to over-halting, which the user can qualify for a higher-tier dialogue, not to
+silently waving through destructive changes.
 
 In either case, the mechanical steps — running tests, grepping for KATs, diffing files, writing
 ledger rows — are frame-free and belong at the cheapest competent tier, not with the adjudicator.

@@ -1,5 +1,5 @@
 ---
-description: "[jf] Autonomously execute a session-sharded plan file as a 1:1 session:commit chain. @plan-admin (T1) orchestrates the mechanical loop; dispatches @build/@general/@explore per session entry, @committer for commits, and pages a forked @plan-juncture (T1) only at inflection points, contract-invalidating discoveries, and sub-track boundaries. State lives in the committed plan ledger. Args: [plan-path] [may-reshard|halt-at-boundaries|fully-autonomous]. Plan path defaults to docs/PLAN.md."
+description: "[jf] Autonomously execute a session-sharded plan file as a 1:1 session:commit chain. @plan-admin orchestrates the mechanical loop; dispatches @build/@general/@explore per session entry, @committer for commits, and pages a forked @plan-juncture (Opus default) or @plan-juncture-sonnet (opt-down) only at inflection points, contract-invalidating discoveries, and sub-track boundaries. State lives in the committed plan ledger. Args: [plan-path] [may-reshard|halt-at-boundaries|fully-autonomous]. Plan path defaults to docs/PLAN.md."
 agent: plan-admin
 subtask: false
 ---
@@ -30,6 +30,12 @@ override a false precondition mid-run.
    flags (`may-reshard`, `halt-at-boundaries`, `fully-autonomous`).  Every "the plan" /
    "docs/PLAN.md" reference below means PLAN. If several sharded plans exist and none was named, ask
    which.
+
+3. **Bind JUNCTURE_AGENT — the juncture adjudicator to page.** Check the PLAN header for a
+   `juncture-tier:` field. If absent or `opus`, bind `JUNCTURE_AGENT = @plan-juncture` (Opus
+   default). If `sonnet`, bind `JUNCTURE_AGENT = @plan-juncture-sonnet` (cost-economised opt-down).
+   Record the binding in the ledger header. Everywhere this command says "fork `@plan-juncture`",
+   substitute JUNCTURE_AGENT.
 
 2. **Bind VERIFY — the project's gate commands.** Discover; do NOT assume `make`. Check in order and
    bind VERIFY_TEST and VERIFY_TYPES (which may be a single combined command):
@@ -304,7 +310,8 @@ CONSTRAINTS:
 ## Constraints
 
 - Runs from `@plan-admin` only. Implementation is always dispatched down-tier.
-- `@plan-juncture` is paged as a subagent only at the three junctures (inflection design, discovery
+- JUNCTURE_AGENT (`@plan-juncture` Opus default, or `@plan-juncture-sonnet` when declared in the
+  PLAN header) is paged as a subagent only at the three junctures (inflection design, discovery
   adjudication, sub-track boundary). It is never resident for the loop.
 - One session-list row → one session commit + one ledger commit. No batching.
 - The driver gates mechanically (4a–4d); `@plan-juncture` adjudicates discoveries (4e fork); subagents

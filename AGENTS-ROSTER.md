@@ -41,11 +41,14 @@ field.
   the execution playbook.
 
 **Subagents** (forked via the Task tool):
-- `@plan-juncture` — T1/Sonnet 4.6. Juncture adjudicator for `/run-plan` chains. Paged by
-  `@plan-admin` at inflection-point interface design, discovery adjudication (does this finding
+- `@plan-juncture` — T0/Opus 4.5. Juncture adjudicator for `/run-plan` chains. Default tier; paged
+  by `@plan-admin` at inflection-point interface design, discovery adjudication (does this finding
   invalidate a frozen downstream contract?), and sub-track boundary coordinate-transform. One-shot
   return; does not implement; writes only to PLAN's `## Cross-session contracts` on inflection
-  design.
+  design. Declare `juncture-tier: sonnet` in the PLAN header to opt down to `@plan-juncture-sonnet`
+  when the five commit-size levers permit (strong test suite + lower correctness-criticality).
+- `@plan-juncture-sonnet` — T1/Sonnet 4.6. Cost-economised opt-down from `@plan-juncture`. Same
+  contract; cheaper model. Activated via `juncture-tier: sonnet` in the PLAN header.
 - `@explore` — T1/Sonnet 4.6. Code-structure surveys, needle-finding in large trees, open-ended
   codebase questions. Default fork choice for read-only exploration. Overrides built-in `@explore`
   to prevent silent Opus inheritance when forked from `@plan-deep`.
@@ -68,8 +71,8 @@ field.
 - `@review` — post-implementation code review on a diff/commit/branch.
 
 **Multisession subsystem** — agents whose names share the `plan-*` prefix convention:
-`@plan-deep`, `@plan-admin`, `@plan-juncture`, and `@committer`. Reference doc:
-`multisession/multi-session-planning.md`.
+`@plan-deep`, `@plan-admin`, `@plan-juncture`, `@plan-juncture-sonnet`, and `@committer`. Reference
+doc: `multisession/multi-session-planning.md`.
 
 ## Command roster
 
@@ -103,10 +106,11 @@ field.
   Also carries the execution playbook that `@git-editor` follows when the user pastes an approved
   plan into a fresh session.
 - `/run-plan` — autonomously execute a session-sharded `docs/PLAN.md` as a 1:1 session:commit
-  chain. `@plan-admin` (T1) orchestrates the mechanical loop; dispatches `@build`/`@general`/
-  `@explore` per session entry, `@committer` for commits, and pages a forked `@plan-juncture` (T1)
-  only at inflection points, contract-invalidating discoveries, and sub-track boundaries. State
-  lives in the PLAN.md ledger. Args: `[plan-path] [may-reshard|halt-at-boundaries|fully-autonomous]`.
+  chain. `@plan-admin` orchestrates the mechanical loop; dispatches `@build`/`@general`/`@explore`
+  per session entry, `@committer` for commits, and pages `@plan-juncture` (Opus default) or
+  `@plan-juncture-sonnet` (opt-down via `juncture-tier: sonnet` in the PLAN header) only at
+  inflection points, contract-invalidating discoveries, and sub-track boundaries. State lives in the
+  PLAN.md ledger. Args: `[plan-path] [may-reshard|halt-at-boundaries|fully-autonomous]`.
 - `/session-end` — end-of-session retrospective via `@session-scan`; proposes captures for approval.
 - `/test-loop` — run tests, fix failures iteratively, stop when green or loop stalls.
 - `/tier-retrospective` — gather tier-appropriate feedback on the AGENTS/REASONING layout from each

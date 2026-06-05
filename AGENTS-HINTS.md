@@ -303,7 +303,7 @@ two frames meet — re-reading it at sub-track boundaries is the practice that c
 and rigidity. "The plan was wrong about X" is a successful outcome of a session, not a failure.
 
 Full treatment of the two-frame relativity (static roadmap-view vs. action riding-the-wave-view)
-lives in `~/Documents/software/opencode-config/multi-session-planning.md`; this hint is the
+lives in `multisession/multi-session-planning.md` in the opencode-config repo; this hint is the
 operational handle.
 
 ## Refactor ordering: doc, code, tests

@@ -13,23 +13,150 @@ internalise.
 ## The atom: the commit-shaped session
 
 The atomic execution unit is **one `@build` or `@general` session producing one commit-shaped
-deliverable**. Calibrated against the rho crate's git history, this is:
+deliverable**. The defining property is *not* a LOC count — it is **one conceptual unit, ending
+green**:
 
-- ~400-1000 LOC of new code (Rust, in the calibration case)
+- Completing exactly one conceptual unit — one algorithm, one optimization layer, one mathematical
+  object, or one substrate trait
 - Plus tests (KATs at minimum; property tests where natural)
 - Plus benchmarks where the work has a quantitative claim
 - Plus one chapter or section of narrative prose (PEDAGOGY.md or equivalent)
-- Touching 4-7 files
-- Completing exactly one conceptual unit — one algorithm, one optimization layer, one mathematical
-  object, or one substrate trait
 - Ending with green tests
+
+**Default size: ~150-400 LOC, touching 2-4 files** — smaller than the original rho-crate
+calibration (~400-1000 LOC, 4-7 files), and deliberately so. The original range sat near the top of
+what Sonnet's coherent-context window can hold without compaction; the smaller default keeps each
+session well inside the window, makes the green-commit checkpoint denser, and makes reverts finer
+grained. **This is a default, not a fixed range** — the commit-size tuning law below adjusts it up
+or down per project. The LOC figure is a consequence of "one conceptual unit at the smallest size
+that keeps the unit whole and the triple-contract sharp," never a target in its own right.
 
 Smaller is wasted session overhead (the warm-up cost of context-loading isn't amortised). Larger
 overflows Sonnet's coherent-context window and forces compaction, which loses precisely the design
-context the session most needs to preserve.
+context the session most needs to preserve. The cost curve in session size is therefore **U-shaped**
+— too small fails to amortise fixed warm-up, too large pays quadratic cache-read accumulation plus a
+compaction event plus lost design context. Trimming the always-injected base context (the system
+prompt, the auto-loaded conventions file) lowers the warm-up term and **shifts the U's optimum
+toward smaller sessions** — context-trim and commit-shrink compound rather than trade off.
 
 **This is the planning currency.** Not LOC alone, not "tasks" alone, not hours. The commit-shaped
 session is the unit at which work composes, fails, and resumes.
+
+### Tuning the commit size: the five inputs
+
+The default (~150-400 LOC) is a starting point. When `@plan-deep` designs a specific multisession,
+it tunes the commit window to the project using five inputs. Four of them push *smaller*; one — the
+irreducible complexity of the change — pushes *larger* and acts as the floor. The tuning is the
+tension between that floor and the four downward pressures: **make each commit as small as the four
+pressures want, but never smaller than the irreducible conceptual unit.**
+
+| Input                                          | Direction          | Why                                                                                                   |
+|------------------------------------------------|--------------------|-------------------------------------------------------------------------------------------------------|
+| 1. Ambient codebase complexity                 | smaller as it rises| spaghetti/intricate surroundings raise the cost of a large diff being wrong; small diffs localise blast radius |
+| 2. Irreducible complexity of the change (FLOOR)| larger as it rises | the conceptual unit is genuinely big; forcing it smaller fractures it and re-introduces cross-session coupling |
+| 3. Cost of a design error (change + chain)     | smaller as it rises| denser green checkpoints mean cheaper, finer-grained reverts when the plan was wrong                   |
+| 4. Correctness-criticality of the application  | smaller as it rises| more frequent green gates and more review surface per unit of change                                  |
+| 5. Inner-loop bandwidth (test-suite quality)   | smaller as it rises| trustworthy fast tests make small commits *safe*; weak tests force larger, conservative units          |
+
+Two structural notes. **Inputs 3 and 4 are the cost-of-being-wrong axis** — the same lens that routes
+agent tier (Opus when the cost of being wrong is high). Commit-size tuning is therefore the *same
+decision* as tier-routing, one level down: high cost-of-wrong pulls toward both smaller commits and
+higher-tier review, for the same reason. **Input 5 is the one the original calibration omitted** and
+it is load-bearing: how aggressively you can shrink commits is gated by how fast and trustworthy the
+test suite is, because the tests are the inner control loop (see below). A codebase with weak tests
+cannot safely carry small dense commits, however much inputs 1/3/4 want them.
+
+### The two-rate cascade: why small commits are safe
+
+A multisession is a **cascaded control system**, not a single slow loop. Reading it as one slow,
+human-gated loop leads to the wrong conclusion — that the system must be tuned conservatively because
+the controller (the human at review) reacts only every several sessions. That misses the inner loop.
+
+- **Inner loop — fast, stabilising.** The test suite plus the green-commit boundary, firing *every
+  session*. High bandwidth: it catches behavioural divergence the moment a commit goes red. This is
+  the loop that makes small, dense commits safe.
+- **Outer loop — slow, adaptive.** The adjudicator forks (`@plan-juncture`) at inflection and
+  sub-track boundaries, firing every 5-15 sessions. Low bandwidth, but its job is precisely to
+  *re-tune the plan* when emergent code-reality diverges from the roadmap — the action→static frame
+  update. This is genuine adaptive control, not a status report.
+
+The cascade is the standard fast-inner-stabiliser / slow-outer-adapter architecture (the same shape
+as fighter avionics: a fast rate-damping loop inside a slower guidance loop). The consequence for
+tuning: **commit-size aggressiveness is bounded by inner-loop bandwidth.** A fast, trustworthy test
+suite lets the inner loop catch drift before the outer loop has to, which licenses both smaller
+commits and more aggressive adjudicator-driven adaptation. A weak test suite means the inner loop
+cannot be trusted to stabilise, so commits must be larger and more conservative and the outer loop
+carries more of the correction burden. This is input 5 of the tuning law, stated as control theory.
+
+The warning that *does* survive: a system tuned to the edge of stability is safe only when the
+controller outpaces the divergence. The inner test-loop is fast enough to earn aggressive tuning; the
+*outer* loop is not. So adaptation that the inner loop cannot catch — anything that invalidates a
+frozen cross-session contract — must still halt and surface to the human, never be ridden through.
+
+### The sixth lever: adjudicator tier (Opus vs Sonnet at junctures)
+
+The juncture adjudicator (`@plan-juncture`) defaults to Sonnet, and for most chains that is right —
+not because juncture work is easy (it is the *highest-judgment* work in the chain: substrate
+interface design, contract-invalidation adjudication, static↔action frame transforms) but because
+the work is de-risked structurally. The `destructive-HALT` invariant bounds a weaker adjudicator's
+downside to *over-halting*, which the human catches and qualifies; waving a destructive change
+through is the only unrecoverable error, and conservatism guards against it. Sonnet-at-junctures is a
+cost-mitigated compromise, not a judgment-matched assignment.
+
+But the tier should be **tunable per chain**, governed by the *same five levers* as commit size,
+because juncture tier is the same cost-of-wrong decision one level up:
+
+- **Levers 1-4 push the adjudicator tier UP (toward Opus) exactly as they push commit size DOWN** —
+  both are the cost-of-wrong response. High criticality (4), high design-error cost (3), intricate
+  substrate (2), or spaghetti ambient code (1) are the cases where a wrong adjudication is least
+  recoverable and the cold-fork reasoning is hardest, so the strongest adjudicator earns its
+  differential there.
+- **Lever 5 (test-suite quality) is the asymmetry: it pushes the adjudicator tier DOWN** while it
+  also pushes commit size down. A strong inner loop catches contract drift behaviourally, so a
+  cheaper outer-loop adjudicator's misses are caught downstream — strong tests let you economise on
+  *both* commit size and adjudicator tier. Test quality is the one lever that buys you a cheaper
+  adjudicator; the other four only buy you smaller commits.
+
+Two facts make the differential cheap to pay when the levers call for it. Junctures are **rare**
+(5-10 per ~70-session project) and **short** (one-shot returns, ~8-13K output), so the Opus-vs-Sonnet
+delta is single-digit dollars across an entire project — negligible against the cost of one
+un-caught contract drift. And a juncture works from a **written digest, not lived context**: a
+stronger model extracts more signal from a lossy externalised action frame, so the exact condition
+that makes junctures risky (cold fork, thin context) is where Opus's marginal advantage is *largest*.
+Tier the rare high-stakes fork up; never tier the frequent mechanical worker up — that is where Opus
+is genuinely wasted.
+
+Default: Sonnet. Escalate to Opus when the levers call for it — most sharply when low test quality
+(weak inner loop) coincides with high correctness-criticality. The tier is selected per chain (in the
+`/run-plan` invocation or the PLAN header), not hardcoded in the agent's frontmatter.
+
+### The deferred fallback: warm resumption for non-garden codebases
+
+Small-commit discipline is the *primary* windowing mechanism, and for well-maintained codebases (a
+"garden" — coherent structure, trustworthy tests) it is usually sufficient on its own: the conceptual
+unit fits comfortably inside a small commit and a healthy context window, and no further machinery is
+needed.
+
+It breaks down where input 2 (irreducible change complexity) is large *and* cannot be reduced:
+intricate refactors, legitimately-intricate algorithms, buggy or spaghetti codebases. There the
+conceptual unit genuinely exceeds a healthy single-session window, and shrinking the commit would
+fracture the unit — Cartesian-producting complexity across artificially-split sessions whose
+boundaries are not contract-sharp.
+
+The escape for those cases is **warm resumption**, not sub-commit cold handoff. The distinction is
+load-bearing. A session that ends with *uncommitted, in-flight* changes handed to a *fresh* (cold)
+fork has no enforced boundary — the next session must reconstruct intent from the working tree alone,
+which is exactly the design context a cold handoff loses. But a subagent can be *resumed* (continued
+with its prior context intact, via its task id) rather than cold-forked. Warm resumption removes the
+boundary instead of smearing it: there is no cold handoff because it is one session that has not
+committed yet. The commit boundary stays sharp (still only commit green, conceptual-unit-complete
+states); what flexes is how many resumption turns the worker takes to reach it, with `@plan-admin`
+deciding at each pause — on a measured context-fill signal, not a guess — whether to commit-and-close
+or resume-with-more.
+
+This fallback (and the context-fill instrument it depends on) is **deliberately deferred** until
+small-commit discipline is shown to be insufficient for the codebases actually in scope. Building it
+before then is instrumenting a cliff the small-commit discipline has already engineered around.
 
 ### Why commits and sessions align
 

@@ -17,7 +17,7 @@ reality, delete it.
 
 The umbrella for thinking about how primary agents, subagents, orchestrators, and autonomous
 chains compose. Currently a loose collection of patterns spread across `AGENTS.md`,
-`multi-session-planning.md`, and the individual agent definitions. Worth eventually consolidating
+`multisession/multi-session-planning.md`, and the individual agent definitions. Worth eventually consolidating
 into something with more shape — possibly a `HIERARCHY.md` or a dedicated roadmap doc — once a
 critical mass of concrete patterns has accumulated.
 
@@ -25,17 +25,17 @@ Open shape questions (do not need to be answered now):
 
 - Does "hierarchy" stay the right framing, or is "ecology" / "topology" / "composition" closer
   to what's emerging?
-- What's the relationship between this theme and `multi-session-planning.md`? The latter is
+- What's the relationship between this theme and `multisession/multi-session-planning.md`? The latter is
   about how sessions compose; this is about how agents compose within and across sessions.
   Probably orthogonal axes, but the overlap deserves articulation.
 - When does a pattern in this theme get promoted into `AGENTS.md` (operational rule) vs.
-  `multi-session-planning.md` (durable reference) vs. stay here (exploration)?
+  `multisession/multi-session-planning.md` (durable reference) vs. stay here (exploration)?
 
 ### Idea: formalize the runtime-enforced contract between orchestrators and subagents
 
 **Status**: noted; no concrete work scheduled.
 
-**Lineage**. `multi-session-planning.md` names three flavours of cross-session contract:
+**Lineage**. `multisession/multi-session-planning.md` names three flavours of cross-session contract:
 compiler-enforced (traits, type signatures), test-enforced (KATs), and prose-enforced
 (invariants stated in docs). Each catches a different class of cross-session drift. The
 `@committer` subagent introduced a new pattern that doesn't fit any of the three cleanly: the

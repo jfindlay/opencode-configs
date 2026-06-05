@@ -72,9 +72,9 @@ the judgment register for. T0/T1 agents follow the trigger directly.
 |                           | import-graph, call-graph, coverage, or test analysis      |       |
 | AGENTS-LOG.md             | During meta-restructuring sessions only (config audits,   | T0    |
 |                           | doc reorganisations)                                      |       |
-| multi-session-planning.md | When planning or executing long-arc multi-session work    | T0    |
-|                           | (the two-frame model, commit-shaped session, contract     |       |
-|                           | taxonomy); before/during a /run-plan chain                |       |
+| multisession/multi-session-planning.md | When planning or executing long-arc multi-session work    | T0    |
+|                                        | (the two-frame model, commit-shaped session, contract     |       |
+|                                        | taxonomy); before/during a /run-plan chain                |       |
 
 ## Subagent strategy (sideways allocation)
 
@@ -143,6 +143,10 @@ See `AGENTS-HINTS.md` for the derivation of the three-axis rule.
 
 **Built-in agents** (no definition file; available in any session):
 - `@review` — post-implementation code review on a diff/commit/branch.
+
+**Multisession subsystem** — agents whose names share the `plan-*` prefix convention:
+`@plan-deep`, `@plan-admin`, `@plan-juncture`, and `@committer`. Reference doc:
+`multisession/multi-session-planning.md`.
 
 ### Command roster
 

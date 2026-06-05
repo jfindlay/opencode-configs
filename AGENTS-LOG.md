@@ -262,7 +262,7 @@ given the verify-between-dispatches work but the number to watch if chains lengt
    mirroring `edit`, globally and in the build override. Alternative weighed: rely on the `ask`
    prompt (rejected — a silent gap that already fired once).
 
-2. **AGENTS.md — registered `multi-session-planning.md` in the load-rules table.** The 340-line
+2. **AGENTS.md — registered `multisession/multi-session-planning.md` in the load-rules table.** The 340-line
    field manual underpinning `/run-plan` was orphaned from dispatch (read only twice, both
    plan-deep, not in the table). Registered rather than absorbed or deleted: the content is durable
    and the two-frame model has no better home. Alternative weighed: fold into `run-plan.md`

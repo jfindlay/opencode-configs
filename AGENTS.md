@@ -55,11 +55,14 @@ the judgment register for. T0/T1 agents follow the trigger directly.
 | AGENTS-SESSION.md                      | At session start; when splitting a session; when writing  | T0/T1 |
 |                                        | or managing rolling-context docs (PLAN.md, NOTES.md)     |       |
 | STYLE-CODE.md                          | Before writing or modifying any code; before reviewing    | T0/T1 |
-|                                        | code; when planning a refactor                            |       |
+|                                        | code; when planning a refactor. Routes to the matching    |       |
+|                                        | per-language sibling (STYLE-CODE-PYTHON/RUST/GO.md).      |       |
 | STYLE-DOC.md                           | Before writing, editing, auditing, or restructuring any   | T0/T1 |
 |                                        | documentation (inline docstrings, human docs, agent docs) |       |
 | STYLE-TEST.md                          | Before writing or modifying any test code; before         | T0/T1 |
-|                                        | reviewing tests; when planning a test refactor            |       |
+|                                        | reviewing tests; when planning a test refactor. Routes to |       |
+|                                        | the matching per-language sibling                         |       |
+|                                        | (STYLE-TEST-PYTHON/RUST/GO.md).                           |       |
 | AGENTS-LENSES.md                       | When reaching for a code-reasoning lens at the prompt     | T0/T1 |
 |                                        | level; for design rules and per-lens reference, see       |       |
 |                                        | composable-code-lenses/docs/                              |       |
@@ -111,9 +114,12 @@ These rules exist because violating them costs turns and clutters sessions.
   design-scale content lives in human docs, not inline. See `STYLE-DOC.md` for the full register
   guidance.
 
+When writing or modifying code, load the matching per-language guide via the `STYLE-CODE.md` index
+(Python → `STYLE-CODE-PYTHON.md`; Rust → `STYLE-CODE-RUST.md`; Go → `STYLE-CODE-GO.md`).
+
 ### Python
 
-When writing or modifying Python code, **load STYLE-CODE.md** before edits. It carries the
+When writing or modifying Python code, **load STYLE-CODE-PYTHON.md** before edits. It carries the
 mechanical rules (PEP 8 with 100-char wrap, mypy strict, rST docstrings, dataclass carve-out) and
 the structuring principles (when to split functions, classes, modules; decorator/dataclass/Pydantic
 guidance; test philosophy).

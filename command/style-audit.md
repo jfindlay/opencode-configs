@@ -17,11 +17,12 @@ User input: $ARGUMENTS
 
 Each child audit covers a different rule surface:
 
-- `/style-audit-code` — `STYLE-CODE.md` (Python source: mechanical rules + structuring principles).
+- `/style-audit-code` — per-language code styleguide (resolve language from the target; load
+  `STYLE-CODE-<LANG>.md` via the `STYLE-CODE.md` index).
 - `/style-audit-doc` — `STYLE-DOC.md` (inline docstrings, human docs, agent docs, rolling-context
   lifecycle).
-- `/style-audit-test` — `STYLE-TEST.md` (test-specific mechanical rules, layered on top of
-  `STYLE-CODE.md`).
+- `/style-audit-test` — per-language test styleguide (resolve language; load `STYLE-TEST-<LANG>.md`
+  via the `STYLE-TEST.md` index, with the same-language code guide as the inherited base).
 
 `/style-audit` runs all three in parallel against the same target and merges their reports. It does
 **not** classify files first and route only the matching audit — scopes overlap (docstrings inside
@@ -60,13 +61,15 @@ Thoroughness: medium
 Read-only: YES. DO NOT EDIT ANY FILES.
 
 GOAL
-Audit the target against ~/.config/opencode/STYLE-CODE.md. Emit findings (mechanical rules) and
-observations (structuring principles). If the target has no Python source, return "no Python
-source in scope" and stop.
+Audit the target against the per-language code styleguide. Resolve language from the target
+(pyproject.toml → Python, Cargo.toml → Rust, go.mod → Go; mixed → all applicable). Load
+STYLE-CODE-<LANG>.md via the STYLE-CODE.md index. Emit findings (mechanical rules) and
+observations (structuring principles). If no source in a supported language is in scope,
+return "no supported source in scope" and stop.
 
 INVESTIGATION TASKS
-1. Load STYLE-CODE.md as the audit reference.
-2. Inspect the target. Skip non-Python files.
+1. Detect target language; load the matching STYLE-CODE-<LANG>.md as the audit reference.
+2. Inspect the target. Scope to source files for the detected language.
 3. For each rule in §"Mechanical rules", emit findings with file:line citations.
 4. For each section under §"*-structuring principles", surface observations (not findings).
 
@@ -83,13 +86,15 @@ Thoroughness: medium
 Read-only: YES. DO NOT EDIT ANY FILES.
 
 GOAL
-Audit the target against ~/.config/opencode/STYLE-DOC.md. Cover inline docstrings (rST conformance,
-line length, en-UK), human docs, and rolling-context files (PLAN/NOTES lifecycle vs code). If the
+Audit the target against ~/.config/opencode/STYLE-DOC.md. Cover inline docstrings (rST
+conformance, line length, en-UK), human docs, and rolling-context files (PLAN/NOTES lifecycle vs
+code). Note: Go source is exempt from line-wrap inline rules; Rust uses rustdoc //! / /// forms
+rather than rST field lists — per the per-language divergences section of STYLE-DOC.md. If the
 target has no doc surface, return "no doc surface in scope" and stop.
 
 INVESTIGATION TASKS
 1. Load STYLE-DOC.md as the audit reference.
-2. Inspect the target. Cover .py docstrings, .md/.rst files, and rolling-context files if present.
+2. Inspect the target. Cover source-file docstrings, .md/.rst files, and rolling-context files.
 3. Emit proposals only — this audit does not auto-fix.
 
 OUTPUT FORMAT
@@ -106,16 +111,18 @@ Thoroughness: medium
 Read-only: YES. DO NOT EDIT ANY FILES.
 
 GOAL
-Audit the target against ~/.config/opencode/STYLE-TEST.md (and STYLE-CODE.md as the inherited
-base). If the target has no test code, return "no test code in scope" and stop.
+Audit the target against the per-language test styleguide. Resolve language from the target
+(pyproject.toml → Python, Cargo.toml → Rust, go.mod → Go; mixed → all applicable). Load
+STYLE-TEST-<LANG>.md via the STYLE-TEST.md index; load STYLE-CODE-<LANG>.md as the inherited base.
+If the target has no test code, return "no test code in scope" and stop.
 
 INVESTIGATION TASKS
-1. Load STYLE-TEST.md and STYLE-CODE.md as audit references.
-2. Inspect the target. Limit scope to test files (paths under tests/, files matching test_*.py or
-   *_test.py).
-3. For each rule in STYLE-TEST.md §"Mechanical rules", emit findings.
+1. Detect target language; load the matching STYLE-TEST-<LANG>.md and STYLE-CODE-<LANG>.md.
+2. Inspect the target. Limit scope to test files (paths under tests/, *_test.go, test_*.py,
+   tests/*.rs, etc.).
+3. For each rule in §"Mechanical rules", emit findings with file:line citations.
 4. For each section under §"Test philosophy" and §"Structuring principles", surface observations.
-   These sections are TODO — note that explicitly when no concrete rules exist yet.
+   These sections are TODO in some guides — note that explicitly when no concrete rules exist yet.
 
 OUTPUT FORMAT
 report. Sections: "Findings (mechanical)", "Observations (structural)", "Files audited".

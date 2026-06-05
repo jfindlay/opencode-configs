@@ -110,4 +110,31 @@ weakest possible enforcement mechanism.
 
 ---
 
-## (No other themes yet)
+## Idea: context-fill plugin hook for @plan-admin
+
+**Status**: deferred — gate not yet fired.
+
+**Gate**: do NOT start until small-commit discipline (see
+`multisession/multi-session-planning.md`) has been tried on real chains and shown insufficient —
+i.e., a conceptual unit genuinely overflowed a healthy window despite small-commit tuning. For
+garden codebases this may never fire. (This is the same gate as the Thread 3 warm-resumption work;
+Thread 4 only earns its keep if Thread 3 is needed.)
+
+**Value**: a model cannot reliably measure its own context fill; it confabulates. OpenCode *does*
+know the exact token count (it computes it to decide auto-compaction). A plugin hook exposing
+per-subagent context-fill ("at 47% / 81% / 94% of window") converts a judgment `@plan-admin` does
+badly into a measurement code does perfectly — the same push-mechanical-measurement-to-the-cheapest-layer
+principle as the rest of the system.
+
+**Unverified assumption**: that OpenCode's plugin hook surface exposes a readable per-session /
+per-subagent context token count mid-session. The `customize-opencode` skill lists hooks
+(`tool.execute.before/after`, session events, `experimental.session.compacting`,
+`experimental.compaction.autocontinue`) but does not confirm a readable live token-fill figure.
+
+**Safe-to-do-early step (when the gate fires)**: fork `@explore` read-only against the OpenCode
+source / plugin SDK (`@opencode-ai/plugin`) and the published config schema to answer: *can a
+plugin read the current context token count for a given (sub)session mid-run, and surface it to
+the orchestrating agent?*
+- If YES → spec the hook.
+- If NO → `@plan-admin` must estimate fill from turn count / cumulative tool-output volume
+  (coarser); note this fallback in the Thread 3 spec when writing it.

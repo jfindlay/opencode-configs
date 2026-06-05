@@ -76,6 +76,17 @@ inline.
 ² Should — pointing agents at the inline-doc contract and human-doc exposition is the job of agent
 docs.
 
+## Per-language divergences
+
+Two divergences introduced by the sibling styleguides; noted here so doc-audits do not
+false-positive:
+
+- **Go source has no 100-char wrap** — `gofmt` owns layout and Go has no line-length setting. The
+  "premature wrap" / ">100 col" inline rules apply to Go *comments and Markdown* but not Go *code*.
+- **Rust uses `//!` / `///` rather than rST docstrings** — `//!` for module/crate headers, `///`
+  for items. The "missing docstring" and field-list rules map to rustdoc `# Errors` / `# Panics`
+  sections, not to rST `:param:` / `:returns:` field lists.
+
 ## Future sections (TODO)
 
 - **rST conformance details.** Field-list ordering, common pitfalls, Sphinx-vs-other-tooling

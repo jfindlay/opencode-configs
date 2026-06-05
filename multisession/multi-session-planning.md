@@ -95,27 +95,30 @@ frozen cross-session contract — must still halt and surface to the human, neve
 
 ### The sixth lever: adjudicator tier (Opus vs Sonnet at junctures)
 
-The juncture adjudicator (`@plan-juncture`) defaults to Sonnet, and for most chains that is right —
-not because juncture work is easy (it is the *highest-judgment* work in the chain: substrate
-interface design, contract-invalidation adjudication, static↔action frame transforms) but because
-the work is de-risked structurally. The `destructive-HALT` invariant bounds a weaker adjudicator's
-downside to *over-halting*, which the human catches and qualifies; waving a destructive change
-through is the only unrecoverable error, and conservatism guards against it. Sonnet-at-junctures is a
-cost-mitigated compromise, not a judgment-matched assignment.
+The juncture adjudicator (`@plan-juncture`) defaults to Opus, because juncture work is the
+*highest-judgment* work in the chain (substrate interface design, contract-invalidation
+adjudication, static↔action frame transforms) and the conditions that make it risky are exactly the
+ones where the stronger model earns its differential. The differential is also cheap: junctures are
+rare and short (see below), so the default pays for the strongest adjudicator where a wrong call is
+least recoverable. Opting *down* to Sonnet is the cost-mitigated compromise — safe because the
+`destructive-HALT` invariant bounds a weaker adjudicator's downside to *over-halting*, which the
+human catches and qualifies; waving a destructive change through is the only unrecoverable error,
+and conservatism guards against it. Sonnet-at-junctures is a judgment-economised assignment, not the
+judgment-matched default.
 
 But the tier should be **tunable per chain**, governed by the *same five levers* as commit size,
 because juncture tier is the same cost-of-wrong decision one level up:
 
-- **Levers 1-4 push the adjudicator tier UP (toward Opus) exactly as they push commit size DOWN** —
+- **Levers 1-4 hold the adjudicator at the Opus default exactly as they push commit size DOWN** —
   both are the cost-of-wrong response. High criticality (4), high design-error cost (3), intricate
   substrate (2), or spaghetti ambient code (1) are the cases where a wrong adjudication is least
   recoverable and the cold-fork reasoning is hardest, so the strongest adjudicator earns its
-  differential there.
-- **Lever 5 (test-suite quality) is the asymmetry: it pushes the adjudicator tier DOWN** while it
-  also pushes commit size down. A strong inner loop catches contract drift behaviourally, so a
-  cheaper outer-loop adjudicator's misses are caught downstream — strong tests let you economise on
-  *both* commit size and adjudicator tier. Test quality is the one lever that buys you a cheaper
-  adjudicator; the other four only buy you smaller commits.
+  differential there and the default stands.
+- **Lever 5 (test-suite quality) is the asymmetry: it is the one lever that justifies opting DOWN to
+  Sonnet** while it also pushes commit size down. A strong inner loop catches contract drift
+  behaviourally, so a cheaper outer-loop adjudicator's misses are caught downstream — strong tests
+  let you economise on *both* commit size and adjudicator tier. Test quality is the one lever that
+  buys you a cheaper adjudicator; the other four only buy you smaller commits.
 
 Two facts make the differential cheap to pay when the levers call for it. Junctures are **rare**
 (5-10 per ~70-session project) and **short** (one-shot returns, ~8-13K output), so the Opus-vs-Sonnet
@@ -126,9 +129,10 @@ that makes junctures risky (cold fork, thin context) is where Opus's marginal ad
 Tier the rare high-stakes fork up; never tier the frequent mechanical worker up — that is where Opus
 is genuinely wasted.
 
-Default: Sonnet. Escalate to Opus when the levers call for it — most sharply when low test quality
-(weak inner loop) coincides with high correctness-criticality. The tier is selected per chain (in the
-`/run-plan` invocation or the PLAN header), not hardcoded in the agent's frontmatter.
+Default: Opus. Opt down to Sonnet (`@plan-juncture-sonnet`) when the levers permit — most clearly
+when strong test-suite quality (trustworthy inner loop) coincides with lower correctness-criticality.
+The tier is selected per chain via the `juncture-tier:` field in the PLAN header (absent or `opus`
+keeps the default; `sonnet` opts down), not hardcoded in the agent's frontmatter.
 
 ### The deferred fallback: warm resumption for non-garden codebases
 

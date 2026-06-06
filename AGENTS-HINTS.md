@@ -322,3 +322,20 @@ are done.
 subagent`, OpenCode appends an auto-dispatch directive ("call the task tool with subagent: <X>") to
 the rendered prompt.  This must be preempted by defensively specifying the `agent: `, for example,
 `plan-deep` in the frontmatter.
+
+## Engineering as the quantification of error; the fiduciary-latitude contract
+
+2026-06-06: User acceptance of a sharded PLAN — expressed mechanically by invoking `/run-plan
+docs/PLAN.md` — is acceptance of the entire implementation path-space the enrolled agents judge best,
+not a line-item contract to be executed literally. Each agent is empowered to make the best possible
+choice among a heterogeneous set of constraints (business demands, technical constraints, resource
+budget); this is the foundational work of engineering itself — to wright legibility, durability, and
+stability out of natural resources: a Chesterton fence here, a gauge on noise there, a map of the
+approximately-linear region within a fantastically contradictory reality. Engineering is
+epistemologically the quantification of error. The operational consequence for `/run-plan`: agents
+hold fiduciary latitude under fidelity to the PLAN, so deviation (even medium deviation, with
+commensurate evidence) rides through and is reported at the step-3 review; halts are reserved for the
+irreconcilable — something incredibly wrong that the agent cannot reconcile against the PLAN's
+provisions, anticipations, or quantifications. This is the premise that motivates the whole
+discovery-and-adjustment apparatus and the juncture adjudication. See
+`multisession/multi-session-planning.md` and `command/run-plan.md` for the mechanics.

@@ -408,6 +408,34 @@ expensive tier run every iteration to access judgment needed only at junctures.
 
 ---
 
+## The fiduciary-latitude contract
+
+User acceptance of a sharded PLAN — expressed mechanically by invoking `/run-plan` — is acceptance
+of the *entire implementation path-space* the enrolled agents judge best, not a line-item contract
+to be executed literally. Each agent is empowered to make the best possible choice among a
+heterogeneous set of constraints (business demands, technical constraints, resource budget).
+
+This is why the discovery-and-adjustment machinery and the juncture adjudication exist at all: the
+PLAN is a prediction; the sessions are the reality that updates it. (This is the same point the
+static-frame / action-frame transform makes — the static frame is updated by the action frame, not
+the other way around. See [The coordinate transform](#the-coordinate-transform) above.)
+
+The engineering framing worth stating close to verbatim, because it is the *why* behind the
+latitude: engineering is the work of wrighting legibility, durability, and stability out of natural
+resources — a Chesterton fence here, a gauge on noise there, a map of the approximately-linear
+region within a fantastically contradictory reality. Engineering is epistemologically the
+quantification of error. The agents hold latitude *and* the predicated trust to fiduciary fidelity
+to the PLAN precisely so they can do this work.
+
+The operational consequence: halts are reserved for the irreconcilable. Even medium deviation rides
+through with commensurate evidence and justification, surfaced at the step-3 review — because the
+happy-path touchpoints (PLAN derivation, initialization, review) already carry enough structure for
+review agents to report deviation without a mid-chain halt. The juncture adjudicator's first job at
+any potential halt is to reconcile the situation against the PLAN's provisions, anticipations, and
+quantifications; it halts only when reconciliation fails.
+
+---
+
 ## Preventing defocus and scope wandering
 
 The two threats to a long-arc project are equal-and-opposite:
@@ -439,6 +467,12 @@ correction against rigidity. Neither is sufficient alone.
   session is appropriate here). Discoveries internal to a sub-track can wait until the boundary.
 - "The plan was wrong about X" is a successful outcome of a session, not a failure. The plan was
   always a prediction; sessions are the data that updates it.
+
+The fiduciary-latitude contract (see [The fiduciary-latitude contract](#the-fiduciary-latitude-contract)
+above) is the foundational premise behind this correction: agents are empowered — indeed expected —
+to act on what they learn, not to halt every time reality diverges from the roadmap. The
+irreconcilable-only halt rule is what keeps that latitude from becoming defocus: deviation is
+authorized, but only halts surface the cases that cannot be reconciled.
 
 ### The discipline
 

@@ -1,5 +1,5 @@
 ---
-description: "[jf] Autonomously execute a session-sharded plan file as a 1:1 session:commit chain. @plan-admin orchestrates the mechanical loop; dispatches @build/@general/@explore per session entry, @committer for commits, and pages a forked @plan-juncture (Opus default) or @plan-juncture-sonnet (opt-down) only at inflection points, contract-invalidating discoveries, and sub-track boundaries. State lives in the committed plan ledger. Args: [plan-path] [may-reshard|halt-at-boundaries|fully-autonomous]. Plan path defaults to docs/PLAN.md."
+description: "[jf] Autonomously execute a session-sharded plan file as a 1:1 session:commit chain. @plan-admin orchestrates the mechanical loop; dispatches @build/@general/@explore per session entry, @committer for commits, and pages a forked @plan-juncture (Opus default) or @plan-juncture-sonnet (opt-down) only at inflection points, contract-invalidating discoveries, and sub-track boundaries. State lives in the committed plan ledger. Args: [plan-path] [may-reshard|halt-at-boundaries]. Plan path defaults to docs/PLAN.md."
 agent: plan-admin
 subtask: false
 ---
@@ -27,7 +27,7 @@ override a false precondition mid-run.
 
 1. **Bind PLAN — the plan file path.** Parse `$ARGUMENTS`: the first path-like token (ending `.md`,
    or any explicit path) is PLAN. Default `PLAN = docs/PLAN.md`. Remaining tokens are run-config
-   flags (`may-reshard`, `halt-at-boundaries`, `fully-autonomous`).  Every "the plan" /
+   flags (`may-reshard`, `halt-at-boundaries`).  Every "the plan" /
    "docs/PLAN.md" reference below means PLAN. If several sharded plans exist and none was named, ask
    which.
 
@@ -98,15 +98,21 @@ If the selected session is marked **`@plan` inflection point** in the plan:
   Include the inflection session entry, the contracts it consumes/produces, and the full current `##
   Action-frame digest`.
 - The fork designs the substrate interface and writes the resolved design into PLAN's relevant `##
-  Cross-session contracts` subsection, then returns a one-paragraph summary.
-- **HALT for human sign-off.** Surface the returned design. Do not dispatch implementation until the
-  user approves.
-- On approval, resume at step 3 for this session (dispatch `@build` to implement the design the fork
-  just wrote).
+  Cross-session contracts` subsection, then returns one of two verdicts:
+  - **`design-confident <summary>`**: the fork judges the design PLAN-consistent and high-confidence.
+    The driver **self-continues** — resume at step 3 and dispatch `@build` to implement, no human
+    halt. Append a digest entry noting the inflection was designed and self-cleared.
+  - **`design-uncertain-HALT <what cannot be reconciled>`**: the fork hit something it cannot
+    reconcile against the PLAN's provisions/anticipations/quantifications (a contradiction with a
+    frozen contract, genuinely under-specified intent the PLAN does not anticipate, or low design
+    confidence with material downstream cost). The driver **halts for human sign-off**, surfacing the
+    fork's named irreconcilability.
 
-Rationale: substrate interfaces are consumed by many downstream sessions; reworking them later is
-the expensive failure mode the inflection point exists to prevent. The fork produces the design
-one-shot; the human loop lives here in the driver.
+Rationale: substrate interfaces are expensive to rework when many downstream sessions consume them —
+this is what justifies the fork's high tier and the escape verdict. The inflection fork exists to
+*design* the interface and to *detect the rare case it cannot reconcile against the PLAN*, not to
+halt unconditionally. When the design is confident and PLAN-consistent, continuous execution is the
+right default.
 
 ### 3. Classify and dispatch the session
 
@@ -147,14 +153,18 @@ prose invariant)?
    - **Discovery flagged:** fork `@plan-juncture` (subagent) with juncture type `discovery-adjudication`.
      Include the discovery, the affected contract(s), the affected downstream sessions, and the full
      current `## Action-frame digest`. Await the fork's one-shot verdict:
-     - `internal-continue`: append to `## Discoveries & risks` in PLAN; continue to step 5.
+     - `internal-continue`: the fork reconciled the discovery against the PLAN's anticipations.
+       Append to `## Discoveries & risks` in PLAN; continue to step 5. Medium deviation that the
+       fork reconciles against the PLAN rides through here — it is reported, not halted.
      - `additive-reshard <spec>`: honoured ONLY if run was invoked with `may-reshard` AND the change
        is *additive* (insert a new session; widen a not-yet-frozen contract). Re-shard the
        downstream session list per the spec, record in `## Discoveries`, continue.
-     - `destructive-HALT`: ALWAYS HALT regardless of `may-reshard`. Surface the discovery, the
-       affected contract, and the affected downstream sessions. Autonomous destructive re-shard is
-       never permitted.  Also append a digest entry for this iteration (non-trivial — a discovery
-       was flagged).  f. **Fix-loop.** On red tests/types: dispatch one `@build` fix subagent with
+     - `destructive-HALT`: ALWAYS HALT regardless of `may-reshard`. This verdict means the discovery
+       is both incredibly wrong AND the fork cannot reconcile it against the PLAN's provisions,
+       anticipations, or quantifications — not merely that it deviates from the PLAN. Surface the
+       discovery, the affected contract, and the affected downstream sessions. Autonomous destructive
+       re-shard is never permitted. Also append a digest entry for this iteration (non-trivial — a
+       discovery was flagged).  f. **Fix-loop.** On red tests/types: dispatch one `@build` fix subagent with
        the failure output. Re-verify. Cap at 2 fix iterations; on the 3rd failure → halt (`BLOCKED:
        session does not converge`). Do not let the fix-loop run unbounded.
 
@@ -217,9 +227,11 @@ If the just-completed session is the last in a sub-track (marked ◆ in the plan
 - Fork `@plan-juncture` (subagent) with juncture type `boundary-transform`. Include the `## Purpose (design
   intent)`, the frozen-contract list, and the full current `## Action-frame digest`.
 - The fork returns: `still-on-intent <notes>` or `drift-HALT <what changed and why>`.
-- If `still-on-intent`: reconcile the ledger's frozen contracts against the plan's stated contracts,
-  note drift in the ledger, and continue per Boundary policy.
-- If `drift-HALT`: halt for human sign-off with the fork's output.
+- If `still-on-intent`: the fork judged work is trending toward design intent, tolerating medium
+  deviation that trends toward intent. Reconcile the ledger's frozen contracts against the plan's
+  stated contracts, note drift in the ledger, and continue per Boundary policy.
+- If `drift-HALT`: the fork found drift it cannot reconcile against the design intent. Halt for
+  human sign-off with the fork's output.
 
 Per the Boundary policy below, self-continue by default (the fork is the "self-review") — do NOT
 halt for human sign-off at ◆ unless the fork returns `drift-HALT` or the run config says
@@ -232,16 +244,20 @@ Then return to step 1.
 The review cadence scales with **sub-track count, not session count**. Boundaries are where the
 human-relevant coordinate-transform happens; sessions are not. Default policy:
 
-- **Halt-for-human:** `@plan-juncture` inflection points (step 2 — after fork returns design for sign-off),
-  `drift-HALT` from a boundary fork (step 7), `destructive-HALT` from a discovery fork (4e),
-  committer secret/refusal (step 5), non-convergence (4f), dependency deadlock.
-- **Self-review-and-continue:** ◆ sub-track boundaries when fork returns `still-on-intent` (step 7),
-  unless overridden by `halt-at-boundaries`.
+- **Halt-for-human:** `design-uncertain-HALT` from an inflection fork (step 2), `drift-HALT` from a
+  boundary fork (step 7), `destructive-HALT` from a discovery fork (4e), committer secret/refusal
+  (step 5), non-convergence (4f), dependency deadlock. These are the irreconcilable cases.
+- **Self-review-and-continue:** inflection points when the fork returns `design-confident` (step 2),
+  ◆ sub-track boundaries when the fork returns `still-on-intent` (step 7), and all medium deviation
+  / discovery that the relevant fork reconciles against the PLAN.
 
-A run may be invoked with `halt-at-boundaries` to force human sign-off at every ◆ (use for the FIRST
-run of a new project, before the shard pattern is proven), or `fully-autonomous` to also
-self-continue inflection points (use only once a project's substrate is known-good, and only when
-inflection design is expected to be straightforward).
+The **default** run mode now self-continues at inflection points (via `design-confident`) and at
+boundaries (via `still-on-intent`). Continuous execution is the default at all three junctures.
+
+A run may be invoked with `halt-at-boundaries` to force human sign-off at every ◆ boundary AND
+treat every inflection as a halt regardless of the fork's verdict. Use for the FIRST run of a new
+project, before the shard pattern is proven — this is the "I don't trust the shard pattern yet"
+mode.
 
 ## Dispatch template (code-change session)
 
@@ -289,8 +305,10 @@ ACTION-FRAME DIGEST (feed to juncture adjudicator):
 JUNCTURE QUESTION:
 <one of:>
   Inflection: Design the substrate interface for session <N>. Write the resolved interface into
-  PLAN's ## Cross-session contracts subsection <X>. Return a one-paragraph summary of what you wrote
-  and any over-specified methods you recommend carrying forward.
+  PLAN's ## Cross-session contracts subsection <X>. Return `design-confident <summary>` if the
+  design is PLAN-consistent and high-confidence, or `design-uncertain-HALT <what cannot be
+  reconciled against the PLAN's provisions/anticipations/quantifications>` if not. Default strongly
+  to `design-confident` — halt only when genuinely irreconcilable.
 
   Discovery: The subagent reported: "<discovery>". Does this invalidate a frozen downstream
   contract? Return one of: internal-continue / additive-reshard <spec> / destructive-HALT, with one
@@ -318,9 +336,10 @@ CONSTRAINTS:
   implement and never self-commit; `@committer` commits and never verifies. Roles stay separate (per
   AGENTS.md autonomous-chain carve-out).
 - The Fix-loop is capped (2 iterations) — non-convergence halts, never grinds.
-- The four halt classes (inflection sign-off, contract-violating discovery, committer
-  secret/refusal, non-convergence/deadlock) are the ONLY autonomous stops on the happy path.
-  Everything else continues.
+- The four halt classes (`design-uncertain-HALT` from an inflection fork, `destructive-HALT` from a
+  discovery fork, committer secret/refusal, non-convergence/deadlock) are the ONLY autonomous stops
+  on the happy path. Everything else continues. The enrolled agents hold fiduciary latitude under
+  fidelity to the PLAN; halts are reserved for the irreconcilable, never for mere deviation.
 - PLAN is committed only as its own rolling-context commit (step 6b), never folded into a session
   commit. After each full iteration the tree is clean and the committed ledger+digest matches the
   last committed session — this is the resumability invariant precondition 5 enforces.

@@ -43,6 +43,19 @@ You run the loop from `/run-plan`. Follow that command's spec exactly:
    frozen-contract list, and design intent; it returns a still-on-intent verdict and reconciliation
    notes. You record these and continue (or halt if the fork flagged drift needing sign-off).
 
+## Critical tool discipline
+
+**Never `cd X && cmd`.** Always use the bash tool's `workdir` parameter.
+
+```
+# BAD — bloats every call, subprocess cd doesn't persist
+command: "cd /home/jfindlay/Source/.../salt && venv/bin/tox -m analyze"
+
+# GOOD
+workdir: "/home/jfindlay/Source/.../salt"
+command: "venv/bin/tox -m analyze"
+```
+
 ## Action-frame digest discipline (critical)
 
 The action-frame digest is the warm-context substitute that makes cold-forked `@plan-juncture` useful at

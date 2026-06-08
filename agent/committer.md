@@ -81,6 +81,22 @@ Missing `WORKING DIRECTORY`, `SESSION CONTRACT`, or `EXPECTED FILES` is a refusa
 Missing `TICKET ID` is fine if the repo doesn't use them; if the repo does use them, derive from the
 branch name (`git rev-parse --abbrev-ref HEAD` → parse `<user>/<project>-XXXX/slug`).
 
+## Critical tool discipline
+
+**Never `cd X && cmd`.** Always use the bash tool's `workdir` parameter.
+
+```
+# BAD — bloats every call, subprocess cd doesn't persist
+command: "cd /home/jfindlay/Source/.../salt && git status"
+
+# GOOD
+workdir: "/home/jfindlay/Source/.../salt"
+command: "git status"
+```
+
+The `Working directory` field in the orchestrator input is the `workdir` for every bash call in
+this agent. Set it once per call; never navigate with `cd`.
+
 ## Procedure
 
 1. **Inventory.** Run in parallel: `git status`, `git diff --stat`, `git log --oneline -n 10`. Use

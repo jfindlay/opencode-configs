@@ -55,6 +55,19 @@ before loading.
    observation that meets the `CAPTURE-CANDIDATE` criteria from the global AGENTS.md, flag it
    explicitly so the user can decide whether to preserve it.
 
+## Critical tool discipline
+
+**Never `cd X && cmd`.** Always use the bash tool's `workdir` parameter.
+
+```
+# BAD — bloats every call, subprocess cd doesn't persist
+command: "cd /home/jfindlay/Source/.../salt && venv/bin/mypy foo.py"
+
+# GOOD
+workdir: "/home/jfindlay/Source/.../salt"
+command: "venv/bin/mypy foo.py"
+```
+
 ## Default investigative style
 
 - Prefer reading the actual code/config/tests to asking the user. Ask only when the problem has

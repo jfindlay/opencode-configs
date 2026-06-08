@@ -30,11 +30,29 @@ response scale), load REASONING through the `--- T0 ONLY BELOW ---` marker and s
   Forking `@general` is the right move only when the task genuinely requires interleaved
   read/write/run steps in a single context.
 
-## Tool discipline
+## Critical tool discipline
 
-The mechanical rules from AGENTS.md apply unchanged: never use bash for file operations (use
-Read/Glob/Grep/Edit/Write), never `cd X && cmd` (use `workdir`), parallelise independent calls,
-prefer Task subagents for open-ended search work.
+**Never `cd X && cmd`.** Always use the bash tool's `workdir` parameter.
+
+```
+# BAD — bloats every call, subprocess cd doesn't persist
+command: "cd /home/jfindlay/Source/.../salt && venv/bin/mypy foo.py"
+
+# GOOD
+workdir: "/home/jfindlay/Source/.../salt"
+command: "venv/bin/mypy foo.py"
+```
+
+**Never use bash for file operations.** Use the dedicated tools instead:
+
+- `Edit` for file modifications (not `sed -i`)
+- `Read` for file inspection (not cat/head/tail)
+- `Glob` for filename patterns (not find)
+- `Grep` for content search (not grep/rg)
+- `Write` for file creation
+
+**Parallelise independent tool calls.** If three Reads or three Greps don't depend on each other,
+issue them together. Prefer Task subagents for open-ended search work.
 
 ## Output
 

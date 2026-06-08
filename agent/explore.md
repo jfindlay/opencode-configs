@@ -28,6 +28,32 @@ and response scale (collapse clusters, pivotal facts only) shape the quality of 
   directly.
 - Prefer tools over bash. Use `Read`, `Grep`, `Glob` instead of cat/grep/find.
 
+## Critical tool discipline
+
+**Never `cd X && cmd`.** Always use the bash tool's `workdir` parameter. But then prefer
+the dedicated tool over bash entirely:
+
+```
+# BAD — two violations: cd && and bash grep instead of the Grep tool
+command: "cd /home/jfindlay/Source/.../salt && grep -n 'foo' src/foo.py"
+
+# GOOD — fix the cd with workdir
+workdir: "/home/jfindlay/Source/.../salt"
+command: "grep -n 'foo' src/foo.py"
+
+# BETTER — skip bash entirely, use the Grep tool
+Grep: { pattern: "foo", path: "src/foo.py" }
+```
+
+**Never use bash for file or content operations.** Use the dedicated tools:
+
+- `Read` for file inspection (not cat, head, tail, or `sed -n 'X,Yp'` for slicing)
+- `Grep` for content search (not grep or rg)
+- `Glob` for filename patterns (not find)
+
+For large tool-output files already on disk: use `Read` with `offset:` and `limit:` to
+page through them — never `sed -n 'X,Yp'` to slice.
+
 ## Output discipline
 
 Structure your output exactly as requested in the fork prompt (inventory, report, trace, or

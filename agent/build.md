@@ -29,10 +29,18 @@ command: "venv/bin/mypy foo.py"
 as bash commands.** Use the dedicated tools instead:
 
 - `Edit` for file modifications (not `sed -i` — no diff preview, no undo)
-- `Read` for file inspection
+- `Read` for file inspection (not cat/head/tail, and not `sed -n 'X,Yp'` for slicing)
 - `Glob` for filename patterns
 - `Grep` for content search
 - `Write` for file creation
+
+```
+# BAD — sed to read a slice of a large file
+command: "sed -n '5160,5260p' /path/to/large-file"
+
+# GOOD — Read tool with offset/limit
+Read: { filePath: "/path/to/large-file", offset: 5160, limit: 100 }
+```
 
 **Parallelize independent tool calls in a single turn.** If three Reads or three Greps don't
 depend on each other, issue them together.

@@ -127,6 +127,27 @@
     "webfetch": "allow"
   },
   "agent": {
+    // Plan mode: read-only by default (global), but allows writes to rolling-context docs
+    // without prompting. The ~/.config/opencode/** deny is preserved — config-repo docs
+    // stay salt-gated even when accessed via the symlink target path.
+    "plan": {
+      "permission": {
+        "edit": {
+          "*": "ask",
+          "**/docs/PLAN.md": "allow",
+          "**/docs/NOTES.md": "allow",
+          "**/docs/ROADMAP.md": "allow",
+          "~/.config/opencode/**": "deny"
+        },
+        "write": {
+          "*": "ask",
+          "**/docs/PLAN.md": "allow",
+          "**/docs/NOTES.md": "allow",
+          "**/docs/ROADMAP.md": "allow",
+          "~/.config/opencode/**": "deny"
+        }
+      }
+    },
     // Build mode: inherits global permissions, but allows edits without prompting.
     // The ~/.config/opencode/** deny is preserved here — runtime edits must always go
     // through workstation-salt regardless of agent.

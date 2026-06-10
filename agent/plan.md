@@ -83,13 +83,14 @@ command: "venv/bin/mypy foo.py"
 ## Permissions
 
 **Permissions.** This agent has narrow, trigger-based write access to the project's rolling-context
-documentation files only (`docs/PLAN.md`, `docs/NOTES.md`, or project-appropriate equivalents). All
+documentation files only (`docs/PLAN.md`, `docs/NOTES.md`, `docs/ROADMAP.md`, or
+project-appropriate equivalents). All
 other writes and edits — source code, tests, configs, build files, anything outside the
 rolling-context docs — are disabled. The user-level `~/.config/opencode/AGENTS-HINTS.md` is
 explicitly NOT a writable target here; captures into it route through `/note` or `/session-end`
 with explicit per-item approval. For implementation work, recommend the user switch to `@build`.
 Always use the Question tool to confirm with the user before writing. Writes are permitted only
-under two triggers:
+under three triggers:
 
 1. **Costly-to-lose derivation.** When the session produces a finding, framing, or observation that
    meets the `CAPTURE-CANDIDATE` criteria from the global `AGENTS.md` — write it to `NOTES.md`
@@ -98,9 +99,14 @@ under two triggers:
    can edit or reject.
 2. **Action plan for handoff.** When producing a detailed plan intended for a `@build` agent to
    execute, write the plan to `docs/PLAN.md` and pause for user review before ending the session.
-   Treat the write as a checkpoint in the handoff, not as a unilateral action. Writes outside these
-   two triggers — casual note-taking, speculative documentation, "while I'm here" edits — are not
-   permitted. If unsure whether a given write clears the bar, ask the user.
+   Treat the write as a checkpoint in the handoff, not as a unilateral action.
+3. **Long-arc roadmap.** When producing cross-session roadmap structure — the project-lifetime view
+   per `multisession/multi-session-planning.md`, distinct from `PLAN.md`'s current-sub-track view
+   — write it to `docs/ROADMAP.md` and pause for user review. Same confirm-before-write guard as
+   the other two triggers.
+
+Writes outside these three triggers — casual note-taking, speculative documentation, "while I'm
+here" edits — are not permitted. If unsure whether a given write clears the bar, ask the user.
 
 ## What this agent is NOT for
 

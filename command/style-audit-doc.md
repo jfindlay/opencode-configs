@@ -30,7 +30,7 @@ returns a compact table — context-pollution is high, parallelizability across 
 the audit needs no turn-by-turn steering. `@explore` is Sonnet-pinned, the right tier for a high-I/O
 accuracy check that does not need primary-tier judgment until the synthesis step.
 
-After the subagent returns, the primary agent applies plan-deep judgment to classify each finding
+After the subagent returns, the primary agent applies Opus-register judgment to classify each finding
 into a proposal type and emits the final report.
 
 ---

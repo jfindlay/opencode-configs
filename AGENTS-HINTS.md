@@ -11,8 +11,12 @@ to the work at hand; you do not need to read this file front-to-back.
 
 Routing model reframes "what's the best model" as "what's the cost of this being wrong". The rule:
 
-- **Cost-of-wrong high → T0 (Opus 4.7).** Architectural tradeoffs, boundary design, cross-cutting
-  audits, phase planning, commit-shape decisions. Session count per week: small.
+- **Generative frontier, interactive dialectic → T-1 (Fable 5).** Genesis of framings that don't
+  yet exist, abduction, pivotal anomalies that resist all canonical options. The bar is not
+  "intellectually interesting" — it is "the Fable-scale reserve changes the answer." ~3× Opus 4.8,
+  ~14× Sonnet. Session count per week: very small.
+- **Cost-of-wrong high, analytical → T0 (Opus 4.8).** Architectural tradeoffs, boundary design,
+  cross-cutting audits, phase planning, commit-shape decisions. Session count per week: small.
 - **Cost-of-wrong moderate → T1 (Sonnet 4.6).** Implementation, refactors, test writing,
   review-address cycles. ~95% of sessions.
 - **Cost-of-wrong low, judgment required → T2 (Haiku or equivalent).** Classify these files, group
@@ -23,8 +27,8 @@ Routing model reframes "what's the best model" as "what's the cost of this being
 Upgrade or downgrade is not about task size. Large mechanical tasks stay at T3. Small architectural
 decisions stay at T0. The signal is "if this is wrong, how much work is downstream?"
 
-Cross-check at phase boundaries with T0-alt (GPT-5 / Gemini 2.5 Pro): ask the alt to steelman
-objections to the T0 plan. Different families catch different failure modes.
+Cross-check T0 conclusions at phase boundaries with T0-alt (GPT-5 / Gemini 2.5 Pro): ask the alt
+to steelman objections to the T0 plan. Different families catch different failure modes.
 
 ## Subagent prompt anatomy
 
@@ -321,7 +325,7 @@ are done.
 2026-06-01: If OpenCode decides (via an unknown mechanism), a command's `agent:` is a `mode:
 subagent`, OpenCode appends an auto-dispatch directive ("call the task tool with subagent: <X>") to
 the rendered prompt.  This must be preempted by defensively specifying the `agent: `, for example,
-`plan-deep` in the frontmatter.
+`plan` in the frontmatter.
 
 ## Engineering as the quantification of error; the fiduciary-latitude contract
 

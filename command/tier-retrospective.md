@@ -5,9 +5,10 @@ description: "[jf] Gather tier-appropriate retrospective feedback on the AGENTS.
 Run the retrospective prompt below against each of these agents in a fresh session per agent
 (or fork subagents from a lightweight primary session for the subagent-mode ones):
 
-- `@plan-deep` (T0 / Opus 4.7)
+- `@dialectic` (T-1 / Fable 5)
+- `@plan` (T0 / Opus 4.8)
 - `@build` (T1 / Sonnet 4.6)
-- `@rebase` (T1 / Sonnet 4.6)
+- `@git-editor` (T1 / Sonnet 4.6)
 - `@explore` (T1 subagent / Sonnet 4.6)
 - `@verify` (T1 subagent / Sonnet 4.6)
 - `@session-scan` (T2 subagent / Haiku 4.5)

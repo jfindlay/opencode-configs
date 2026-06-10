@@ -34,7 +34,7 @@ that don't exist in OPENCODE are preserved (e.g.  `bun.lock`, `node_modules/`, `
      - `AGENTS.md`, `AGENTS-REASONING.md`, `AGENTS-HINTS.md`, `AGENTS-REASONING-HINTS.md`,
        `AGENTS-LOG.md`
      - `opencode.json`
-     - `agent/<name>.md` (build, plan-deep, explore, rebase, verify, session-scan, general)
+      - `agent/<name>.md` (build, plan, dialectic, explore, git-editor, verify, session-scan, general)
      - `command/<name>.md` (existing or new)
 
 2. **Make the edit in OPENCODE.** Use `Edit` or `Write` against the OPENCODE path, never RUNTIME. If

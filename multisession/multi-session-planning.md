@@ -44,7 +44,7 @@ session is the unit at which work composes, fails, and resumes.
 
 ### Tuning the commit size: the five inputs
 
-The default (~150-400 LOC) is a starting point. When `@plan-deep` designs a specific multisession,
+The default (~150-400 LOC) is a starting point. When `@plan` designs a specific multisession,
 it tunes the commit window to the project using five inputs. Four of them push *smaller*; one — the
 irreducible complexity of the change — pushes *larger* and acts as the floor. The tuning is the
 tension between that floor and the four downward pressures: **make each commit as small as the four

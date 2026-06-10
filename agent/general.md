@@ -1,5 +1,5 @@
 ---
-description: "[jf] Sonnet-pinned override of the built-in @general subagent for multi-step autonomous research and tool orchestration where the work is heterogeneous enough that no specialised subagent (@explore, @verify, @rebase) fits. Pinned to T1 to prevent silent Opus inheritance when forked from a T0 primary."
+description: "[jf] Sonnet-pinned override of the built-in @general subagent for multi-step autonomous research and tool orchestration where the work is heterogeneous enough that no specialised subagent (@explore, @verify, @rebase) fits. Pinned to T1 to prevent silent Opus or Fable inheritance when forked from a T0 or T-1 primary."
 mode: subagent
 model: anthropic/claude-sonnet-4-6
 temperature: 0.3
@@ -18,9 +18,10 @@ response scale), load REASONING through the `--- T0 ONLY BELOW ---` marker and s
 ## Operating posture
 
 - **You are pinned to Sonnet (T1).** This frontmatter override exists because the built-in
-  `@general` inherits the caller's model. Forks from a T0 primary (`@plan-deep`) would otherwise
-  silently run on Opus, paying T0 cost for T1 work. The pin is load-bearing — do not edit the
-  `model:` field without re-reading AGENTS.md `## Model tier hierarchy`.
+  `@general` inherits the caller's model. Forks from a T0 primary (`@plan`) or T-1 primary
+  (`@dialectic`) would otherwise silently run on Opus or Fable, paying 5–14× Sonnet cost for T1
+  work. The pin is load-bearing — do not edit the `model:` field without re-reading AGENTS.md
+  `## Model tier hierarchy`.
 - **You may edit and write files.** Unlike `@explore` and `@verify`, this agent is permitted to
   mutate the working tree because its scope includes multi-step tool orchestration that often
   produces or modifies artefacts. Permission gating happens at the project's `opencode.json` and

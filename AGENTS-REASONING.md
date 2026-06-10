@@ -1,6 +1,6 @@
 # Reasoning priming (activational)
 
-Rules for primary agents (T0/T1) and judgment-bearing subagents (T1). These fire alongside
+Rules for primary agents (T-1/T0/T1) and judgment-bearing subagents (T1). These fire alongside
 `AGENTS.md` conventions with equal activational weight. Agents referencing this file must treat its
 contents as rules in force, not as optional framings — the referential register of `AGENTS-HINTS.md`
 does not apply here.
@@ -12,18 +12,23 @@ productively apply.
 ## Tier gating within this file
 
 Sections are ordered so that T1 agents can stop reading at a clearly-marked boundary. Everything
-above the `--- T0 ONLY BELOW ---` marker applies to both T0 (Opus 4.7) and T1 (Sonnet 4.6) agents.
-Everything below the marker is T0-only: deep-dialectic material whose execution at T1 would produce
-fake rigour — the four-step abductive decomposition and its Dupin framing are built for Opus-scale
-reasoning reserve, and asking Sonnet to will them into existence costs attention against the rules
-it can actually apply.
+above the `--- T-1/T0 ONLY BELOW ---` marker applies to T-1 (Fable 5), T0 (Opus 4.8), and T1
+(Sonnet 4.6) agents. Everything below the marker is T-1/T0-only: deep-dialectic material whose
+execution at T1 would produce fake rigour — the four-step abductive decomposition and its Dupin
+framing are built for Fable/Opus-scale reasoning reserve, and asking Sonnet to will them into
+existence costs attention against the rules it can actually apply.
 
-**T0 agents** (currently: `plan-deep`): read the whole file; treat all sections as rules in force.
+**T-1 agents** (currently: `dialectic`): read the whole file; treat all sections as rules in force.
+Also load `AGENTS-REASONING-HINTS.md` proactively — it is the natural companion for the
+generative/abductive work that defines this tier.
+
+**T0 agents** (currently: `plan`): read the whole file; treat all sections as rules in force.
 
 **T1 agents** (currently: `build`, `git-editor`, `explore`, `verify`, `general`): read through the
 marker and stop. If you encounter a fact pattern where eliminative and generalizing modes both fail
 against a pivotal anomaly, the correct move is to surface the anomaly and recommend escalation to
-`@plan-deep`, not to attempt the abductive decomposition yourself.
+`@plan`, or to `@dialectic` if the anomaly is at the generative frontier, not to attempt the
+abductive decomposition yourself.
 
 ## Capability allocation (governing principle)
 
@@ -106,13 +111,13 @@ demands them — not as default structure.
 
 ---
 
-## --- T0 ONLY BELOW ---
+## --- T-1/T0 ONLY BELOW ---
 
 T1 agents: stop reading. The section below is deep-dialectic material (modes of inference, the
-four-step abductive decomposition, the Dupin framing) calibrated for Opus-scale reasoning reserve.
-If your current work encounters a pivotal anomaly that eliminative and generalizing modes cannot
-accommodate, surface it and recommend the user escalate to `@plan-deep` — do not attempt the
-abductive decomposition at T1.
+four-step abductive decomposition, the Dupin framing) calibrated for Fable/Opus-scale reasoning
+reserve. If your current work encounters a pivotal anomaly that eliminative and generalizing modes
+cannot accommodate, surface it and recommend the user escalate to `@plan` (or `@dialectic` if the
+problem is at the generative frontier) — do not attempt the abductive decomposition at T1.
 
 ## Modes of inference (selection before spending)
 

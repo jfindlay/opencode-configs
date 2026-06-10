@@ -300,3 +300,59 @@ file-family defects, so no config change.
   `AGENTS-REASONING.md` §'Capability allocation > Analogy (reloadable handle)' on 2026-04-27.
 - **Rolling-context lifecycle rule** (2026-04-26 in HINTS) → absorbed into `AGENTS.md` on
   2026-04-27.
+
+---
+
+## 2026-06-09 — Fable tier (T-1) added; @plan-deep retired; Opus normalised to 4.8
+
+**Context.** Anthropic's Claude Fable 5 is ~3× Opus 4.8 (~$0.01/$0.05 per 1k in/out vs
+~$0.0035/$0.0175). The user's stated value proposition for the premium is narrow: interactive
+dialectic at the generative extremity — genesis of framings that don't yet exist, pivotal anomalies
+that resist all canonical options, abductive leaps. Everything else — audits, phase planning,
+cross-cutting reviews — stays on Opus 4.8.
+
+**Changes:**
+
+1. **New `agent/dialectic.md` (T-1/Fable 5, temperature 0.6).** Primary agent for the extremity
+   charter. Loads `AGENTS-REASONING-HINTS.md` proactively (vs on-demand at T0). Charter explicitly
+   scoped to interactive dialectic; NOT-for list explicitly names `@plan` for analytical T0 work.
+   Write permissions identical to old `@plan-deep` (rolling-context docs only).
+
+2. **New `agent/plan.md` (T0/Opus 4.8) — overrides built-in plan agent.** Full body override
+   carrying the T0 reasoning register. Replaces `@plan-deep` for all analytical T0 work: audits,
+   phase planning, rebase plans, shard-plan. Charter retains the six plan-deep operating
+   principles; NOT-for list distinguishes `@dialectic` (generative frontier) from `@build`
+   (implementation). The decision to promote the built-in plan override rather than just renaming
+   plan-deep: the user wanted Opus 4.8 at the `@plan` slot specifically to make it the natural
+   first escalation from `@build`, consistent with the built-in mode name.
+
+3. **Deleted `agent/plan-deep.md`.** Fully superseded by `agent/plan.md` (T0 analytical) and
+   `agent/dialectic.md` (T-1 generative). Historical mentions in AGENTS-LOG.md untouched.
+
+4. **`agent/plan-juncture.md` model bumped from 4.5 → 4.8.** Normalised to current Opus. The 4.5
+   pin was a drift artefact — the juncture adjudicator is the most consequential single judgment in
+   `/run-plan`, and there was no reason to leave it on a prior-generation model.
+
+5. **`AGENTS-REASONING.md` T0-only marker → T-1/T0-only.** Both Fable and Opus read the
+   below-marker material (modes of inference, four-step abductive decomposition). T1 agents stop
+   at the marker unchanged. Escalation pointers updated from `@plan-deep` to `@plan` /
+   `@dialectic` by failure mode.
+
+6. **`AGENTS-REASONING-HINTS.md` tier gating updated.** `@plan-deep` → `@dialectic` and `@plan`.
+
+7. **`AGENTS-ROSTER.md` and `AGENTS-HINTS.md`** updated throughout: T-1 tier entry with
+   cost rationale, all `@plan-deep` references replaced, Opus version drift corrected (4.7 → 4.8).
+
+8. **Commands updated:** `shard-plan` (`agent:` frontmatter + prose), `run-plan`, `commit`,
+   `config-retrospective`, `update-config`, `style-audit-doc`, `tier-retrospective` (added T-1
+   row; fixed stale `@rebase` → `@git-editor`).
+
+9. **`multisession/multi-session-planning.md`** — single `@plan-deep` reference replaced.
+
+**Alternative weighed:** promoting `@plan-deep` to Fable rather than creating a new agent and
+keeping Opus at `@plan`. Rejected because: (a) most `@plan-deep` work is analytical, not
+generative — paying 3× Fable premium for audits and phase plans has no quality return; (b) the
+user's stated bar for Fable is the "extremity of cognition" + "adduction" (interactive dialectic
+shape), which is categorically narrower than the old `@plan-deep` charter; (c) having a named
+`@plan` at Opus keeps the natural `@build` → `@plan` escalation gradient at a cost step the user
+finds justified (~1.2× Sonnet), while Fable is explicitly an opt-in for rare sessions.

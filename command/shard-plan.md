@@ -1,6 +1,6 @@
 ---
 description: "[jf] Shard a roadmap, a prose plan, or an in-session design statement into a /run-plan-executable docs/PLAN.md: session list (one commit-shaped session per row), cross-session contracts, progress ledger, and action-frame digest. Applies the five-input commit-size tuning law and sets juncture-tier. This is the SHARDING step /run-plan refuses to do; it does NOT execute the plan. Args: [roadmap-or-plan-path] [sub-track]."
-agent: plan-deep
+agent: plan
 subtask: false
 ---
 
@@ -11,7 +11,7 @@ Turn a long-arc design into the executable form `/run-plan` consumes. The output
 This command produces the shards and pauses for review; it never runs `/run-plan` itself (executing
 is a separate, `@plan-admin` action).
 
-Runs from `@plan-deep` (Opus): sharding is the same high-judgment interface-and-contract design the
+Runs from `@plan` (Opus 4.8): sharding is the same high-judgment interface-and-contract design the
 inflection juncture does — session boundaries, contract freezes, tier and juncture-tier selection.
 If invoked from a different agent, note that the judgment register expects Opus and proceed only if
 the user confirms.
@@ -121,7 +121,7 @@ In greenfield mode, the whole session is a dialogue: elicit intent → propose s
 ## Output and handoff
 
 1. Show the proposed `docs/PLAN.md` (or the diff, in re-shard mode) as a fenced block.
-2. Confirm via the Question tool before writing (the `@plan-deep` handoff-checkpoint rule: the write
+2. Confirm via the Question tool before writing (the `@plan` handoff-checkpoint rule: the write
    is a checkpoint, not a unilateral act).
 3. Write `docs/PLAN.md`. Pause for review. Do NOT run `/run-plan`.
 4. If the design statement (greenfield) or a discovery during sharding is itself a durable
@@ -132,7 +132,7 @@ In greenfield mode, the whole session is a dialogue: elicit intent → propose s
 - Sharding only. Never execute a session, never run the VERIFY gate as more than discovery, never
   commit code. `/run-plan` (from `@plan-admin`) executes.
 - Writes are limited to `docs/PLAN.md` (and, on approval, a roadmap/NOTES capture). All other writes
-  are disabled per `@plan-deep` permissions.
+  are disabled per `@plan` permissions.
 - Every session row must reduce to a one-line commit title. If it can't, it isn't one session.
 - Do not assume project tooling (`make`, `origin`, file layout) — discover it (survey + VERIFY
   binding), exactly as `/run-plan`'s preflight does.

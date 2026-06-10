@@ -11,7 +11,7 @@ approval, secret check). Steering=YES throughout.
 confirmation, the session is short and steerable. This is the default for direct user-driven
 commit work.
 
-For **autonomous-chain commits** (orchestrating agents like `@plan-deep` or a long-running
+For **autonomous-chain commits** (orchestrating agents like `@plan` or a long-running
 `@build` dispatching implementation subagents in sequence), use the `@committer` subagent
 instead. It takes a session-contract summary + expected-files list and either commits cleanly or
 refuses — no user-confirmation step, but stricter scope-drift refusal as compensation. See

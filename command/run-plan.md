@@ -9,7 +9,7 @@ subtask: false
 Drive a session-sharded plan file to completion as an autonomous chain. The plan must already be in
 session-list form (one commit-shaped session per row, each with a title, category, tier, expected
 files, and consumed contracts) per `multisession/multi-session-planning.md`.  This command does NOT shard a plan
-— that is a `@plan-deep` interactive task. It EXECUTES an already-sharded one.
+— that is a `@plan` interactive task. It EXECUTES an already-sharded one.
 
 This command runs from `@plan-admin` (T1). The mechanical loop — select, dispatch, gate, commit,
 ledger — is entirely the driver's work. T1 judgment (discovery adjudication, inflection-point

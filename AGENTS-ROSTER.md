@@ -5,8 +5,13 @@ field; when in an autonomous chain and orchestrating a committer dispatch.
 
 ## Model tier hierarchy (full detail)
 
-- **T0 — Claude Opus 4.7**: deep exploration, architectural tradeoff analysis, boundary design,
-  cross-cutting audits. Use when the cost of being wrong is high.
+- **T-1 — Claude Fable 5**: interactive dialectic at the generative extremity — genesis of framings
+  that don't yet exist, abduction, pivotal anomalies that resist all canonical options. Use only
+  when the problem requires Fable-scale reasoning reserve and the interactive dialectic shape.
+  ~3× Opus 4.8 / ~14× Sonnet. Session count per week: very small.
+- **T0 — Claude Opus 4.8**: deep planning, architectural tradeoff analysis, boundary design,
+  cross-cutting audits. Use when the cost of being wrong is high and the work is analytical rather
+  than generative.
 - **T0-alt — GPT-5.5 / Gemini 3.1 Pro** (as available): cross-check T0 conclusions at phase
   boundaries. Different families catch different failure modes.
 - **T1 — Claude Sonnet 4.6**: default for implementation, refactors, tests, docstring work,
@@ -19,18 +24,22 @@ field; when in an autonomous chain and orchestrating a committer dispatch.
 - **T3 — Kimi K2.5 or equivalent**: pure mechanical extraction/counting. Create subagents on demand;
   none pre-built.
 
-Default to T1. Escalate to T0 only when cost-of-wrong is high; downgrade to T2/T3 for mechanical
-subagents. Never rely on prose guidance alone — encode tier in each subagent's `model:` frontmatter
-field.
+Default to T1. Escalate to T0 for high cost-of-wrong analytical work; escalate to T-1 only for
+interactive generative work at the extremity. Downgrade to T2/T3 for mechanical subagents. Never
+rely on prose guidance alone — encode tier in each subagent's `model:` frontmatter field.
 
 ## Agent roster
 
 **Primary agents** (invoked by `@name` or set as startup agent):
-- `@plan-deep` — T0/Opus 4.7. Deep exploration, architectural tradeoffs, cross-cutting audits.
-  Rolling-context writes allowed; all other writes require user approval. References
-  `AGENTS-REASONING.md` in full including the T0-only section.
+- `@dialectic` — T-1/Fable 5. Interactive dialectic at the generative extremity: genesis, abduction,
+  pivotal anomalies. Temperature 0.6. Rolling-context writes allowed; all other writes require user
+  approval. References `AGENTS-REASONING.md` in full; loads `AGENTS-REASONING-HINTS.md`
+  proactively. NOT for audits, reviews, or routine deep work — use `@plan` for those.
+- `@plan` — T0/Opus 4.8. Deep planning, architectural tradeoffs, cross-cutting audits, phase
+  planning, rebase plans. Rolling-context writes allowed; all other writes require user approval.
+  References `AGENTS-REASONING.md` in full including the T-1/T0-only section.
 - `@build` — T1/Sonnet 4.6. Default implementation: coding, refactors, test fixes, review-address
-  cycles. References `AGENTS-REASONING.md` up to the T0-only marker.
+  cycles. References `AGENTS-REASONING.md` up to the T-1/T0-only marker.
 - `@plan-admin` — T1/Sonnet 4.6. Autonomous-chain driver for `/run-plan`. Runs the mechanical
   loop (select, dispatch, gate, commit, ledger); pages a forked `@plan-juncture` only at the three
   junctures (inflection design, discovery adjudication, sub-track boundary). Never implements;
@@ -41,7 +50,7 @@ field.
   the execution playbook.
 
 **Subagents** (forked via the Task tool):
-- `@plan-juncture` — T0/Opus 4.5. Juncture adjudicator for `/run-plan` chains. Default tier; paged
+- `@plan-juncture` — T0/Opus 4.8. Juncture adjudicator for `/run-plan` chains. Default tier; paged
   by `@plan-admin` at inflection-point interface design, discovery adjudication (does this finding
   invalidate a frozen downstream contract?), and sub-track boundary coordinate-transform. One-shot
   return; does not implement; writes only to PLAN's `## Cross-session contracts` on inflection
@@ -51,13 +60,14 @@ field.
   contract; cheaper model. Activated via `juncture-tier: sonnet` in the PLAN header.
 - `@explore` — T1/Sonnet 4.6. Code-structure surveys, needle-finding in large trees, open-ended
   codebase questions. Default fork choice for read-only exploration. Overrides built-in `@explore`
-  to prevent silent Opus inheritance when forked from `@plan-deep`.
+  to prevent silent Opus or Fable inheritance when forked from `@plan` or `@dialectic`.
 - `@verify` — T1/Sonnet 4.6. Verifies a list of claims (typically review findings) against the
   actual code. Returns accurate/inaccurate/needs-discussion labels per claim. Used by
   `/address-review` when ≥5 findings require code verification.
 - `@general` — T1/Sonnet 4.6. Multi-step autonomous work with heterogeneous tools where no
   specialised subagent (`@explore`, `@verify`, `@git-editor`) fits. May edit/write. Overrides built-in
-  `@general` to pin the tier — without the pin, forks from a T0 primary would silently run on Opus.
+  `@general` to pin the tier — without the pin, forks from a T0 or T-1 primary would silently run
+  on Opus or Fable.
 - `@session-scan` — T2/Haiku 4.5. High-volume session-history scan for retrospectives. Used by
   `/session-end`. Does NOT reference `AGENTS-REASONING.md`.
 - `@committer` — T2/Haiku 4.5. Narrow session-close commit subagent for autonomous chains.
@@ -71,7 +81,7 @@ field.
 - `@review` — post-implementation code review on a diff/commit/branch.
 
 **Multisession subsystem** — agents whose names share the `plan-*` prefix convention:
-`@plan-deep`, `@plan-admin`, `@plan-juncture`, `@plan-juncture-sonnet`, and `@committer`. Reference
+`@plan`, `@plan-admin`, `@plan-juncture`, `@plan-juncture-sonnet`, and `@committer`. Reference
 doc: `multisession/multi-session-planning.md`.
 
 ## Command roster
@@ -90,10 +100,10 @@ doc: `multisession/multi-session-planning.md`.
   observations; STUB.
 - `/commit` — inspect uncommitted changes, draft a user-conventional commit message, and gate on
   user approval before committing.
-- `/config-retrospective` — single-session `@plan-deep` audit of the OpenCode user-level
-  infrastructure against the session store, scored against a relentless-simplicity lens. Forks
-  `@explore` for permission-flow + usage-pattern data; the cohesion review is the orchestrator's own
-  spine; approved changes are actioned by forked `@build`/`@general` and committed via the
+- `/config-retrospective` — single-session `@plan` audit of the OpenCode user-level infrastructure
+  against the session store, scored against a relentless-simplicity lens. Forks `@explore` for
+  permission-flow + usage-pattern data; the cohesion review is the orchestrator's own spine;
+  approved changes are actioned by forked `@build`/`@general` and committed via the
   `/update-config` convention. On-demand only.
 - `/explore` — fork a parameterized `@explore` subagent with a structured investigation prompt.
 - `/format-loop` — iterative format + fix loop until clean or convergence fails; pass a scope in

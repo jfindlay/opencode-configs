@@ -44,7 +44,7 @@ session is the unit at which work composes, fails, and resumes.
 
 ### Tuning the commit size: the five inputs
 
-The default (~150-400 LOC) is a starting point. When `@plan` designs a specific multisession,
+The default (~150-400 LOC) is a starting point. When `@architect` designs a specific multisession,
 it tunes the commit window to the project using five inputs. Four of them push *smaller*; one — the
 irreducible complexity of the change — pushes *larger* and acts as the floor. The tuning is the
 tension between that floor and the four downward pressures: **make each commit as small as the four
@@ -190,7 +190,7 @@ the `Fp` trait; the curve group law; a number-field arithmetic library.
 - High cost to get wrong because rework propagates through every downstream session.
 - Worth over-specifying up front. The first session should add interface methods it doesn't strictly
   need yet, if there's reasonable confidence downstream sessions will need them.
-- Worth `@plan` judgment if substrate shape is non-obvious.
+- Worth `@architect` judgment if substrate shape is non-obvious.
 
 ### Category B — algorithm
 
@@ -304,7 +304,7 @@ inside each sub-track are sub-nodes. Has well-defined metrics:
 - Total session count (predicts schedule)
 - Critical-path length (predicts minimum schedule)
 - Cross-track contracts (predicts coordination cost)
-- `@plan` sessions (predicts cost)
+- `@architect` sessions (predicts cost)
 
 This is the view from outside time. It is correct at any moment — the graph doesn't change much
 between days. Useful for:
@@ -312,7 +312,7 @@ between days. Useful for:
 - Scoping decisions ("can we afford the full scope?")
 - Sequencing decisions ("which track first?")
 - Pacing decisions ("are we on schedule?")
-- Resource allocation ("which sessions need `@plan`?")
+- Resource allocation ("which sessions need `@architect`?")
 
 Useless for the question the current session is actually trying to answer.
 
@@ -352,14 +352,14 @@ are needed. The roadmap is a prediction; the sessions are the reality.
 a sub-track, the session does what the session needs to do; the static frame is consulted only when
 crossing into a new sub-track or when a discovery forces a re-evaluation.
 
-3. **Mid-project `@plan` reviews are inflection points, not snapshots.** They live in both frames
+3. **Mid-project `@architect` reviews are inflection points, not snapshots.** They live in both frames
 simultaneously: they consume the action-frame state (what was just learned) and produce static-frame
-updates (revised roadmap, revised contracts, revised sub-track ordering). Treating a `@plan` review
+updates (revised roadmap, revised contracts, revised sub-track ordering). Treating a `@architect` review
 as a status report misses its actual function. It is the moment where the coordinate transform is
 performed.
 
    An inflection review can be *paged* (a forked subagent invoked at the juncture) rather than
-   *resident* (a continuously-running `@plan` context), provided the action-frame texture is fed in
+   *resident* (a continuously-running `@architect` context), provided the action-frame texture is fed in
    as a written digest — because a forked subagent sees only what is written down, not what was
    experienced. The digest is the externalized action frame: not a transcript, but the minimum
    texture the juncture adjudicator needs that the static ledger rows don't capture. A paged
@@ -372,17 +372,17 @@ The coordinate-transform judgment requires someone holding the action frame — 
 flexed, what the next few sessions need to know that isn't written in the plan. There are two ways
 to provide this:
 
-- **Resident context:** a continuously-running `@plan` session accumulates the action frame
+- **Resident context:** a continuously-running `@architect` session accumulates the action frame
   organically as the chain runs. The transform is high quality because nothing is lost. Cost: the
   expensive tier is present for every mechanical iteration, not just junctures.
 - **Externalized digest + paged fork:** a cheap driver runs the mechanical loop and maintains a
   durable "action-frame digest" in the plan file — appended on non-trivial iterations (discoveries,
-  contract flexes, notable texture). At each juncture, the digest is fed into a cold-forked `@plan`
+  contract flexes, notable texture). At each juncture, the digest is fed into a cold-forked `@architect`
   invocation. Cost: the digest is lossier than a live context; the fork's adjudication is only as
   good as what was written down.
 
 The choice is a cost/quality tradeoff. For long chains (>20 sessions), the token cost of a resident
-`@plan` context is substantial; the externalized digest is the practical option. For short or
+`@architect` context is substantial; the externalized digest is the practical option. For short or
 high-stakes chains, resident context is worth the cost. When using the externalized-digest path, the
 paged adjudicator need not be the same tier as the interactive plan-deriver — the digest and the
 `destructive-HALT` invariant (always halts regardless of the fork's opinion) bound the downside of a
@@ -463,7 +463,7 @@ correction against rigidity. Neither is sufficient alone.
 - The action-frame discovery channel is real and must be respected. If session N discovers that the
   substrate session got something wrong, the right move is to surface it at the sub-track boundary,
   not to grind through with the wrong substrate.
-- Discoveries that affect cross-track contracts deserve immediate static-frame review (a `@plan`
+- Discoveries that affect cross-track contracts deserve immediate static-frame review (a `@architect`
   session is appropriate here). Discoveries internal to a sub-track can wait until the boundary.
 - "The plan was wrong about X" is a successful outcome of a session, not a failure. The plan was
   always a prediction; sessions are the data that updates it.
@@ -504,9 +504,9 @@ under-scheduled. It is not just summarising; it is the moment where the sub-trac
 their public form, where invariants get named in prose for the first time, where the cross-track
 implications are surfaced. Allocate at least a full session, sometimes more.
 
-### `@plan` inflection points
+### `@architect` inflection points
 
-Inflection-point `@plan` sessions are rare (5-10 across a 70-session project) but each is expensive
+Inflection-point `@architect` sessions are rare (5-10 across a 70-session project) but each is expensive
 in real time even though their session count is small. They consume the previous N sessions' output,
 produce updates to multiple documents, and shape the next M sessions. Don't try to slot them into "a
 free evening."

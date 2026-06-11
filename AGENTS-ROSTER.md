@@ -34,8 +34,8 @@ rely on prose guidance alone — encode tier in each subagent's `model:` frontma
 - `@dialectic` — T-1/Fable 5. Interactive dialectic at the generative extremity: genesis, abduction,
   pivotal anomalies. Temperature 0.6. Rolling-context writes allowed; all other writes require user
   approval. References `AGENTS-REASONING.md` in full; loads `AGENTS-REASONING-HINTS.md`
-  proactively. NOT for audits, reviews, or routine deep work — use `@plan` for those.
-- `@plan` — T0/Opus 4.8. Deep planning, architectural tradeoffs, cross-cutting audits, phase
+  proactively. NOT for audits, reviews, or routine deep work — use `@architect` for those.
+- `@architect` — T0/Opus 4.8. Deep planning, architectural tradeoffs, cross-cutting audits, phase
   planning, rebase plans. Rolling-context writes allowed; all other writes require user approval.
   References `AGENTS-REASONING.md` in full including the T-1/T0-only section.
 - `@build` — T1/Sonnet 4.6. Default implementation: coding, refactors, test fixes, review-address
@@ -60,7 +60,7 @@ rely on prose guidance alone — encode tier in each subagent's `model:` frontma
   contract; cheaper model. Activated via `juncture-tier: sonnet` in the PLAN header.
 - `@explore` — T1/Sonnet 4.6. Code-structure surveys, needle-finding in large trees, open-ended
   codebase questions. Default fork choice for read-only exploration. Overrides built-in `@explore`
-  to prevent silent Opus or Fable inheritance when forked from `@plan` or `@dialectic`.
+  to prevent silent Opus or Fable inheritance when forked from `@architect` or `@dialectic`.
 - `@verify` — T1/Sonnet 4.6. Verifies a list of claims (typically review findings) against the
   actual code. Returns accurate/inaccurate/needs-discussion labels per claim. Used by
   `/address-review` when ≥5 findings require code verification.
@@ -80,8 +80,8 @@ rely on prose guidance alone — encode tier in each subagent's `model:` frontma
 **Built-in agents** (no definition file; available in any session):
 - `@review` — post-implementation code review on a diff/commit/branch.
 
-**Multisession subsystem** — agents whose names share the `plan-*` prefix convention:
-`@plan`, `@plan-admin`, `@plan-juncture`, `@plan-juncture-sonnet`, and `@committer`. Reference
+**Multisession subsystem** — the long-arc planning and execution roster:
+`@architect`, `@plan-admin`, `@plan-juncture`, `@plan-juncture-sonnet`, and `@committer`. Reference
 doc: `multisession/multi-session-planning.md`.
 
 ## Command roster
@@ -100,7 +100,7 @@ doc: `multisession/multi-session-planning.md`.
   observations; STUB.
 - `/commit` — inspect uncommitted changes, draft a user-conventional commit message, and gate on
   user approval before committing.
-- `/config-retrospective` — single-session `@plan` audit of the OpenCode user-level infrastructure
+- `/config-retrospective` — single-session `@architect` audit of the OpenCode user-level infrastructure
   against the session store, scored against a relentless-simplicity lens. Forks `@explore` for
   permission-flow + usage-pattern data; the cohesion review is the orchestrator's own spine;
   approved changes are actioned by forked `@build`/`@general` and committed via the

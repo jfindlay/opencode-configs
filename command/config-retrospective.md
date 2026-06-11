@@ -1,5 +1,5 @@
 ---
-description: "[jf] Single-session @plan audit of the OpenCode user-level infrastructure against the session store. Forks @explore for permission-flow + usage-pattern data; the cohesion review (does the file family stay relentlessly simple?) is the spine. Approved changes are actioned by forked @build/@general subagents and committed via the /update-config convention. On-demand only."
+description: "[jf] Single-session @architect audit of the OpenCode user-level infrastructure against the session store. Forks @explore for permission-flow + usage-pattern data; the cohesion review (does the file family stay relentlessly simple?) is the spine. Approved changes are actioned by forked @build/@general subagents and committed via the /update-config convention. On-demand only."
 ---
 
 # /config-retrospective
@@ -8,7 +8,7 @@ Audit the OpenCode user-level infrastructure — permission rules, agent files, 
 files — against the user's actual session-store usage, then action the changes worth making. Source
 of truth at `opencode-config/`; runtime mirror at `~/.config/opencode/`.
 
-This command runs end-to-end in **one `@plan` session**. There is no cross-session hand-off and
+This command runs end-to-end in **one `@architect` session**. There is no cross-session hand-off and
 no workspace-transient carrier file: the orchestrator forks read-only `@explore` subagents to mine
 the session store (high context-pollution, parallelizable, non-steerable — a textbook fork), holds
 the findings in its own context, surfaces decisions to the user, and dispatches `@build`/`@general`
@@ -99,12 +99,12 @@ consumes the fork's output.
 **Thread 1 — permission-flow.** Which tool invocations triggered prompts most often, by pattern?
 Which fired despite a rule that should cover them (replay current `opencode.json` against historical
 args)? Novel patterns this period? Allow/deny ratio per pattern. Per-agent breakdown — does
-`@plan` trigger different prompts than `@build`?
+`@architect` trigger different prompts than `@build`?
 
 **Thread 2 — usage-pattern.** Agent distribution: which invoked, how often, for what work? Commands
 defined under `command/` but never invoked, or invoked once? Session-shape: median length,
 compaction distribution, agent-switch frequency. Divergence between intended and actual use — is
-`@plan` (Opus) doing `@build` (Sonnet) work? Are forks on the right axis (the three-axis test
+`@architect` (Opus) doing `@build` (Sonnet) work? Are forks on the right axis (the three-axis test
 in AGENTS.md `## Subagent strategy`)? Is `/q` used, and when it shouldn't be?
 
 **Thread 3 — cohesion (the spine, orchestrator's own).** Does the file family hang together? Is the
@@ -117,7 +117,7 @@ against the relentless-simplicity lens above.
 
 ## Steps
 
-1. **Confirm tier.** This command runs on T0/Opus (`@plan`). The cohesion review is
+1. **Confirm tier.** This command runs on T0/Opus (`@architect`). The cohesion review is
    tradeoff-analysis register; the data-mining is delegated to a Sonnet fork. If you are not on
    Opus, tell the user and stop.
 

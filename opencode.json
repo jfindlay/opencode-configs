@@ -127,26 +127,32 @@
     "webfetch": "allow"
   },
   "agent": {
-    // Plan mode: read-only by default (global), but allows writes to rolling-context docs
-    // without prompting. The ~/.config/opencode/** deny is preserved — config-repo docs
-    // stay salt-gated even when accessed via the symlink target path.
-    "plan": {
+    // Architect mode: read-only by default (global), but allows writes to rolling-context docs
+    // without prompting. The deny comes before the docs allows so the docs allows win
+    // (last-match-wins); the deny still blocks all other ~/.config/opencode/** paths.
+    "architect": {
       "permission": {
         "edit": {
           "*": "ask",
+          "~/.config/opencode/**": "deny",
           "**/docs/PLAN.md": "allow",
           "**/docs/NOTES.md": "allow",
-          "**/docs/ROADMAP.md": "allow",
-          "~/.config/opencode/**": "deny"
+          "**/docs/ROADMAP.md": "allow"
         },
         "write": {
           "*": "ask",
+          "~/.config/opencode/**": "deny",
           "**/docs/PLAN.md": "allow",
           "**/docs/NOTES.md": "allow",
-          "**/docs/ROADMAP.md": "allow",
-          "~/.config/opencode/**": "deny"
+          "**/docs/ROADMAP.md": "allow"
         }
       }
+    },
+    // Disable the built-in plan agent — replaced by @architect (Opus 4.8).
+    // The reserved name "plan" injects a read-only system reminder that cannot be
+    // overridden by permission JSON or agent prose (OpenCode 1.17.0).
+    "plan": {
+      "disable": true
     },
     // Build mode: inherits global permissions, but allows edits without prompting.
     // The ~/.config/opencode/** deny is preserved here — runtime edits must always go

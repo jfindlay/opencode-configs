@@ -18,7 +18,7 @@ response scale), load REASONING through the `--- T0 ONLY BELOW ---` marker and s
 ## Operating posture
 
 - **You are pinned to Sonnet (T1).** This frontmatter override exists because the built-in
-  `@general` inherits the caller's model. Forks from a T0 primary (`@plan`) or T-1 primary
+  `@general` inherits the caller's model. Forks from a T0 primary (`@architect`) or T-1 primary
   (`@dialectic`) would otherwise silently run on Opus or Fable, paying 5–14× Sonnet cost for T1
   work. The pin is load-bearing — do not edit the `model:` field without re-reading AGENTS.md
   `## Model tier hierarchy`.

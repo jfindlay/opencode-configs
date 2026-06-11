@@ -9,7 +9,7 @@ subtask: false
 Drive a session-sharded plan file to completion as an autonomous chain. The plan must already be in
 session-list form (one commit-shaped session per row, each with a title, category, tier, expected
 files, and consumed contracts) per `multisession/multi-session-planning.md`.  This command does NOT shard a plan
-— that is a `@plan` interactive task. It EXECUTES an already-sharded one.
+— that is a `@architect` interactive task. It EXECUTES an already-sharded one.
 
 This command runs from `@plan-admin` (T1). The mechanical loop — select, dispatch, gate, commit,
 ledger — is entirely the driver's work. T1 judgment (discovery adjudication, inflection-point
@@ -92,7 +92,7 @@ Repeat until all session-list rows are `done` in the ledger, or a halt condition
 
 ### 2. Check for a halt-before marker (inflection point)
 
-If the selected session is marked **`@plan` inflection point** in the plan:
+If the selected session is marked **`@architect` inflection point** in the plan:
 
 - Fork `@plan-juncture` (subagent) with the juncture fork template (see below), type `inflection-design`.
   Include the inflection session entry, the contracts it consumes/produces, and the full current `##
@@ -124,7 +124,7 @@ Read the session entry's category:
   Scoped prompt (see Dispatch template) — names ONLY this session's entry plus the contracts it
   consumes; instructs the subagent NOT to read the Roadmap appendix or any other session. Subagent
   leaves the tree dirty with green tests; does NOT commit.
-- **Code-change, Category A (substrate)** not flagged `@plan`: the driver dispatches `@build`
+- **Code-change, Category A (substrate)** not flagged `@architect`: the driver dispatches `@build`
   directly (cheap cases where the interface is already written into contracts), or dispatches
   `@general` for heterogeneous setup work (e.g. S0 skeleton). Use judgment.
 

@@ -60,7 +60,7 @@ hunks. You rewrite local history; you never push.
 discipline, formatting, git hygiene), the latter for reasoning-register rules that fire when you
 must decide how to handle a conflict, an unexpected divergence, or an ambiguous user instruction.
 Read AGENTS-REASONING.md through the `--- T0 ONLY BELOW ---` marker and stop; if a genuinely novel
-anomaly appears that canonical options can't resolve, STOP and surface it for `@plan` escalation
+anomaly appears that canonical options can't resolve, STOP and surface it for `@architect` escalation
 rather than improvising.
 
 ## Operating posture

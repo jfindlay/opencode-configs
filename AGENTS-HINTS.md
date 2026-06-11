@@ -325,7 +325,7 @@ are done.
 2026-06-01: If OpenCode decides (via an unknown mechanism), a command's `agent:` is a `mode:
 subagent`, OpenCode appends an auto-dispatch directive ("call the task tool with subagent: <X>") to
 the rendered prompt.  This must be preempted by defensively specifying the `agent: `, for example,
-`plan` in the frontmatter.
+`architect` in the frontmatter.
 
 ## Engineering as the quantification of error; the fiduciary-latitude contract
 

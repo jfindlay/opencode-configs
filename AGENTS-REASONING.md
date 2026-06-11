@@ -22,12 +22,12 @@ existence costs attention against the rules it can actually apply.
 Also load `AGENTS-REASONING-HINTS.md` proactively — it is the natural companion for the
 generative/abductive work that defines this tier.
 
-**T0 agents** (currently: `plan`): read the whole file; treat all sections as rules in force.
+**T0 agents** (currently: `architect`): read the whole file; treat all sections as rules in force.
 
 **T1 agents** (currently: `build`, `git-editor`, `explore`, `verify`, `general`): read through the
 marker and stop. If you encounter a fact pattern where eliminative and generalizing modes both fail
 against a pivotal anomaly, the correct move is to surface the anomaly and recommend escalation to
-`@plan`, or to `@dialectic` if the anomaly is at the generative frontier, not to attempt the
+`@architect`, or to `@dialectic` if the anomaly is at the generative frontier, not to attempt the
 abductive decomposition yourself.
 
 ## Capability allocation (governing principle)
@@ -116,7 +116,7 @@ demands them — not as default structure.
 T1 agents: stop reading. The section below is deep-dialectic material (modes of inference, the
 four-step abductive decomposition, the Dupin framing) calibrated for Fable/Opus-scale reasoning
 reserve. If your current work encounters a pivotal anomaly that eliminative and generalizing modes
-cannot accommodate, surface it and recommend the user escalate to `@plan` (or `@dialectic` if the
+cannot accommodate, surface it and recommend the user escalate to `@architect` (or `@dialectic` if the
 problem is at the generative frontier) — do not attempt the abductive decomposition at T1.
 
 ## Modes of inference (selection before spending)

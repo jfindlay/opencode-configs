@@ -356,3 +356,46 @@ user's stated bar for Fable is the "extremity of cognition" + "adduction" (inter
 shape), which is categorically narrower than the old `@plan-deep` charter; (c) having a named
 `@plan` at Opus keeps the natural `@build` → `@plan` escalation gradient at a cost step the user
 finds justified (~1.2× Sonnet), while Fable is explicitly an opt-in for rare sessions.
+
+---
+
+## 2026-06-10 — @plan renamed @architect; built-in plan disabled
+
+**Context.** The reserved OpenCode agent name `plan` carries a built-in, injected read-only system
+reminder that is independent of `mode:` frontmatter and of the `permission` JSON in `opencode.json`.
+The reminder asserts precedence over all agent prose, including per-agent permission overrides. As a
+result, the `agent.plan.permission` block introduced in the 2026-06-09 session — intended to grant
+`@plan` write access to rolling-context docs (`docs/PLAN.md`, `docs/NOTES.md`, `docs/ROADMAP.md`)
+— was silently defeated. `@plan` refused edits in any repo. No amount of permission JSON or prose
+softening can remove OpenCode's injected reminder; the only fix is to vacate the reserved name.
+
+Confirmed: OpenCode 1.17.0. The reminder is not in any config file (Grep clean); it is runtime-injected
+for any agent occupying the `plan` slot. The same applies to `build`.
+
+**Changes:**
+
+1. **`agent/plan.md` → `agent/architect.md`.** No changes to file content; the filename is the only
+   thing triggering the reserved-name injection.
+
+2. **`opencode.json` `agent` block:**
+   - `"plan"` key renamed `"architect"`.
+   - Permission ordering fixed: the `~/.config/opencode/**` deny is now listed **before** the
+     `docs/*.md` allows. OpenCode uses last-match-wins; the old ordering let the deny shadow the
+     allows (Defect 1 from the diagnosis). Now docs/*.md wins everywhere, including inside the
+     config repo accessed via the symlink.
+   - `"plan": { "disable": true }` added to suppress the built-in vanilla plan agent, which would
+     otherwise reappear in the Tab-cycle and `@` roster once our override vacates the name.
+
+3. **Prose updated** throughout: `AGENTS-ROSTER.md`, `AGENTS-REASONING.md`, `AGENTS-REASONING-HINTS.md`,
+   `AGENTS-HINTS.md`, `agent/build.md`, `agent/dialectic.md`, `agent/git-editor.md`, `agent/general.md`,
+   `agent/explore.md`, `agent/committer.md`, `command/shard-plan.md` (incl. `agent:` frontmatter),
+   `command/run-plan.md`, `command/config-retrospective.md`, `command/tier-retrospective.md`,
+   `command/update-config.md`, `multisession/multi-session-planning.md`.
+   AGENTS-LOG.md history entries left unchanged (historical record).
+
+4. **`AGENTS-ROSTER.md` multisession-subsystem note** rephrased: removed stale "share the `plan-*`
+   prefix convention" language (no longer accurate with `@architect` in the group).
+
+**Capture:** reserved OpenCode agent names (`plan`, `build`) carry injected read-only/full-access
+behavior that the permission system and prose cannot override. An agent that needs non-default
+permissions must use a non-reserved name.

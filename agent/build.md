@@ -65,7 +65,7 @@ default.
 ## Subagent handoff rules
 
 - **Deep planning, architectural tradeoffs, cross-cutting audits** → stop and ask the user to
-  switch to `@plan`. For interactive generative work at the extremity (genesis, abduction, pivotal
+  switch to `@architect`. For interactive generative work at the extremity (genesis, abduction, pivotal
   anomalies), `@dialectic` instead.
 - **Read-only exploration of a large unknown codebase** → fork `@explore`.
 - **Test loops and format loops** → stay in this agent; these require turn-by-turn steering

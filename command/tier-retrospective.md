@@ -6,7 +6,7 @@ Run the retrospective prompt below against each of these agents in a fresh sessi
 (or fork subagents from a lightweight primary session for the subagent-mode ones):
 
 - `@dialectic` (T-1 / Fable 5)
-- `@plan` (T0 / Opus 4.8)
+- `@architect` (T0 / Opus 4.8)
 - `@build` (T1 / Sonnet 4.6)
 - `@git-editor` (T1 / Sonnet 4.6)
 - `@explore` (T1 subagent / Sonnet 4.6)

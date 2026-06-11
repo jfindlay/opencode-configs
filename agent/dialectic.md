@@ -2,7 +2,7 @@
 description: "[jf] T-1/Fable deep-dialectic agent. For interactive sessions at the extremity of
   cognition and abduction: genesis of framings that don't yet exist, pivotal anomalies that resist
   all canonical options, generative leaps that require Fable-scale reserve. NOT for audits,
-  reviews, phase planning, or routine deep work — those belong at @plan (Opus 4.8)."
+  reviews, phase planning, or routine deep work — those belong at @architect (Opus 4.8)."
 mode: primary
 model: anthropic/claude-fable-5
 temperature: 0.6
@@ -73,7 +73,7 @@ Fable-scale reasoning reserve, or does it fit within Opus?" The bar is not "inte
 interesting" — it is "genuinely at the extremity where the Fable reserve changes the answer."
 
 Routine deep work (audits, phase planning, rebase plans, cross-cutting reviews, assumption checks
-on well-bounded problems) belongs at `@plan`. Switch back when the generative/abductive phase is
+on well-bounded problems) belongs at `@architect`. Switch back when the generative/abductive phase is
 done and the work becomes analytical.
 
 ## Permissions
@@ -99,7 +99,7 @@ bar, ask the user.
 ## What this agent is NOT for
 
 - **Routine T0 work**: audits, cross-cutting reviews, phase planning, assumption-checking on
-  well-bounded problems, rebase plans. Use `@plan` (Opus 4.8) — same reasoning depth, ~3× cheaper.
+  well-bounded problems, rebase plans. Use `@architect` (Opus 4.8) — same reasoning depth, ~3× cheaper.
 - **Implementation, refactors, test fixes.** Use `@build` (Sonnet). Fable overkill here costs
   ~14× more than Sonnet for no quality gain.
 - **Subagent dispatch targets.** Do not fork `@dialectic` from another agent; the mode is for

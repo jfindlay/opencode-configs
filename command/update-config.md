@@ -2,8 +2,9 @@
 description: "[jf] Route OpenCode config edits to the git-revisioned source of truth at opencode-config/, then stage a commit. Runtime ~/.config/opencode/ is symlinked from the git repo."
 ---
 
-# No fork: every step is short and steerable — file selection, edit approval, commit message
-# approval. Steering=YES throughout.
+# Steering=YES through file selection, edit approval, and message approval — all interactive. The
+# final commit step forks a single @committer subagent to perform the mechanical git work, so that
+# "commit" stays one composable primitive rather than re-implemented inline here.
 
 Edit target / scope hint (optional): $ARGUMENTS
 
@@ -41,7 +42,36 @@ that don't exist in OPENCODE are preserved (e.g.  `bun.lock`, `node_modules/`, `
    the edit is non-trivial (new file, structural change, multiple sections), show the proposed
    change as a fenced block first and ask "Apply this? (yes / edit / abort)" via the Question tool.
 
-3. **Commit.** Stage the changed files, formulate a commit message, and commit.
+3. **Commit via a forked `@committer`.** Do not stage or commit inline — delegate the mechanical
+   git work to a single `@committer` subagent. This keeps "commit" one composable primitive shared
+   with `/commit` and the autonomous chains.
+
+   a. Draft a commit message (title + body) for the edited files, following the repo's plain
+      no-ticket convention (check `git log --oneline -5` for recent style).
+   b. The commit content and message are settled by this point, so message approval is optional:
+      offer the drafted message and ask whether to commit as-is or revise (Question tool). Skip the
+      gate if the user already approved a message this turn.
+   c. Fork `@committer` with this input:
+      ```
+      Working directory: <absolute path to opencode-config>
+
+      SESSION CONTRACT
+      <one sentence naming the config change that landed>
+
+      EXPECTED FILES
+      <the exact paths edited under OPENCODE, comma- or bullet-separated>
+
+      COMMIT MESSAGE (verbatim)
+      <the approved title on line 1, body on the following lines>
+
+      STAGING MODE
+      exact
+      ```
+      `STAGING MODE: exact` is deliberate: config edits often coexist with unrelated dirty files in
+      the worktree (a transient `PLAN.md`, an editor `.swp`), and this command should commit only
+      what it touched rather than refuse on drift.
+   d. Relay the subagent's `COMMITTED:` or `REFUSED:` line. On refusal, surface the reason and
+      stop — never fall back to an inline commit.
 
 ## Constraints
 
@@ -54,4 +84,5 @@ that don't exist in OPENCODE are preserved (e.g.  `bun.lock`, `node_modules/`, `
 ## Exit report
 
 - Files edited (under OPENCODE).
-- Commit hash and title, or "no commit (changes pending)".
+- The `@committer` result: `COMMITTED: <hash> <title>`, the `REFUSED: …` reason, or "no commit
+  (changes pending)".

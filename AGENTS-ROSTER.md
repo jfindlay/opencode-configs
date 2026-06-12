@@ -70,12 +70,17 @@ rely on prose guidance alone — encode tier in each subagent's `model:` frontma
   on Opus or Fable.
 - `@session-scan` — T2/Haiku 4.5. High-volume session-history scan for retrospectives. Used by
   `/session-end`. Does NOT reference `AGENTS-REASONING.md`.
-- `@committer` — T2/Haiku 4.5. Narrow session-close commit subagent for autonomous chains.
-  Reads a session-contract summary + expected-files list from the orchestrator, stages exactly
-  those files, drafts a commit message in repo convention, commits. Refuses on scope drift,
-  empty diff, secret-shaped files, or hook failures — never improvises. Distinct from
-  `@git-editor` (which carries elevated history-rewriting permissions and is for interactive,
-  multi-step git work) and from `/commit` (which gates each step on user confirmation).
+- `@committer` — T2/Haiku 4.5. The ecosystem's single forward-commit primitive: turns a known
+  fileset into one new commit. Reads a session-contract summary + expected-files list, stages
+  exactly those files (whole-path, never hunks), uses a supplied verbatim message or drafts one in
+  repo convention, commits. `STAGING MODE` tunes drift tolerance: `strict` (default, for autonomous
+  chains — drift is a refusal) or `exact` (commit only the named paths, ignore an otherwise-dirty
+  tree). Refuses on incomplete work, empty diff, secret-shaped files, or hook failures — never
+  improvises. Invoked two ways: directly by an orchestrator (`@plan-admin`, `@architect`) in an
+  autonomous chain, or by a command (`/commit`, `/update-config`) that owns the user-facing
+  draft/approve loop and then delegates the mechanical commit. Distinct from `@git-editor`, which
+  carries elevated history-rewriting permissions (amend, rebase, hunk-split) — `@committer` only
+  ever moves forward and the two never overlap.
 
 **Built-in agents** (no definition file; available in any session):
 - `@review` — post-implementation code review on a diff/commit/branch.

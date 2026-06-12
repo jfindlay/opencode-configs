@@ -2,19 +2,24 @@
 description: "[jf] Inspect uncommitted changes, draft a conventional commit message, and ask before committing. Supports optional $ARGUMENTS as a ticket id or scope hint."
 ---
 
-# No fork: commit flow is short and every step needs user confirmation # (split decision, message
-approval, secret check). Steering=YES throughout.
+# Steering=YES through the interactive part — split decision, message approval, secret check. The
+# final commit mechanics are delegated to a forked @committer subagent so that "commit" stays one
+# composable primitive. Steering ends once the user approves the message.
 
 ## When to use which
 
-`/commit` is the **interactive** commit flow — the user is present, every step gates on
-confirmation, the session is short and steerable. This is the default for direct user-driven
-commit work.
+`/commit` owns the **interactive draft/approve loop** — the user is present, the split decision and
+message approval gate on confirmation, the session is short and steerable. Once the message is
+approved, `/commit` delegates the mechanical `git add`/`git commit` to a forked `@committer`
+(passing the approved message verbatim, `STAGING MODE: exact`). This is the default for direct
+user-driven commit work.
 
 For **autonomous-chain commits** (orchestrating agents like `@architect` or a long-running
-`@build` dispatching implementation subagents in sequence), use the `@committer` subagent
-instead. It takes a session-contract summary + expected-files list and either commits cleanly or
-refuses — no user-confirmation step, but stricter scope-drift refusal as compensation. See
+`@build` dispatching implementation subagents in sequence), dispatch `@committer` directly with a
+session-contract summary + expected-files list; it drafts its own message and either commits
+cleanly or refuses (default `strict` mode — drift is a refusal). The difference is only *who owns
+the message and the approval gate*: `/commit` keeps that loop with the user; an orchestrator hands
+`@committer` a contract and trusts its draft. Both bottom out in the same commit primitive. See
 `agent/committer.md`.
 
 ## What this command does
@@ -49,17 +54,40 @@ Scope hint from user (optional): $ARGUMENTS
 4. Show me the proposed commit message + a `git diff --stat` of what will be included. Use the
    Question tool to ask: "OK to commit? (yes / edit message / split / abort)"
 
-5. On approval:
-   - `git add` the appropriate files (use `-u` if all modifications, specific paths otherwise —
-     never bare `git add .`).
-   - `git commit -m "<title>" -m "<body>"`.
-   - Show `git log -1` and `git status` to confirm.
+5. On approval, delegate the commit to a forked `@committer` (do not `git add`/`git commit` inline):
+   ```
+   Working directory: <current working directory>
+
+   SESSION CONTRACT
+   <one sentence naming what this commit lands, from the analysis in step 2>
+
+   EXPECTED FILES
+   <the specific paths to include — the same set you would have git-added>
+
+   COMMIT MESSAGE (verbatim)
+   <the approved title on line 1, body on the following lines>
+
+   STAGING MODE
+   exact
+   ```
+   - `STAGING MODE: exact` because the user has chosen a specific fileset and unrelated worktree
+     changes should be left alone, not treated as drift.
+   - If the user chose to commit *all* modifications (no selective split), still pass the full
+     modified set as `EXPECTED FILES` — `@committer` never runs a bare `git add .`.
+   - Relay the subagent's `COMMITTED: <hash> <title>` or `REFUSED: …` line. On refusal (e.g. a
+     secret-shaped file or hook failure), surface the reason and stop; do not commit inline as a
+     fallback.
 
 ## Constraints
 
 - NEVER skip hooks (`--no-verify`, `--no-gpg-sign`).
-- NEVER use `git commit --amend` unless I explicitly request it AND the HEAD commit was authored in
-  this session AND has not been pushed.
+- `@committer` creates new commits only; it cannot amend (the flag is denied). If I explicitly ask
+  to amend the HEAD commit, this is a `@git-editor` job, not a `@committer` delegation — route there
+  instead.
 - NEVER push to remote. Stop after commit.
-- If pre-commit hook fails, read its output, fix the issue, create a NEW commit — do not amend.
-- If the commit-title ticket id is unclear, STOP and ask. Do not guess.
+- `@committer` REFUSES on a pre-commit hook failure and relays the hook output. When that happens,
+  read the output, fix the issue, and re-run this flow to create a NEW commit — do not amend, do not
+  bypass the hook.
+- If the commit-title ticket id is unclear, STOP and ask before drafting. Do not guess. (Ticket
+  resolution happens here, during drafting — the verbatim message handed to `@committer` is already
+  final.)

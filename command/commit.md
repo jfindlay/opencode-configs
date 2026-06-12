@@ -1,5 +1,5 @@
 ---
-description: "[jf] Inspect uncommitted changes, draft a conventional commit message, and ask before committing. Supports optional $ARGUMENTS as a ticket id or scope hint."
+description: "[jf] Inspect uncommitted changes, draft a conventional commit message, and ask before committing. Supports optional $ARGUMENTS as a ticket id, scope hint, or --no-coauthor flag."
 ---
 
 # Steering=YES through the interactive part — split decision, message approval, secret check. The
@@ -50,6 +50,11 @@ Scope hint from user (optional): $ARGUMENTS
      If neither source yields one, ask me for the ticket id before proceeding.
    - **Body**: 1–4 sentences explaining the *why*, not the *what*. Optional bullet points for
      distinct change aspects. Wrap lines at 72 characters for the body.
+   - **Co-author trailer (default ON).** Append a `Co-authored-by:` line after a blank line at the
+     end of the body, crediting the agent that produced the diff. The agent did the intellectual
+     work; omitting attribution is credit-laundering. Use the current session's model:
+     `Co-authored-by: Claude Sonnet 4.6 <claude-sonnet@anthropic.com>`. Suppress only if
+     $ARGUMENTS contains `--no-coauthor` or I explicitly ask to omit it.
 
 4. Show me the proposed commit message + a `git diff --stat` of what will be included. Use the
    Question tool to ask: "OK to commit? (yes / edit message / split / abort)"

@@ -140,5 +140,9 @@ guidance; test philosophy).
 - Commit body: one to a few sentences or points. Keep strictly focused on the *why* only — the
   purpose of the commit. Keep details out of the commit message. They should be evident from the
   commit body.
+- **Agent attribution**: commits where an agent produced the diff carry a `Co-authored-by:` trailer
+  crediting the content agent(s). Attribution is default ON. Full convention (who gets credited,
+  identity string format, suppression conditions) lives in `AGENTS-ROSTER.md` under "Agent
+  attribution convention".
 - Keep commits separated by focus; squash fixup commits before finishing.
 - NEVER push branches to a remote; NEVER commit `.env` / credential files.

@@ -148,8 +148,47 @@ The pattern:
    expected-files list. The committer stages exactly those files, drafts a message in the repo's
    convention, commits — or refuses on drift / empty diff / secrets / hook failure. The
    committer never improvises; refusal bounces the decision back to the orchestrator.
-4. **The orchestrator may then dispatch the next implementation subagent** in the chain.
+4. **The orchestrator passes `CO_AUTHOR`** naming the content agent(s) that produced the diff.
+   See "Agent attribution convention" below.
+5. **The orchestrator may then dispatch the next implementation subagent** in the chain.
 
 This carve-out applies only to subagent chains. Direct user invocation of `@build` continues to
 follow the "ask before committing" rule (or the user runs `/commit` explicitly). `@git-editor`
 retains its existing behaviour for interactive history-shaping work.
+
+## Agent attribution convention
+
+Agent-produced commits carry a `Co-authored-by:` trailer crediting the content agent(s). The
+agent did the intellectual work of the diff — design, strategy, code — and omitting that is
+credit-laundering. Attribution is **default ON**; suppression requires an explicit reason.
+
+### Who gets credited
+
+- **Content agents** (`@build`, `@general`, `@explore` when its findings materially shaped the
+  diff, `@architect` when it designed the approach) — YES.
+- **Mechanical agents** (`@committer`, `@session-scan`) — NO. They are the equivalent of the CI
+  system that ran `git commit`, not authors of the content.
+- **Orchestrators** (`@plan-admin`) — NO, unless the orchestrator itself wrote substantive content
+  (rare). Orchestration is direction, not authorship.
+
+When multiple content agents contributed substantively (e.g. `@explore` found the structure,
+`@build` implemented it), include one trailer per agent.
+
+### Identity string format
+
+```
+Co-authored-by: Claude Sonnet 4.6 <claude-sonnet@anthropic.com>
+Co-authored-by: Claude Opus 4.8 <claude-opus@anthropic.com>
+```
+
+Convention: version-pinned human-readable name (so the history is honest about what ran);
+role-only email (durable across version bumps, clearly non-human). Use `anthropic.com` as the
+domain — it is unambiguous and won't be mistaken for a real person's address.
+
+### Suppression
+
+Pass `CO_AUTHOR: none` to `@committer`, or `--no-coauthor` to `/commit`, only when:
+- The human wrote the diff themselves and the agent only committed it.
+- The repo's contribution policy explicitly prohibits AI co-author trailers.
+
+In all other cases, include the trailer.

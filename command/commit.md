@@ -53,7 +53,7 @@ Scope hint from user (optional): $ARGUMENTS
    - **Co-author trailer (default ON).** Append a `Co-authored-by:` line after a blank line at the
      end of the body, crediting the agent that produced the diff. The agent did the intellectual
      work; omitting attribution is credit-laundering. Use the current session's model:
-     `Co-authored-by: Claude Sonnet 4.6 <claude-sonnet@anthropic.com>`. Suppress only if
+     `Co-authored-by: Claude Sonnet 4.6 <noreply+claude-sonnet@anthropic.com>`. Suppress only if
      $ARGUMENTS contains `--no-coauthor` or I explicitly ask to omit it.
 
 4. Show me the proposed commit message + a `git diff --stat` of what will be included. Use the

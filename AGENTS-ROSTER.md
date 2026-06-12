@@ -177,8 +177,8 @@ When multiple content agents contributed substantively (e.g. `@explore` found th
 ### Identity string format
 
 ```
-Co-authored-by: Claude Sonnet 4.6 <claude-sonnet@anthropic.com>
-Co-authored-by: Claude Opus 4.8 <claude-opus@anthropic.com>
+Co-authored-by: Claude Sonnet 4.6 <noreply+claude-sonnet@anthropic.com>
+Co-authored-by: Claude Opus 4.8 <noreply+claude-opus@anthropic.com>
 ```
 
 Convention: version-pinned human-readable name (so the history is honest about what ran);

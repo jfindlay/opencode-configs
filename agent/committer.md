@@ -148,7 +148,7 @@ this agent. Set it once per call; never navigate with `cd`.
      1. If the orchestrator provided `CO_AUTHOR: none` — omit the trailer entirely.
      2. If the orchestrator provided one or more `CO_AUTHOR` lines — use them verbatim.
      3. If `CO_AUTHOR` was omitted — use the current session's model as the default:
-        `Co-authored-by: Claude Sonnet 4.6 <claude-sonnet@anthropic.com>`.
+        `Co-authored-by: Claude Sonnet 4.6 <noreply+claude-sonnet@anthropic.com>`.
    - This agent (`@committer`) does NOT get a co-author trailer — it is the mechanical commit
      runner, not the content author.
 

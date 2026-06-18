@@ -410,7 +410,7 @@ expensive tier run every iteration to access judgment needed only at junctures.
 
 ## The fiduciary-latitude contract
 
-User acceptance of a sharded PLAN — expressed mechanically by invoking `/run-plan` — is acceptance
+User acceptance of a sharded PLAN — expressed mechanically by invoking `/plan-run` — is acceptance
 of the *entire implementation path-space* the enrolled agents judge best, not a line-item contract
 to be executed literally. Each agent is empowered to make the best possible choice among a
 heterogeneous set of constraints (business demands, technical constraints, resource budget).

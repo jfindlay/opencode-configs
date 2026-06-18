@@ -108,7 +108,7 @@ is fine. Agents are for repeated elevated work within one posture, not one-shot 
 
 ### Addendum: agent-driven rebase execution strategy
 
-Concrete strategy for `@git-editor` when executing a `/rebase-plan`-approved rebase. Load-bearing
+Concrete strategy for `@git-editor` when executing a `/plan-rebase`-approved rebase. Load-bearing
 for the rebase flow to work at all — without this, `git rebase -i` stalls on editor invocation.
 
 **Default editor safety**: the `no-interactive-editor.js` plugin sets `EDITOR`, `GIT_EDITOR`,
@@ -127,7 +127,7 @@ for every `reword` and `squash` message. An agent driving rebase autonomously ha
 
 **The strategy — "edit-everywhere + --amend -m"**:
 
-1. The plan command (`/rebase-plan`) emits only `pick` and `edit` directives. Never `reword`,
+1. The plan command (`/plan-rebase`) emits only `pick` and `edit` directives. Never `reword`,
    `squash`, or `fixup`. Every directive that would open `$GIT_EDITOR` is replaced by `edit`.
 2. The agent writes the approved todo list to a tempfile, then invokes: `GIT_SEQUENCE_EDITOR="cp
    <tempfile>" git rebase -i <base>`. The `cp` command acts as the "editor" — it overwrites git's

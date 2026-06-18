@@ -1,14 +1,14 @@
 ---
-description: "[jf] Shard a roadmap, a prose plan, or an in-session design statement into a /run-plan-executable docs/PLAN.md: session list (one commit-shaped session per row), cross-session contracts, progress ledger, and action-frame digest. Applies the five-input commit-size tuning law and sets juncture-tier. This is the SHARDING step /run-plan refuses to do; it does NOT execute the plan. Args: [roadmap-or-plan-path] [sub-track]."
+description: "[jf] Shard a roadmap, a prose plan, or an in-session design statement into a /plan-run-executable docs/PLAN.md: session list (one commit-shaped session per row), cross-session contracts, progress ledger, and action-frame digest. First reconciles docs/ROADMAP.md at the sub-track boundary (mark prior sub-track done, fold its discoveries up, mark the next in-progress). Applies the five-input commit-size tuning law and sets juncture-tier. This is the SHARDING step /plan-run refuses to do; it does NOT execute the plan. Args: [roadmap-or-plan-path] [sub-track]."
 agent: architect
 subtask: false
 ---
 
-# /shard-plan
+# /plan-shard
 
-Turn a long-arc design into the executable form `/run-plan` consumes. The output is a
+Turn a long-arc design into the executable form `/plan-run` consumes. The output is a
 `docs/PLAN.md` in session-list form per `~/.config/opencode/multisession/multi-session-planning.md`.
-This command produces the shards and pauses for review; it never runs `/run-plan` itself (executing
+This command produces the shards and pauses for review; it never runs `/plan-run` itself (executing
 is a separate, `@plan-admin` action).
 
 Runs from `@architect` (Opus 4.8): sharding is the same high-judgment interface-and-contract design the
@@ -26,7 +26,7 @@ Resolve which one applies before doing anything else.
    `docs/PLAN.md`, a design doc). Read it. A second token, if present, names the sub-track to shard
    (e.g. `G.A`); default to the next un-started sub-track.
 2. **From an existing structured PLAN.md (re-shard/edit).** `docs/PLAN.md` already has some of the
-   `/run-plan` sections but is stale, mis-sized, or pre-dates the current tuning law. Read it and
+   `/plan-run` sections but is stale, mis-sized, or pre-dates the current tuning law. Read it and
    the roadmap; revise in place rather than regenerate.
 3. **Greenfield, no artifact.** `$ARGUMENTS` is empty and no roadmap/plan file exists (or the user
    says so). Elicit the design statement interactively: ask for the design intent, the sub-track to
@@ -34,6 +34,33 @@ Resolve which one applies before doing anything else.
    Surface a `CAPTURE-CANDIDATE` if the design statement is itself worth preserving to a roadmap.
 
 State which mode you are in before proceeding.
+
+## Reconcile the roadmap first (sub-track-boundary update)
+
+Sharding a sub-track *is* a sub-track boundary, and the boundary is the roadmap's prescribed review
+cadence (`multi-session-planning.md`: the static frame is updated *by* the action frame, reviewed
+every 5–15 sessions at sub-track boundaries — never co-maintained with the rolling PLAN, whose
+cadence is per-session). Nothing downstream keeps `docs/ROADMAP.md` current: `/plan-run` and
+`@plan-juncture` write only to `PLAN.md`. So `/plan-shard`, running at the boundary, is the chain's
+one point that folds the action frame back into the static frame. Do this *before* sharding the next
+slice, so the next shard derives from a current roadmap.
+
+Skip in greenfield mode (no roadmap to reconcile yet) and skip if no roadmap file exists. Otherwise,
+when a prior sub-track's `PLAN.md` is present (it just completed, or you are re-sharding):
+
+1. **Mark the just-completed sub-track `done`** in the roadmap's sub-track list/status, using the
+   prior `PLAN.md` progress ledger as the source of truth (all rows `done` → sub-track done; partial
+   → mark partial and name the stopping row).
+2. **Fold discoveries back.** Copy the prior `PLAN.md` `## Discoveries & risks` entries that are
+   roadmap-durable (cross-track contract changes, scope shifts, substrate facts) into the roadmap's
+   Discoveries log. Leave sub-track-internal, already-resolved discoveries behind — only static-frame
+   facts propagate. Re-read the roadmap design intent and note any drift the discoveries imply (this
+   is the defocus check the manual prescribes at every boundary).
+3. **Mark the sub-track being sharded `in progress`** so the static frame reflects the live work.
+
+This is a discrete boundary step, not continuous roadmap co-maintenance — keep it bounded to the
+status/discovery delta. It is gated by the same confirm-before-write checkpoint as the `PLAN.md`
+write (see Output and handoff): show the proposed ROADMAP diff and confirm before writing.
 
 ## Survey the codebase first (fork when it pays)
 
@@ -71,14 +98,14 @@ split or merge a session, state the lever or corollary that drove it.
 `sonnet` (opt down only when strong test-suite quality, lever 5, coincides with lower
 correctness-criticality). State the reasoning in one sentence near the header.
 
-## The target structure (what /run-plan reads)
+## The target structure (what /plan-run reads)
 
-Produce `docs/PLAN.md` with exactly these sections. `/run-plan` preconditions on the starred ones.
+Produce `docs/PLAN.md` with exactly these sections. `/plan-run` preconditions on the starred ones.
 
 - **Header comment** with `juncture-tier:` (`<!-- juncture-tier: opus -->`).
 - `## Purpose (design intent)` — the prose intent, re-read at every ◆ boundary (anti-defocus anchor).
 - `## Verify gate` — the bound VERIFY_TEST / VERIFY_TYPES commands (discover them; do not assume
-  `make`). `/run-plan` re-discovers these but stating them here documents the gate.
+  `make`). `/plan-run` re-discovers these but stating them here documents the gate.
 - **`## Session list`** ★ — one commit-shaped session per row. Columns: `#` | `Session` (commit-title
   shaped) | `Cat` (A substrate / B algorithm / C optimization / I integrative) | `Tier` (Opus only
   where cost-of-wrong demands) | `Consumes` (contract names) | `Expected files`. Mark sub-track-final
@@ -92,14 +119,15 @@ Produce `docs/PLAN.md` with exactly these sections. `/run-plan` preconditions on
   substrate interface into the relevant subsection at execution time; mark not-yet-frozen ones
   *"to be frozen at <session>"*.
 - **`## Progress ledger`** ★ — table: `#` | `Session` | `Status` (pending/done) | `Commit` | `Froze`.
-  All rows `pending` at shard time. `/run-plan` maintains this.
+  All rows `pending` at shard time. `/plan-run` maintains this.
 - **`## Action-frame digest`** ★ — empty at shard time (`*(none yet)*`). The externalized action
-  frame `/run-plan` appends to and the juncture forks consume.
-- `## Discoveries & risks` — carried from the roadmap Discoveries log and any risk register, phrased
-  as `/run-plan` reads for discovery adjudication (internal-continue / additive-reshard /
-  destructive-HALT).
+  frame `/plan-run` appends to and the juncture forks consume.
+- `## Discoveries & risks` — carried *down* from the roadmap Discoveries log and any risk register,
+  phrased as `/plan-run` reads for discovery adjudication (internal-continue / additive-reshard /
+  destructive-HALT). The reverse flow — discoveries accrued in a completed `PLAN.md` folded back *up*
+  into the roadmap — happens in the reconciliation step above, not here.
 - `## Notes for executors` — tier routing, register (PEDAGOGY), invariants to preserve, the
-  suggested first `/run-plan` invocation (`halt-at-boundaries` for an unproven shard pattern).
+  suggested first `/plan-run` invocation (`halt-at-boundaries` for an unproven shard pattern).
 
 Apply the three contract flavours deliberately: compiler contracts (traits/signatures) catch
 interface drift, KATs catch behavioural drift, prose invariants catch invariant drift. Each session
@@ -120,28 +148,36 @@ In greenfield mode, the whole session is a dialogue: elicit intent → propose s
 
 ## Output and handoff
 
-1. Show the proposed `docs/PLAN.md` (or the diff, in re-shard mode) as a fenced block.
-2. Confirm via the Question tool before writing (the `@architect` handoff-checkpoint rule: the write
-   is a checkpoint, not a unilateral act).
-3. Write `docs/PLAN.md`. Pause for review. Do NOT run `/run-plan`.
-4. If the design statement (greenfield) or a discovery during sharding is itself a durable
-   roadmap-level fact, surface it as a `CAPTURE-CANDIDATE` for `docs/ROADMAP.md` or NOTES.
+1. Show the proposed `docs/ROADMAP.md` reconciliation diff (sub-track status + folded discoveries),
+   if any, and the proposed `docs/PLAN.md` (or the PLAN diff, in re-shard mode) as fenced blocks.
+2. Confirm via the Question tool before writing either file (the `@architect` handoff-checkpoint
+   rule: the write is a checkpoint, not a unilateral act). The ROADMAP reconciliation keeps the same
+   confirm-before-write gate as the PLAN write.
+3. Write `docs/ROADMAP.md` (if reconciled) then `docs/PLAN.md`. Pause for review. Do NOT run
+   `/plan-run`.
+4. If the design statement (greenfield) or a discovery during sharding is a durable roadmap-level
+   fact *not already folded in by the reconciliation step*, surface it as a `CAPTURE-CANDIDATE` for
+   `docs/ROADMAP.md` or NOTES.
 
 ## Constraints
 
 - Sharding only. Never execute a session, never run the VERIFY gate as more than discovery, never
-  commit code. `/run-plan` (from `@plan-admin`) executes.
-- Writes are limited to `docs/PLAN.md` (and, on approval, a roadmap/NOTES capture). All other writes
-   are disabled per `@architect` permissions.
+  commit code. `/plan-run` (from `@plan-admin`) executes.
+- Writes are limited to `docs/PLAN.md` and the sub-track-boundary reconciliation of `docs/ROADMAP.md`
+   (status + folded discoveries; on approval, plus any roadmap/NOTES capture). All other writes are
+   disabled per `@architect` permissions. Roadmap writes stay bounded to the boundary delta — do not
+   rewrite roadmap structure or co-maintain it per-session.
 - Every session row must reduce to a one-line commit title. If it can't, it isn't one session.
 - Do not assume project tooling (`make`, `origin`, file layout) — discover it (survey + VERIFY
-  binding), exactly as `/run-plan`'s preflight does.
+  binding), exactly as `/plan-run`'s preflight does.
 
 ## Exit report
 
 - Entry mode used (file / re-shard / greenfield).
+- Roadmap reconciliation: sub-track marked done (+ any discoveries folded up), sub-track marked
+  in-progress — or "none (greenfield / no roadmap / no prior PLAN)".
 - Session count, sub-track(s) sharded, `◆` and `@architect` markers placed.
 - `juncture-tier` set and the lever that decided it.
 - Any split/merge and the lever that drove it.
 - Capture candidates surfaced.
-- The suggested `/run-plan` invocation to execute the result.
+- The suggested `/plan-run` invocation to execute the result.

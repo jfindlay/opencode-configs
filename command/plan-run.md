@@ -4,7 +4,7 @@ agent: plan-admin
 subtask: false
 ---
 
-# /run-plan
+# /plan-run
 
 Drive a session-sharded plan file to completion as an autonomous chain. The plan must already be in
 session-list form (one commit-shaped session per row, each with a title, category, tier, expected

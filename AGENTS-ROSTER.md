@@ -40,17 +40,17 @@ rely on prose guidance alone — encode tier in each subagent's `model:` frontma
   References `AGENTS-REASONING.md` in full including the T-1/T0-only section.
 - `@build` — T1/Sonnet 4.6. Default implementation: coding, refactors, test fixes, review-address
   cycles. References `AGENTS-REASONING.md` up to the T-1/T0-only marker.
-- `@plan-admin` — T1/Sonnet 4.6. Autonomous-chain driver for `/run-plan`. Runs the mechanical
+- `@plan-admin` — T1/Sonnet 4.6. Autonomous-chain driver for `/plan-run`. Runs the mechanical
   loop (select, dispatch, gate, commit, ledger); pages a forked `@plan-juncture` only at the three
   junctures (inflection design, discovery adjudication, sub-track boundary). Never implements;
   never adjudicates discoveries itself.
 - `@git-editor` — T1/Sonnet 4.6. General git work: rebases, commits, cherry-picks, amends,
   branch/tag cleanup. Elevated git permissions; rewrites local history only and never pushes. For
-  narrative-arc rebase work, paired with `/rebase-plan` which carries both the planning steps and
+  narrative-arc rebase work, paired with `/plan-rebase` which carries both the planning steps and
   the execution playbook.
 
 **Subagents** (forked via the Task tool):
-- `@plan-juncture` — T0/Opus 4.8. Juncture adjudicator for `/run-plan` chains. Default tier; paged
+- `@plan-juncture` — T0/Opus 4.8. Juncture adjudicator for `/plan-run` chains. Default tier; paged
   by `@plan-admin` at inflection-point interface design, discovery adjudication (does this finding
   invalidate a frozen downstream contract?), and sub-track boundary coordinate-transform. One-shot
   return; does not implement; writes only to PLAN's `## Cross-session contracts` on inflection
@@ -86,8 +86,9 @@ rely on prose guidance alone — encode tier in each subagent's `model:` frontma
 - `@review` — post-implementation code review on a diff/commit/branch.
 
 **Multisession subsystem** — the long-arc planning and execution roster:
-`@architect`, `@plan-admin`, `@plan-juncture`, `@plan-juncture-sonnet`, and `@committer`. Reference
-doc: `multisession/multi-session-planning.md`.
+`@architect`, `@plan-admin`, `@plan-juncture`, `@plan-juncture-sonnet`, and `@committer`. Lifecycle
+commands: `/roadmap-construct` (Phase 0, build the ROADMAP) → `/plan-shard` (slice a sub-track into
+a PLAN) → `/plan-run` (execute the PLAN). Reference doc: `multisession/multi-session-planning.md`.
 
 ## Command roster
 
@@ -105,6 +106,10 @@ doc: `multisession/multi-session-planning.md`.
   observations; STUB.
 - `/commit` — inspect uncommitted changes, draft a user-conventional commit message, and gate on
   user approval before committing.
+- `/roadmap-construct` — prime `@architect` to co-construct a long-arc `docs/ROADMAP.md` (the
+  project-lifetime static-frame view) from free-form intent. Phase 0 of the multiplan lifecycle,
+  upstream of `/plan-shard`; a design dialogue, not a procedure. Orients on the full
+  construct → {shard → apply → reconcile}* loop but deliberately does not mechanize it.
 - `/config-retrospective` — single-session `@architect` audit of the OpenCode user-level infrastructure
   against the session store, scored against a relentless-simplicity lens. Forks `@explore` for
   permission-flow + usage-pattern data; the cohesion review is the orchestrator's own spine;
@@ -117,10 +122,10 @@ doc: `multisession/multi-session-planning.md`.
 - `/update-config` — edit OpenCode config files in the `opencode-config/` repo (symlinked to
   `~/.config/opencode/`; edits are live immediately).
 - `/q` — force a terse one-turn answer; suspends reasoning-register rules for that turn only.
-- `/rebase-plan` — plan (not execute) a narrative-arc rebase; outputs a rebase script for review.
+- `/plan-rebase` — plan (not execute) a narrative-arc rebase; outputs a rebase script for review.
   Also carries the execution playbook that `@git-editor` follows when the user pastes an approved
   plan into a fresh session.
-- `/run-plan` — autonomously execute a session-sharded `docs/PLAN.md` as a 1:1 session:commit
+- `/plan-run` — autonomously execute a session-sharded `docs/PLAN.md` as a 1:1 session:commit
   chain. `@plan-admin` orchestrates the mechanical loop; dispatches `@build`/`@general`/`@explore`
   per session entry, `@committer` for commits, and pages `@plan-juncture` (Opus default) or
   `@plan-juncture-sonnet` (opt-down via `juncture-tier: sonnet` in the PLAN header) only at

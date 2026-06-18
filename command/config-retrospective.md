@@ -55,7 +55,7 @@ direct query:
 - `session.model` (text) — JSON, e.g. `{"id":"claude-sonnet-4-6","providerID":"anthropic",...}`.
   Tier-check with `json_extract(model, '$.id')`.
 - `session.parent_id` (text) — parent session for a forked subagent; NULL for top-level. **This is
-  how fork trees / `/run-plan` chains are reconstructed** (a plan-deep parent with build/general/
+  how fork trees / `/plan-run` chains are reconstructed** (a plan-deep parent with build/general/
   explore/committer children ordered by `time_created`).
 - `session.cost` (real) and `session.tokens_input/output/reasoning/cache_read/cache_write` (integer)
   — per-session economics, for chain-vs-standalone cost and Opus-overhead analysis.

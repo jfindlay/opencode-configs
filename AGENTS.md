@@ -74,7 +74,7 @@ the judgment register for. T0/T1 agents follow the trigger directly.
 |                                        | doc reorganisations)                                      |       |
 | multisession/multi-session-planning.md | When planning or executing long-arc multi-session work    | T0    |
 |                                        | (the two-frame model, commit-shaped session, contract     |       |
-|                                        | taxonomy); before/during a /run-plan chain                |       |
+|                                        | taxonomy); before/during a /plan-run chain                |       |
 
 ## Tool discipline
 

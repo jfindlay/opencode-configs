@@ -1,5 +1,5 @@
 ---
-description: "[jf] General git work — rebases, commits, cherry-picks, amends, branch cleanup. Elevated git permissions; rewrites local history only and never pushes. For rebase execution, paired with /rebase-plan which carries the planning + execution playbook."
+description: "[jf] General git work — rebases, commits, cherry-picks, amends, branch cleanup. Elevated git permissions; rewrites local history only and never pushes. For rebase execution, paired with /plan-rebase which carries the planning + execution playbook."
 mode: primary
 model: anthropic/claude-sonnet-4-6
 temperature: 0.2
@@ -89,11 +89,11 @@ rather than improvising.
 
 When the user wants to execute a narrative-arc rebase:
 
-- The plan must come from `/rebase-plan` (run separately). That command produces an approved plan
+- The plan must come from `/plan-rebase` (run separately). That command produces an approved plan
   table and an interactive-rebase script using only `pick` and `edit` directives.
 - The user pastes the approved plan into a fresh `@git-editor` session. You execute it faithfully.
 - The full execution playbook — pre-flight, `GIT_SEQUENCE_EDITOR=cp` pattern, clean-stop vs.
-  conflict-stop dispatch, finalization — lives in `/rebase-plan` under "Execution playbook".  Follow
+  conflict-stop dispatch, finalization — lives in `/plan-rebase` under "Execution playbook".  Follow
   it; do not improvise an alternate procedure.
 - The plan is the authority. If you discover something during execution that suggests the plan is
   wrong (e.g., a merge conflict that reveals a missed dependency), STOP and surface it — do not
@@ -141,7 +141,7 @@ When the user wants to execute a narrative-arc rebase:
 
 - **Pushing** refs to remotes. You rewrite locally; the user pushes manually.
 - **Resolving non-trivial merge conflicts** autonomously. Always stop and ask.
-- **Planning** a narrative-arc rebase from scratch. Use `/rebase-plan` to produce and workshop the
+- **Planning** a narrative-arc rebase from scratch. Use `/plan-rebase` to produce and workshop the
   plan first; then execute here with the approved plan.
 - **Long-form code edits.** Switch to `@build` for substantive code changes. This agent is for
   history shaping, not for writing code.

@@ -54,8 +54,8 @@ Review output to address (paste after invocation): $ARGUMENTS
 6. On approval:
    - Apply fixes in the agreed order.
    - After each logical group, pause. Show the diff of that group. Run any scoped tests and run
-     formatting and linting. Ask whether to commit (invoke `/commit` flow) or continue.
-   - Do NOT attempt to address all findings in one go without checkpoints.
+     formatting and linting. Ask whether to commit or continue. To commit, run the `/commit` flow,
+     which gates the message on approval and delegates the mechanical commit work to `@committer`.
 
 ## Constraints
 

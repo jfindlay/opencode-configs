@@ -108,3 +108,43 @@ A quick triage rubric for deciding whether to load this file mid-session:
 
 If unsure whether the situation warrants this file, the cheap move is to surface the fact-pattern
 signature to the user and ask before loading.
+
+---
+
+## Superposed requirements: collapse by trial, not deliberation
+
+The modes above all assume a fact set to read. A distinct signature arises when the *requirements*
+themselves are superposed — the user supplies deliberately contradictory feedback, or two
+registers/conventions conflict with no governing tiebreak (REASONING's "principle wins" offers
+none because both sides are principled). This is the load-list trigger "the canonical option set
+itself seems wrong" at the level of goals rather than explanations: deliberation cannot pick a
+basis because it has no resistance gradient to descend. Reasoning harder produces a more elaborate
+tie, not a resolution.
+
+**The move is to collapse the superposition with a trial, not with thought.** Encode the conflict
+as an explicit conditional whose branch is decided by a cheap adversarial trial — a timeboxed
+proof attempt, a build, a spike — that supplies the resistance gradient deliberation lacks. The
+adversary (a Lean kernel resisting a witness, a compiler, a benchmark) finds a direction that
+argument could not.
+
+**Declare the apparatus, or the collapse is uninterpretable.** A trial is a measurement, and
+measurement projects onto the basis the apparatus defines rather than revealing a pre-existing
+value. So state the timebox and the success criterion explicitly: they fix *which observable* the
+trial reads. A 1-hour proof timebox measures "is this cheap to formalize *in the current API*?",
+which is a different observable from "is this worth formalizing?" — they may correlate, but the
+declared apparatus is what keeps a negative result from being misread. Pair every trial with a
+**demotion path** (a recorded TODO carrying the witness sketch) so a failed trial lands as
+"expensive in this basis," not as a verdict on worth.
+
+**Caveat — the trial finds *a* direction, not *the* direction.** Choosing the apparatus is the
+real decision; the trial only executes it. This is the honest limit of the metaphor: collapse is
+not discovery. If the apparatus is wrong, the trial faithfully answers the wrong question.
+
+**Relation to the abductive mode.** This is the empirical cousin of step 4 (test): where abduction
+posits a locus and then tests reverse-engineered connections against facts, superposed-requirement
+resolution posits a *conditional* and tests its branches against a constructed adversary. Both
+replace forward derivation from a stuck position with outward construction validated by hard
+contact. Worked instance: physlib EM gauge follow-up, Item 4 (necessity-of-raised-index claim) —
+a register conflict between completionist ledgering and physlib's tolerance-of-unledgered-prose,
+resolved not by argument but by a timeboxed witness-proof attempt with a TODO-string demotion
+path. (`/run-plan` session, 2026-06-11.)

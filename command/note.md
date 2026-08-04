@@ -15,19 +15,14 @@ Capture text (optional): $ARGUMENTS
      immediately following context (up to the next blank line). Show me what
      you found and ask: "Use this? (yes / paste different text)"
 
-2. **Classify the target file.** Choose the best fit from:
-   - `~/.config/opencode/AGENTS.md` — only for stable, broadly applicable
-     conventions or anti-patterns. Rarely the right target.
-   - `docs/PLAN.md` (in current project) — current-phase state: decisions,
-     open questions, next steps.
-   - `docs/NOTES.md` (in current project) — decisions, framings, mental models,
-     and learnings (including "If X, Y happens because Z" surprises). Dated
-     entry format: `YYYY-MM-DD: <content>`.
-   - `~/.config/opencode/AGENTS-HINTS.md` — framings and mental models useful
-     to the agent globally across projects. Append-mostly.
+2. **Classify the target file.** See `AGENTS-CAPTURE.md` for the two-stage criteria and
+   `AGENTS-SESSION.md` §Rolling context for the target-file taxonomy. The four options are:
+   `~/.config/opencode/AGENTS.md` (stable universal conventions), `docs/PLAN.md` (current-phase
+   state), `docs/NOTES.md` (decisions, framings, surprises), `~/.config/opencode/AGENTS-HINTS.md`
+   (global framings).
 
-   State your classification choice and one-sentence reason. Ask: "Target
-   correct? (yes / pick different)"
+   State your classification choice and one-sentence reason. Ask: "Target correct? (yes / pick
+   different)"
 
 3. **Draft the exact text to append.** Apply the format for the target file:
    - `AGENTS.md`: concise rule or convention, no date prefix.

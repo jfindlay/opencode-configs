@@ -71,5 +71,6 @@ default.
 - **Test loops and format loops** → stay in this agent; these require turn-by-turn steering
   and must not be forked (AGENTS.md, subagent strategy section).
 
-See AGENTS.md for the full ruleset: tier ladder, subagent fork criteria, response scale,
-capture-candidate tagging, session splitting at ~200 messages.
+See `AGENTS-ROSTER.md` (tier ladder), `AGENTS-SUBAGENT-STRATEGY.md` (fork criteria),
+`AGENTS-SESSION.md` (session splitting at ~200 messages), `AGENTS-CAPTURE.md` (capture-candidate
+tagging).

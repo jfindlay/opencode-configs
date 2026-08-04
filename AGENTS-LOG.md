@@ -399,3 +399,56 @@ for any agent occupying the `plan` slot. The same applies to `build`.
 **Capture:** reserved OpenCode agent names (`plan`, `build`) carry injected read-only/full-access
 behavior that the permission system and prose cannot override. An agent that needs non-default
 permissions must use a non-reserved name.
+
+---
+
+## 2026-08-04 — Contract-vs-transcript audit; command-layer retrenchment
+
+`@architect` audit of all command files against a single admission test: does this command carry
+knowledge the agent cannot rederive from the standing contracts? A command that merely transcribes
+what the contract layer already produces is negative-value — it duplicates, drifts, and drains
+salience.
+
+**What changed (5 commits).**
+
+1. **Deleted 4 commands.** `update-config` — symlink-routing and runtime-artifact rules already in
+   `AGENTS.md`. `tier-retrospective` — questionnaire never exercised; `AGENTS-LOG.md` preserves the
+   idea. `style-audit-code` and `style-audit-test` — STUBs whose intended shape is rederivable.
+   Repointed `AGENTS.md`, `AGENTS-ROSTER.md`, and the `STYLE-CODE/STYLE-TEST` Audit-invocation
+   sections to the collapsed `/style-audit` entry.
+
+2. **Compressed `/commit` from 98 to 39 lines.** The non-derivable core is the interactive
+   draft/approve loop itself; everything else (split-proposal protocol, scripted ticket stop-and-ask,
+   constraints block restating `@committer` refusal rules) was derivable from `AGENTS.md` and
+   `agent/committer.md`.
+
+3. **Style-audit articulation re-homed into `STYLE-DOC.md` `## Audit checklist`.** `style-audit-doc.md`
+   restated STYLE-DOC rules as 13 inline categories, violating its own do-not-restate constraint.
+   Additive categories (legacy code, phase markers, rolling-context lifecycle verdicts, proposal
+   taxonomy) now live in the contract so any agent can audit from it. `/style-audit` rewritten as a
+   lean single entry point (61 lines); `style-audit-doc.md` deleted.
+
+4. **Compressed `/config-retrospective` from 205 to 80 lines.** Schema crib (SQLite layout,
+   `millisecond-epoch`, permission-decisions-NOT-logged trap) kept verbatim as the non-derivable
+   core. Threads reduced to three one-line questions; Steps compressed to 7 lines; `/update-config`
+   references replaced with direct-edit + `@committer` phrasing.
+
+5. **Pointer-rot sweep.** `AGENTS-HINTS.md`: restored `## The hi-fi analogy` (~15 lines, the
+   fuller unpacking of the capability-reserve handle in `AGENTS-REASONING.md`); fixed
+   §"Subagent prompt anatomy" pointer (`AGENTS.md` → `AGENTS-SUBAGENT-STRATEGY.md`); fixed
+   §"Capture-candidate collaboration shape" pointer (`AGENTS.md` → `AGENTS-CAPTURE.md`).
+   `agent/build.md` closing line repointed to the actual homes (ROSTER, SUBAGENT-STRATEGY, SESSION,
+   CAPTURE). `command/explore.md` intro repointed to `AGENTS-SUBAGENT-STRATEGY.md`.
+   `command/note.md` step-2 taxonomy replaced with references to `AGENTS-CAPTURE.md` +
+   `AGENTS-SESSION.md`.
+
+**The captured framing (admission test).** A command earns its existence only by carrying knowledge
+the agent cannot derive from the standing contracts — a schema crib, a hazard playbook, a
+loop-termination policy, a register specification. The retrenchment enriches contracts and thins
+invocations.
+
+**Alternatives weighed.** Delete `/commit` outright — rejected: it is the interactive entry to the
+single-commit-primitive (`@committer`) shared with autonomous chains; the refusal taxonomy runs on
+every commit path from one definition; the Haiku tail is a small context-cleanliness win. Keep
+`/style-audit` as a fan-out to three child audits — rejected: articulation re-homed to the contract
+(`STYLE-DOC.md`), making the fan-out unnecessary; one entry point, zero stub-bounces.

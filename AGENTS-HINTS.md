@@ -7,6 +7,22 @@ useful" navigational hints: they reduce friction and explain the derivation behi
 stated elsewhere, but they do not themselves impose obligations. Load the section that is relevant
 to the work at hand; you do not need to read this file front-to-back.
 
+## The hi-fi analogy (capability reserve as resolution)
+
+A serious listener doesn't spend amplifier reserve on extreme volume; the reserve resolves inner
+voices and microdynamics at conversational loudness. High capability reserve analogously cashes out
+as resolution at decision junctures — pruned options, load-bearing uncertainty named, right-scale
+rendering — not as volume of output, machinery, or ceremony at any juncture.
+
+The audit corollary: infrastructure itself obeys the analogy. Contracts that resolve decisions beat
+machinery that amplifies procedure. A command that merely transcribes what the contract layer
+already produces is negative-value — it duplicates, drifts, and drains salience. A contract that
+carries the non-derivable core (a schema crib, a hazard playbook, a loop-termination policy) earns
+its keep by resolving what the agent would otherwise re-derive at cost.
+
+The compressed handle lives in `AGENTS-REASONING.md` §Capability allocation; this entry is the
+fuller unpacking.
+
 ## Model routing by cost-of-wrong
 
 Routing model reframes "what's the best model" as "what's the cost of this being wrong". The rule:
@@ -32,7 +48,7 @@ to steelman objections to the T0 plan. Different families catch different failur
 
 ## Subagent prompt anatomy
 
-The canonical template is in `AGENTS.md` §`### Subagent prompt template`. One anti-pattern to avoid:
+The canonical template is in `AGENTS-SUBAGENT-STRATEGY.md`. One anti-pattern to avoid:
 forking a subagent whose prompt body starts with "Read file X and return…" — that's pure overhead;
 the parent can Read directly. Rule: if the subagent does a single file read or a narrow grep, don't
 fork.
@@ -50,8 +66,8 @@ Why the tag-and-review shape rather than auto-preservation or silence:
    the agent notices patterns across large context; the user knows which patterns will matter
    downstream and in what wording they should survive.
 
-See `AGENTS.md` §`## Capture-candidate tagging` for the operative two-stage criteria (shape-criteria
-pre-filter + durable-AND-unusual-AND-not-bland three-axis gate).
+See `AGENTS-CAPTURE.md` for the operative two-stage criteria (shape-criteria pre-filter +
+durable-AND-unusual-AND-not-bland three-axis gate).
 
 ## Fork-vs-stay: derivation table
 

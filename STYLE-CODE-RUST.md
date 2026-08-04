@@ -64,5 +64,5 @@ See `STYLE-TEST-RUST.md`.
 
 ## Audit invocation
 
-`/style-audit-code` audits a Rust target against this document when the target's language resolves
-to Rust. Mechanical rules emit findings; structuring principles surface as observations.
+`/style-audit <target>` forks a read-only `@explore` against the code surface using this document
+as the reference. Mechanical rules emit findings; structuring principles surface as observations.

@@ -41,5 +41,5 @@ TODO.
 
 ## Audit invocation
 
-`/style-audit-test` audits a Go test target against this document (with `STYLE-CODE-GO.md` as the
-inherited base) when the target language resolves to Go.
+`/style-audit <target>` forks a read-only `@explore` against the test surface using this document
+(with `STYLE-CODE-GO.md` as the inherited base) as the reference.

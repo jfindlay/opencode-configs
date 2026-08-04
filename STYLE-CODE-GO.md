@@ -58,5 +58,5 @@ See `STYLE-TEST-GO.md`.
 
 ## Audit invocation
 
-`/style-audit-code` audits a Go target against this document when the target language resolves to
-Go.
+`/style-audit <target>` forks a read-only `@explore` against the code surface using this document
+as the reference. Mechanical rules emit findings; structuring principles surface as observations.

@@ -85,6 +85,5 @@ See `STYLE-TEST.md`.
 
 ## Audit invocation
 
-The `/style-audit-code` command audits a target file or module against the principles in this
-document. Declarative checks (mechanical rules) emit findings; judgment-layer principles
-(structuring) surface as observations for human review.
+`/style-audit <target>` forks a read-only `@explore` against the code surface using this document
+as the reference. Mechanical rules emit findings; structuring principles surface as observations.

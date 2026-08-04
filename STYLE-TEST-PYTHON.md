@@ -93,5 +93,5 @@ TODO:
 
 ## Audit invocation
 
-The `/style-audit-test` command audits a target test file or module against the rules in this
-document. Currently a STUB pending the philosophy and structuring sections above.
+`/style-audit <target>` forks a read-only `@explore` against the test surface using this document
+(and the matching `STYLE-CODE-PYTHON.md` as the inherited base) as the reference.

@@ -73,8 +73,8 @@ rely on prose guidance alone — encode tier in each subagent's `model:` frontma
   chains — drift is a refusal) or `exact` (commit only the named paths, ignore an otherwise-dirty
   tree). Refuses on incomplete work, empty diff, secret-shaped files, or hook failures — never
   improvises. Invoked two ways: directly by an orchestrator (`@plan-admin`, `@architect`) in an
-  autonomous chain, or by a command (`/commit`, `/update-config`) that owns the user-facing
-  draft/approve loop and then delegates the mechanical commit. Distinct from `@git-editor`, which
+  autonomous chain, or by `/commit` (the interactive command that owns the user-facing draft/approve
+  loop and then delegates the mechanical commit). Distinct from `@git-editor`, which
   carries elevated history-rewriting permissions (amend, rebase, hunk-split) — `@committer` only
   ever moves forward and the two never overlap.
 
@@ -90,16 +90,10 @@ rely on prose guidance alone — encode tier in each subagent's `model:` frontma
 
 - `/address-review` — process pasted review output; classify findings, plan fixes, apply with
   checkpoints. Forks `@verify` when ≥5 findings require code verification.
-- `/style-audit` — meta-command: runs `/style-audit-code`, `/style-audit-doc`, and
-  `/style-audit-test` in parallel against a target and merges their findings into a single per-file
-  report. Real orchestration; child audits are STUBs until they grow content.
-- `/style-audit-code` — audit Python source against `STYLE-CODE.md` (mechanical rules and
-  structuring principles); emits findings and observations; STUB.
-- `/style-audit-doc` — audit inline docs (rST conformance, line length, en-UK) and rolling-context
-  lifecycle (PLAN/NOTES/GOTCHAS accuracy vs code) against `STYLE-DOC.md`; forks `@explore`; emits
-  proposals only.
-- `/style-audit-test` — audit Python test code against `STYLE-TEST.md`; emits findings and
-  observations; STUB.
+- `/style-audit` — audit a target (file, dir, or package) for code, doc, and test style violations.
+  Resolves language; forks one read-only `@explore` per applicable surface; merges findings by file;
+  emits proposals only. Reference: `STYLE-DOC.md` `## Audit checklist` (doc surface),
+  `STYLE-CODE-<LANG>.md` (code), `STYLE-TEST-<LANG>.md` (test).
 - `/commit` — inspect uncommitted changes, draft a user-conventional commit message, and gate on
   user approval before committing.
 - `/roadmap-construct` — prime `@architect` to co-construct a long-arc `docs/ROADMAP.md` (the
@@ -109,14 +103,12 @@ rely on prose guidance alone — encode tier in each subagent's `model:` frontma
 - `/config-retrospective` — single-session `@architect` audit of the OpenCode user-level infrastructure
   against the session store, scored against a relentless-simplicity lens. Forks `@explore` for
   permission-flow + usage-pattern data; the cohesion review is the orchestrator's own spine;
-  approved changes are actioned by forked `@build`/`@general` and committed via the
-  `/update-config` convention. On-demand only.
+  approved changes are actioned by forked `@build`/`@general` and committed via `@committer`
+  with user-approved message. On-demand only.
 - `/explore` — fork a parameterized `@explore` subagent with a structured investigation prompt.
 - `/format-loop` — iterative format + fix loop until clean or convergence fails; pass a scope in
   `$ARGUMENTS` to narrow it, or ask for check-only when you don't want fixes applied.
 - `/note` — capture a CAPTURE-CANDIDATE into a target docs file with per-item approval.
-- `/update-config` — edit OpenCode config files in the `opencode-config/` repo (symlinked to
-  `~/.config/opencode/`; edits are live immediately).
 - `/q` — force a terse one-turn answer; suspends reasoning-register rules for that turn only.
 - `/plan-rebase` — plan (not execute) a narrative-arc rebase; outputs a rebase script for review.
   Also carries the execution playbook that `@git-editor` follows when the user pastes an approved
@@ -128,8 +120,6 @@ rely on prose guidance alone — encode tier in each subagent's `model:` frontma
   ledger. Args: `[plan-path] [may-reshard|halt-at-boundaries|fully-autonomous]`.
 - `/session-end` — end-of-session retrospective via `@session-scan`; proposes captures for approval.
 - `/test-loop` — run tests, fix failures iteratively, stop when green or loop stalls.
-- `/tier-retrospective` — gather tier-appropriate feedback on the AGENTS/REASONING layout from each
-  agent.
 
 ## Autonomous-chain carve-out (committer dispatch pattern)
 

@@ -15,10 +15,10 @@ the work.
 ## OpenCode config files
 
 The authoritative source is the `opencode-config/` git repo. `~/.config/opencode/` is a
-**symlink** to that repo, so edits are live immediately — no apply step. Use `/update-config`
-for routed edits (it handles the correct repo path and commits). Runtime artifacts (`bun.lock`,
-`package.json`, `node_modules/`, etc.) are managed by OpenCode itself and must NOT be committed
-to the repo — they exist only at the symlink target and are covered by `.gitignore`.
+**symlink** to that repo, so edits are live immediately — no apply step. Edit files directly
+in the `opencode-config/` repo; commit per the standard git conventions below. Runtime artifacts
+(`bun.lock`, `package.json`, `node_modules/`, etc.) are managed by OpenCode itself and must NOT
+be committed to the repo — they exist only at the symlink target and are covered by `.gitignore`.
 
 ## Model tiers
 
@@ -41,7 +41,7 @@ the judgment register for. T0/T1 agents follow the trigger directly.
 |----------------------------------------|-----------------------------------------------------------|-------|
 | AGENTS.md                              | Always (auto-loaded; this file)                           | All   |
 | AGENTS-REASONING.md                    | Always at session start                                   | T0/T1 |
-| AGENTS-REASONING-HINTS.md             | At any impasse; before delicate uncertainty resolution;   | T0    |
+| AGENTS-REASONING-HINTS.md              | At any impasse; before delicate uncertainty resolution;   | T0    |
 |                                        | when an anomaly resists the canonical option set          |       |
 | AGENTS-HINTS.md                        | When reaching for a referential framing; when a captured  | T0/T1 |
 |                                        | hint might apply; when AGENTS.md or REASONING points to   |       |
@@ -54,7 +54,7 @@ the judgment register for. T0/T1 agents follow the trigger directly.
 | AGENTS-CAPTURE.md                      | When producing or encountering a CAPTURE-CANDIDATE-shaped | T0/T1 |
 |                                        | finding                                                   |       |
 | AGENTS-SESSION.md                      | At session start; when splitting a session; when writing  | T0/T1 |
-|                                        | or managing rolling-context docs (PLAN.md, NOTES.md)     |       |
+|                                        | or managing rolling-context docs (PLAN.md, NOTES.md)      |       |
 | STYLE-CODE.md                          | Before writing or modifying any code; before reviewing    | T0/T1 |
 |                                        | code; when planning a refactor. Routes to the matching    |       |
 |                                        | per-language sibling (STYLE-CODE-PYTHON/RUST/GO.md).      |       |

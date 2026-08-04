@@ -1,148 +1,61 @@
 ---
-description: "[jf] Run /style-audit-code, /style-audit-doc, and /style-audit-test in parallel against a target and merge the findings. Args: [target]."
+description: "[jf] Audit a target for code, doc, and test style violations. Args: [target]."
 ---
 
-Orchestrate the three style-audit commands against a single target, fanning out to parallel
-`@explore` subagents and merging their findings into one report.
+Audit a target (file, dir, or package) for code, doc, and test style violations. Forks one
+read-only `@explore` per applicable surface; merges findings by file; emits proposals only.
 
 User input: $ARGUMENTS
 
-## Argument parsing
+## Steps
 
-1. Treat $ARGUMENTS as the audit target — a file, directory, package, or module path.
-2. If $ARGUMENTS is empty, ask me for the target before forking.
-3. Resolve the target to an absolute path. If the path doesn't exist, stop and ask.
+1. **Resolve target.** If $ARGUMENTS is empty, ask. Resolve to an absolute path; stop if it
+   doesn't exist. Detect language(s) from project markers (`pyproject.toml` → Python,
+   `Cargo.toml` → Rust, `go.mod` → Go; absent markers → ask).
 
-## What this command does
+2. **Determine applicable surfaces.** Three possible surfaces:
+   - **code** — source files in the detected language.
+   - **doc** — inline docstrings, `.md`/`.rst` files, rolling-context files (`PLAN.md`, `NOTES.md`).
+   - **test** — test files (paths under `tests/`, `*_test.go`, `test_*.py`, `tests/*.rs`, etc.).
 
-Each child audit covers a different rule surface:
+   Skip a surface only when the target has zero footprint for it ("no test files in scope" is a
+   valid audit result, not a skip reason).
 
-- `/style-audit-code` — per-language code styleguide (resolve language from the target; load
-  `STYLE-CODE-<LANG>.md` via the `STYLE-CODE.md` index).
-- `/style-audit-doc` — `STYLE-DOC.md` (inline docstrings, human docs, agent docs, rolling-context
-  lifecycle).
-- `/style-audit-test` — per-language test styleguide (resolve language; load `STYLE-TEST-<LANG>.md`
-  via the `STYLE-TEST.md` index, with the same-language code guide as the inherited base).
+3. **Fork one `@explore` per applicable surface in parallel.**
 
-`/style-audit` runs all three in parallel against the same target and merges their reports. It does
-**not** classify files first and route only the matching audit — scopes overlap (docstrings inside
-`.py` files trigger both code and doc rules), and a misclassification is worse than letting an
-audit return "nothing applicable here" cleanly.
+   Each fork uses the template from `AGENTS-SUBAGENT-STRATEGY.md`:
 
-## Status of children
+   ```
+   Working directory: <cwd>
+   Thoroughness: medium
+   Read-only: YES. DO NOT EDIT ANY FILES.
 
-All three child audits are currently STUBs. Until they grow real audit logic, this command's yield
-is bounded by what the stubs return — typically a short "STUB: not yet implemented" reply per
-child. The orchestration layer (this command) is real, so once the children gain content, this
-command produces real output without a rewrite.
+   GOAL
+   Audit <target> against the <surface> styleguide. <Surface-specific instruction below.>
 
-## Pre-fork planning (required)
+   INVESTIGATION TASKS
+   1. Load the reference: <see per-surface below>.
+   2. Inspect the target. Scope to <surface files>.
+   3. For each rule in §"Mechanical rules", emit findings with file:line.
+   4. For structuring/philosophy sections, emit observations (not findings).
+   5. For the doc surface only: run the rolling-context lifecycle check per STYLE-DOC.md
+      §"Audit checklist".
 
-Before invoking the Task tool:
+   OUTPUT FORMAT
+   Sections: "Findings (mechanical)", "Observations (structural)", "Files audited".
+   Cap at 80 rows. Report total count if more violations exist.
+   Target: <absolute path>
+   ```
 
-1. Decide the working directory for the subagents — usually the session's CWD, but override if the
-   target is rooted elsewhere.
-2. Confirm the target is well-formed (exists, readable). If it's a directory, decide whether to
-   audit recursively or only the top level — default recursive; ask if ambiguous.
-3. If the target obviously has no surface for one of the audits (e.g. a pure markdown doc has no
-   Python code or tests), still fan out to all three — the child returns "nothing applicable" and
-   the merged report records that.
+   Per-surface reference:
+   - **code**: `STYLE-CODE-<LANG>.md` via `STYLE-CODE.md` index.
+   - **doc**: `STYLE-DOC.md` (including `## Audit checklist`).
+   - **test**: `STYLE-TEST-<LANG>.md` + `STYLE-CODE-<LANG>.md` as inherited base.
 
-## Fan-out: three parallel `@explore` forks
+4. **Merge findings by file** (not by surface). When the same line triggers multiple surfaces,
+   tag all triggering surface names. Distinguish mechanical findings from structural observations.
 
-Issue three Task-tool calls in a single assistant turn (parallel execution). Each fork uses the
-canonical subagent prompt template from AGENTS.md, with the goal scoped to its respective audit.
+5. If Pass A (inline) or rolling-context findings exceed 200 rows total, tooling drift is likely.
+   Recommend `/format-loop` first and stop.
 
-### Fork 1 — code audit
-
-```
-Working directory: <cwd-or-override>
-Thoroughness: medium
-Read-only: YES. DO NOT EDIT ANY FILES.
-
-GOAL
-Audit the target against the per-language code styleguide. Resolve language from the target
-(pyproject.toml → Python, Cargo.toml → Rust, go.mod → Go; mixed → all applicable). Load
-STYLE-CODE-<LANG>.md via the STYLE-CODE.md index. Emit findings (mechanical rules) and
-observations (structuring principles). If no source in a supported language is in scope,
-return "no supported source in scope" and stop.
-
-INVESTIGATION TASKS
-1. Detect target language; load the matching STYLE-CODE-<LANG>.md as the audit reference.
-2. Inspect the target. Scope to source files for the detected language.
-3. For each rule in §"Mechanical rules", emit findings with file:line citations.
-4. For each section under §"*-structuring principles", surface observations (not findings).
-
-OUTPUT FORMAT
-report. Sections: "Findings (mechanical)", "Observations (structural)", "Files audited".
-Target: <absolute path>
-```
-
-### Fork 2 — doc audit
-
-```
-Working directory: <cwd-or-override>
-Thoroughness: medium
-Read-only: YES. DO NOT EDIT ANY FILES.
-
-GOAL
-Audit the target against ~/.config/opencode/STYLE-DOC.md. Cover inline docstrings (rST
-conformance, line length, en-UK), human docs, and rolling-context files (PLAN/NOTES lifecycle vs
-code). Note: Go source is exempt from line-wrap inline rules; Rust uses rustdoc //! / /// forms
-rather than rST field lists — per the per-language divergences section of STYLE-DOC.md. If the
-target has no doc surface, return "no doc surface in scope" and stop.
-
-INVESTIGATION TASKS
-1. Load STYLE-DOC.md as the audit reference.
-2. Inspect the target. Cover source-file docstrings, .md/.rst files, and rolling-context files.
-3. Emit proposals only — this audit does not auto-fix.
-
-OUTPUT FORMAT
-report. Sections: "Inline doc findings", "Human doc findings", "Rolling-context findings",
-"Files audited".
-Target: <absolute path>
-```
-
-### Fork 3 — test audit
-
-```
-Working directory: <cwd-or-override>
-Thoroughness: medium
-Read-only: YES. DO NOT EDIT ANY FILES.
-
-GOAL
-Audit the target against the per-language test styleguide. Resolve language from the target
-(pyproject.toml → Python, Cargo.toml → Rust, go.mod → Go; mixed → all applicable). Load
-STYLE-TEST-<LANG>.md via the STYLE-TEST.md index; load STYLE-CODE-<LANG>.md as the inherited base.
-If the target has no test code, return "no test code in scope" and stop.
-
-INVESTIGATION TASKS
-1. Detect target language; load the matching STYLE-TEST-<LANG>.md and STYLE-CODE-<LANG>.md.
-2. Inspect the target. Limit scope to test files (paths under tests/, *_test.go, test_*.py,
-   tests/*.rs, etc.).
-3. For each rule in §"Mechanical rules", emit findings with file:line citations.
-4. For each section under §"Test philosophy" and §"Structuring principles", surface observations.
-   These sections are TODO in some guides — note that explicitly when no concrete rules exist yet.
-
-OUTPUT FORMAT
-report. Sections: "Findings (mechanical)", "Observations (structural)", "Files audited".
-Target: <absolute path>
-```
-
-## Post-fork handling: merge
-
-When all three subagents return:
-
-1. **Summarize each audit in 1–2 sentences** before pasting findings — the user sees the shape
-   first, then the detail.
-2. **Group findings by file**, not by audit. A `.py` file with a docstring problem and a code
-   problem should appear once with both findings nested. This is the dedup the meta-command exists
-   for.
-3. **Mark cross-audit overlaps explicitly.** When the same line triggers rules in multiple audits,
-   tag the finding with all triggering audit names so the user can decide which rule is
-   load-bearing.
-4. **Distinguish findings from observations.** Findings are mechanical (rule violation, line
-   citation); observations are judgment-layer (might be violating a structuring principle, needs
-   human review).
-5. **Flag any `CAPTURE-CANDIDATE:` tags** that surfaced in any of the three subagent outputs.
-6. **End with the user prompt:** "Act on these findings, drill into a specific file, or stop?"
+6. End: "Act on these findings, drill into a specific file, or stop?"

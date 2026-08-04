@@ -87,6 +87,46 @@ false-positive:
   for items. The "missing docstring" and field-list rules map to rustdoc `# Errors` / `# Panics`
   sections, not to rST `:param:` / `:returns:` field lists.
 
+## Audit checklist
+
+Additive categories beyond what mechanical linters catch. An agent running `/style-audit` on the
+doc surface should check for each:
+
+**Inline-doc categories (Pass A)**
+- Legacy/intermediate-state code — compatibility shims, dead feature-flag branches, `old_X`/`X_v2`
+  pairs where one is unused. Flag only when confidence is high.
+- Phase or refactor marker leftovers — "Phase 1", "C2", "TODO(phaseX)", "stage 2", "(WIP)" in code
+  or comments. These are plan-narrative artifacts that should be removed after the phase lands.
+- Inline → agent reference violations — any docstring or comment mentioning `AGENTS.md`, `PLAN.md`,
+  or `NOTES.md`. Forbidden direction per §1 and §3.
+- Unstable data citations — test counts, file counts, commit hashes, computed values. See §3.
+
+**Rolling-context lifecycle (Pass C)**
+
+For each entry in `PLAN.md` or `NOTES.md`, determine:
+- **Claim**: what does the entry assert about the code?
+- **Code reflection**: is the claim reflected in code (motivational comment, test, structural
+  decision)? Cite `file:line` or "not found".
+- **AGENTS.md reflection**: is the claim folded into AGENTS.md? Cite section or "not found".
+- **Status verdict**: `ABSORBED` (reflected in code and/or AGENTS.md) | `STALE` (contradicts
+  current code) | `LIVE` (accurate, not yet absorbed) | `UNCERTAIN` (cannot determine without user).
+
+For `PLAN.md` specifically: identify completed sections (acceptance criteria met, no follow-up
+tasks remain) vs. in-flight sections.
+
+**Proposal taxonomy**
+
+- `ABSORB-INTO-CODE` — LIVE entry; relevant code exists but lacks the motivational comment.
+- `FOLD-INTO-AGENTS` — LIVE entry; broadly applicable; belongs in project AGENTS.md.
+- `DELETE` — ABSORBED entry; cite the reflection evidence verbatim.
+- `AMEND-STALE` — STALE entry; propose corrected entry or removal-with-replacement.
+- `FIX-INLINE` — Pass A finding; propose the exact edit.
+- `FLAG-FOR-USER` — UNCERTAIN, mixed-evidence, or judgment calls. No proposal text, just the
+  finding and the question.
+
+**Default to `FLAG-FOR-USER` over `DELETE`/`ABSORB` when evidence is incomplete.** Over-flagging
+is the safe failure mode; never lose unactioned rolling-context content.
+
 ## Future sections (TODO)
 
 - **rST conformance details.** Field-list ordering, common pitfalls, Sphinx-vs-other-tooling
@@ -95,6 +135,3 @@ false-positive:
   punctuation; em-dash usage; sentence-case headings.
 - **Register-by-doc-type.** When narrative prose is appropriate (design docs) vs. when bullet-list
   density is preferred (reference docs).
-- **Audit invocation.** The `/style-audit-doc` command audits inline docs (rST conformance, line
-  length, en-UK) and rolling-context lifecycle (PLAN/NOTES accuracy vs. code) against the
-  principles in this document.

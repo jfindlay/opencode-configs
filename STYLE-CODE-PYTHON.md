@@ -5,7 +5,8 @@ the mechanical rules (what a perfect linter would catch) and the structuring pri
 linters can't catch — the judgment layer).
 
 Sibling of `STYLE-CODE-RUST.md` (Rust) and `STYLE-CODE-GO.md` (Go). `STYLE-CODE.md` is the index
-that routes by language.
+that routes by language. Living exemplar: `~/Source/python-template`. When a rule here is
+ambiguous, the template repo is normative.
 
 ## Mechanical rules
 

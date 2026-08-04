@@ -3,6 +3,8 @@
 Loaded on demand by T0/T1 agents before writing, modifying, or reviewing Python test code. Carries
 the test-specific mechanical rules and (eventually) structuring principles. All conventions in
 `STYLE-CODE-PYTHON.md` apply to test code as well — this file adds to them, never relaxes them.
+Living exemplar: `~/Source/python-template`. When a rule here is ambiguous, the template repo is
+normative.
 
 ## Mechanical rules
 

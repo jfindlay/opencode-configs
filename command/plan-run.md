@@ -1,5 +1,5 @@
 ---
-description: "[jf] Autonomously execute a session-sharded plan file as a 1:1 session:commit chain. @plan-admin orchestrates the mechanical loop; dispatches @build/@general/@explore per session entry, @committer for commits, and pages a forked @plan-juncture (Opus default) or @plan-juncture-sonnet (opt-down) only at inflection points, contract-invalidating discoveries, and sub-track boundaries. State lives in the committed plan ledger. Args: [plan-path] [may-reshard|halt-at-boundaries]. Plan path defaults to docs/PLAN.md."
+description: "[jf] Autonomously execute a session-sharded plan file as a 1:1 session:commit chain. @plan-admin orchestrates the mechanical loop; dispatches @build/@general/@explore per session entry, @committer for commits, and pages a forked @plan-juncture (Opus) only at inflection points, contract-invalidating discoveries, and sub-track boundaries. State lives in the committed plan ledger. Args: [plan-path] [may-reshard|halt-at-boundaries]. Plan path defaults to docs/PLAN.md."
 agent: plan-admin
 subtask: false
 ---
@@ -30,12 +30,6 @@ override a false precondition mid-run.
    flags (`may-reshard`, `halt-at-boundaries`).  Every "the plan" /
    "docs/PLAN.md" reference below means PLAN. If several sharded plans exist and none was named, ask
    which.
-
-3. **Bind JUNCTURE_AGENT — the juncture adjudicator to page.** Check the PLAN header for a
-   `juncture-tier:` field. If absent or `opus`, bind `JUNCTURE_AGENT = @plan-juncture` (Opus
-   default). If `sonnet`, bind `JUNCTURE_AGENT = @plan-juncture-sonnet` (cost-economised opt-down).
-   Record the binding in the ledger header. Everywhere this command says "fork `@plan-juncture`",
-   substitute JUNCTURE_AGENT.
 
 2. **Bind VERIFY — the project's gate commands.** Discover; do NOT assume `make`. Check in order and
    bind VERIFY_TEST and VERIFY_TYPES (which may be a single combined command):
@@ -224,6 +218,18 @@ resume reads only committed state and never has to reconcile an uncommitted ledg
 
 If the just-completed session is the last in a sub-track (marked ◆ in the plan):
 
+- **Anneal gate (run before forking).** Grep the sub-track's durable files (source, tests, human
+  docs — excluding PLAN/ROADMAP and git metadata) against the anneal denylist from PLAN's
+  `## Notes for executors` (seed default below). This is mechanical — no juncture fork needed.
+  - **Hits → dispatch one `@build` anneal-fix subagent** to translate plan coordinates into
+    standalone statements. Counts against the Fix-loop budget (cap 2). Re-grep. Still hitting →
+    halt (`BLOCKED: anneal failed to converge`).
+  - **No hits → continue to the boundary-transform fork.**
+  - Seed denylist (per-project tunable in PLAN's `## Notes for executors`; target plan coordinates,
+    not domain terms — e.g. "KAT"/"known-answer test" is legitimate domain vocabulary):
+    `\bS[0-9]+\b` (plan session ids), `sub-track`, `frozen contract`, `PLAN\.md`, `ROADMAP\.md`,
+    `action-frame`, `◆`, `\bCat [ABC]\b`, `plan-(run|shard|juncture)`.
+
 - Fork `@plan-juncture` (subagent) with juncture type `boundary-transform`. Include the `## Purpose (design
   intent)`, the frozen-contract list, and the full current `## Action-frame digest`.
 - The fork returns: `still-on-intent <notes>` or `drift-HALT <what changed and why>`.
@@ -279,6 +285,12 @@ CONTRACTS YOU CONSUME (do not break these)
 CONTRACTS YOU PRODUCE
 <what later sessions will consume from you; if substrate, over-specify per the plan>
 
+REGISTER (durable artifacts)
+In code, tests, and human docs, state the actual property, reason, or invariant — never the
+plan coordinate. Plan vocabulary (session ids, categories, "frozen contract", sub-track
+names, PLAN/ROADMAP references) belongs in PLAN, the ledger, and commit messages only.
+E.g. "known-answer test for the walk-state invariant W = a·G + b·Q", not "KAT for S4".
+
 DONE WHEN
 - <the entry's KAT(s)> pass.
 - <VERIFY_TEST> and <VERIFY_TYPES> are green (orchestrator substitutes the bound commands, e.g.
@@ -325,12 +337,17 @@ CONSTRAINTS:
 - Write to PLAN's ## Cross-session contracts ONLY if this is an inflection-design juncture.
 ```
 
+## Fix-loop dispatch
+
+When dispatching a `@build` fix subagent (step 4f or the anneal-fix in step 7), include one line
+in the prompt: "REGISTER rule applies — see dispatch template." Fix forks edit durable files and
+the same plan-coordinate prohibition applies.
+
 ## Constraints
 
 - Runs from `@plan-admin` only. Implementation is always dispatched down-tier.
-- JUNCTURE_AGENT (`@plan-juncture` Opus default, or `@plan-juncture-sonnet` when declared in the
-  PLAN header) is paged as a subagent only at the three junctures (inflection design, discovery
-  adjudication, sub-track boundary). It is never resident for the loop.
+- `@plan-juncture` (Opus) is paged as a subagent only at the three junctures (inflection design,
+  discovery adjudication, sub-track boundary). It is never resident for the loop.
 - One session-list row → one session commit + one ledger commit. No batching.
 - The driver gates mechanically (4a–4d); `@plan-juncture` adjudicates discoveries (4e fork); subagents
   implement and never self-commit; `@committer` commits and never verifies. Roles stay separate (per

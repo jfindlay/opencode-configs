@@ -73,7 +73,7 @@ not a checklist to march through:
    and the inflection junctures.
 5. **Scope, sequencing, and the cost-of-wrong texture.** Which sub-track first; what the
    correctness-criticality and design-error-cost profile is (this later informs commit-size tuning
-   and `juncture-tier` at shard time — surface it now so the static frame records it).
+   at shard time — surface it now so the static frame records it).
 6. **Open questions and risks inbox.** The questions that cannot be answered now. These seed the
    roadmap's Discoveries & open-questions log — the channel the reconcile step folds findings back
    into.
@@ -92,8 +92,7 @@ Produce `docs/ROADMAP.md` as the durable, project-lifetime static-frame document
   Mark the substrate sub-track. Do NOT enumerate sessions.
 - **`## Cross-track contracts (coarse)`** — contracts spanning sub-tracks, at roadmap grain; tagged
   by flavour (compiler / test / prose) where already evident. Frozen precisely later, not here.
-- **`## Sequencing & scope`** — proposed sub-track order, the cost-of-wrong texture, any
-  `juncture-tier` leaning to carry into shard time.
+- **`## Sequencing & scope`** — proposed sub-track order and the cost-of-wrong texture.
 - **`## Discoveries & open questions`** — the inbox. Seeded from conversation step 6; the reconcile
    step (and `/plan-shard`'s boundary reconciliation) append here as the project runs.
 - **`## Status`** — sub-track status ledger (not-started / in-progress / done). All not-started at

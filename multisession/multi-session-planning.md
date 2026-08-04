@@ -93,46 +93,15 @@ controller outpaces the divergence. The inner test-loop is fast enough to earn a
 *outer* loop is not. So adaptation that the inner loop cannot catch — anything that invalidates a
 frozen cross-session contract — must still halt and surface to the human, never be ridden through.
 
-### The sixth lever: adjudicator tier (Opus vs Sonnet at junctures)
+### Adjudicator tier: Opus at junctures
 
-The juncture adjudicator (`@plan-juncture`) defaults to Opus, because juncture work is the
-*highest-judgment* work in the chain (substrate interface design, contract-invalidation
-adjudication, static↔action frame transforms) and the conditions that make it risky are exactly the
-ones where the stronger model earns its differential. The differential is also cheap: junctures are
-rare and short (see below), so the default pays for the strongest adjudicator where a wrong call is
-least recoverable. Opting *down* to Sonnet is the cost-mitigated compromise — safe because the
-`destructive-HALT` invariant bounds a weaker adjudicator's downside to *over-halting*, which the
-human catches and qualifies; waving a destructive change through is the only unrecoverable error,
-and conservatism guards against it. Sonnet-at-junctures is a judgment-economised assignment, not the
-judgment-matched default.
-
-But the tier should be **tunable per chain**, governed by the *same five levers* as commit size,
-because juncture tier is the same cost-of-wrong decision one level up:
-
-- **Levers 1-4 hold the adjudicator at the Opus default exactly as they push commit size DOWN** —
-  both are the cost-of-wrong response. High criticality (4), high design-error cost (3), intricate
-  substrate (2), or spaghetti ambient code (1) are the cases where a wrong adjudication is least
-  recoverable and the cold-fork reasoning is hardest, so the strongest adjudicator earns its
-  differential there and the default stands.
-- **Lever 5 (test-suite quality) is the asymmetry: it is the one lever that justifies opting DOWN to
-  Sonnet** while it also pushes commit size down. A strong inner loop catches contract drift
-  behaviourally, so a cheaper outer-loop adjudicator's misses are caught downstream — strong tests
-  let you economise on *both* commit size and adjudicator tier. Test quality is the one lever that
-  buys you a cheaper adjudicator; the other four only buy you smaller commits.
-
-Two facts make the differential cheap to pay when the levers call for it. Junctures are **rare**
-(5-10 per ~70-session project) and **short** (one-shot returns, ~8-13K output), so the Opus-vs-Sonnet
-delta is single-digit dollars across an entire project — negligible against the cost of one
-un-caught contract drift. And a juncture works from a **written digest, not lived context**: a
-stronger model extracts more signal from a lossy externalised action frame, so the exact condition
-that makes junctures risky (cold fork, thin context) is where Opus's marginal advantage is *largest*.
-Tier the rare high-stakes fork up; never tier the frequent mechanical worker up — that is where Opus
-is genuinely wasted.
-
-Default: Opus. Opt down to Sonnet (`@plan-juncture-sonnet`) when the levers permit — most clearly
-when strong test-suite quality (trustworthy inner loop) coincides with lower correctness-criticality.
-The tier is selected per chain via the `juncture-tier:` field in the PLAN header (absent or `opus`
-keeps the default; `sonnet` opts down), not hardcoded in the agent's frontmatter.
+The juncture adjudicator (`@plan-juncture`) runs at Opus, fixed. Juncture work is the
+highest-judgment work in the chain — substrate interface design, contract-invalidation adjudication,
+static↔action frame transforms — performed cold from a written digest, which is exactly the
+condition where the stronger model extracts the most signal from lossy context. Junctures are rare
+(5–10 per ~70-session project) and short (one-shot returns), so the cost tradeoff is negligible for
+the assurance retained: single-digit dollars per project against one un-caught contract drift. Tier
+the rare high-stakes fork up; never tier the frequent mechanical worker up.
 
 ### The deferred fallback: warm resumption for non-garden codebases
 
@@ -288,6 +257,33 @@ cross-session drift. Compiler contracts catch interface drift; test contracts ca
 drift; prose contracts catch invariant drift. Trying to do everything with compiler contracts
 produces over-engineered abstractions; trying to do everything with tests produces brittle tests;
 trying to do everything with prose produces unenforced wishes.
+
+### Register discipline: plan coordinates stay in the margin
+
+**Planning vocabulary must not outlive the document that defines it.** Two vocabularies are
+distinguished: *domain invariants* (e.g. the walk-state invariant `W = a·G + b·Q`) are content and
+must appear in code, tests, and docs; *plan coordinates* (session ids, category letters, ◆, "frozen
+contract", sub-track names, PLAN/ROADMAP references) are registration marks — load-bearing in the
+rolling docs (PLAN, ledger, digest, commit messages), dangling pointers in the shipped artifact
+once the PLAN is archived.
+
+The printer's-marks analogy is exact: registration and cut marks live outside the trim line; the
+anneal is the trim. A post-arc maintenance agent is served by the same annealed code, tests, and
+docs a human is; a mid-arc agent working from a dispatch prompt that names the invariant directly
+loses nothing by not seeing the session id.
+
+The mechanism is hybrid: (1) **in-process prevention** — the dispatch template in `/plan-run`
+carries a REGISTER block instructing each build agent to state the actual property, never the plan
+coordinate; (2) **per-sub-track anneal gate** — at each ◆ boundary the driver greps the sub-track's
+durable files against a denylist before the boundary-transform juncture fork, dispatching a fix
+subagent on hits. The temporal asymmetry: compact coordinates aid mid-arc agent reconstruction only
+while the defining doc is co-present; after the arc they are noise. The hybrid strategy keeps the
+anneal a near-no-op verification (prevention makes leaks rare) rather than a large end-of-arc strip
+diff.
+
+The per-project denylist (seeded from the default in `/plan-run`, tunable in PLAN's
+`## Notes for executors`) targets plan coordinates, not domain terms — "KAT"/"known-answer test" is
+legitimate domain vocabulary in a crypto library; `\bS4\b` as a session id is not.
 
 ---
 

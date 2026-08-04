@@ -1,5 +1,5 @@
 ---
-description: "[jf] Shard a roadmap, a prose plan, or an in-session design statement into a /plan-run-executable docs/PLAN.md: session list (one commit-shaped session per row), cross-session contracts, progress ledger, and action-frame digest. First reconciles docs/ROADMAP.md at the sub-track boundary (mark prior sub-track done, fold its discoveries up, mark the next in-progress). Applies the five-input commit-size tuning law and sets juncture-tier. This is the SHARDING step /plan-run refuses to do; it does NOT execute the plan. Args: [roadmap-or-plan-path] [sub-track]."
+description: "[jf] Shard a roadmap, a prose plan, or an in-session design statement into a /plan-run-executable docs/PLAN.md: session list (one commit-shaped session per row), cross-session contracts, progress ledger, and action-frame digest. First reconciles docs/ROADMAP.md at the sub-track boundary (mark prior sub-track done, fold its discoveries up, mark the next in-progress). Applies the five-input commit-size tuning law. This is the SHARDING step /plan-run refuses to do; it does NOT execute the plan. Args: [roadmap-or-plan-path] [sub-track]."
 agent: architect
 subtask: false
 ---
@@ -12,7 +12,7 @@ This command produces the shards and pauses for review; it never runs `/plan-run
 is a separate, `@plan-admin` action).
 
 Runs from `@architect` (Opus 4.8): sharding is the same high-judgment interface-and-contract design the
-inflection juncture does — session boundaries, contract freezes, tier and juncture-tier selection.
+inflection juncture does — session boundaries, contract freezes, and tier selection.
 If invoked from a different agent, note that the judgment register expects Opus and proceed only if
 the user confirms.
 
@@ -85,8 +85,7 @@ unit whole. Default band: **~150–400 LOC, 2–4 files**. Tune with the five in
 2. Irreducible complexity of the change (the FLOOR — ↑ → larger; never fracture below it).
 3. Cost of a design error (↑ → smaller).
 4. Correctness-criticality (↑ → smaller).
-5. Inner-loop bandwidth / test-suite quality (↑ → smaller, AND the one lever that licenses opting
-   the juncture tier DOWN to Sonnet).
+5. Inner-loop bandwidth / test-suite quality (↑ → smaller).
 
 Then apply the **one-line-commit-title corollary**: if a planned session can't be described in one
 commit-title-shaped sentence, it is more than one session — split it until each row has a clean
@@ -94,15 +93,10 @@ title. Splitting is only legitimate at a contract-sharp boundary (one half freez
 other consumes); never fracture an irreducible unit (input 2) just to hit a LOC number. When you
 split or merge a session, state the lever or corollary that drove it.
 
-**Set `juncture-tier`** in the PLAN header comment: `opus` (default — levers 1–4 hold it up) or
-`sonnet` (opt down only when strong test-suite quality, lever 5, coincides with lower
-correctness-criticality). State the reasoning in one sentence near the header.
-
 ## The target structure (what /plan-run reads)
 
 Produce `docs/PLAN.md` with exactly these sections. `/plan-run` preconditions on the starred ones.
 
-- **Header comment** with `juncture-tier:` (`<!-- juncture-tier: opus -->`).
 - `## Purpose (design intent)` — the prose intent, re-read at every ◆ boundary (anti-defocus anchor).
 - `## Verify gate` — the bound VERIFY_TEST / VERIFY_TYPES commands (discover them; do not assume
   `make`). `/plan-run` re-discovers these but stating them here documents the gate.
@@ -113,7 +107,10 @@ Produce `docs/PLAN.md` with exactly these sections. `/plan-run` preconditions on
 - `## Session detail` — per-row deliverable, ≥1 KAT (a row whose deliverable can't be a KAT has an
   undefined contract — flag it), subtleties, deferrals. Lower-fidelity sketches for rows after the
   substrate session are correct, not lazy: sessions inside a sub-track are crisply specified only
-  after the substrate freezes.
+  after the substrate freezes. The integrative (Cat I) session's deliverable includes the
+  planning-register anneal: durable files free of plan coordinates, denylist grep clean, any leaked
+  coordinates translated into standalone prose (the integrative session is already "where contracts
+  get their public form" — the anneal is the same act).
 - **`## Cross-session contracts`** ★ — one subsection per contract, each tagged compiler- / test- /
   prose-enforced, with Defined-in and Consumed-by. The inflection juncture fork writes the resolved
   substrate interface into the relevant subsection at execution time; mark not-yet-frozen ones
@@ -127,7 +124,9 @@ Produce `docs/PLAN.md` with exactly these sections. `/plan-run` preconditions on
   destructive-HALT). The reverse flow — discoveries accrued in a completed `PLAN.md` folded back *up*
   into the roadmap — happens in the reconciliation step above, not here.
 - `## Notes for executors` — tier routing, register (PEDAGOGY), invariants to preserve, the
-  suggested first `/plan-run` invocation (`halt-at-boundaries` for an unproven shard pattern).
+  suggested first `/plan-run` invocation (`halt-at-boundaries` for an unproven shard pattern), and
+  the **anneal denylist**: the per-project denylist the ◆ boundary gate greps, seeded from the
+  default in `/plan-run` and tuned here (drop/add patterns that collide with domain vocabulary).
 
 Apply the three contract flavours deliberately: compiler contracts (traits/signatures) catch
 interface drift, KATs catch behavioural drift, prose invariants catch invariant drift. Each session
@@ -139,7 +138,7 @@ method "we might need later" if confidence is reasonable — adding it later is 
 Steering is high throughout — surface each load-bearing choice rather than deciding silently:
 
 - Session boundaries and any split/merge (with the driving lever named) — Question tool.
-- Tier assignments and the `juncture-tier` setting (with lever-5 reasoning) — Question tool.
+- Tier assignments (with lever reasoning) — Question tool.
 - Contract freezes and which sessions consume them — confirm before writing.
 - The VERIFY gate, if discovery is ambiguous — confirm.
 
@@ -155,7 +154,14 @@ In greenfield mode, the whole session is a dialogue: elicit intent → propose s
    confirm-before-write gate as the PLAN write.
 3. Write `docs/ROADMAP.md` (if reconciled) then `docs/PLAN.md`. Pause for review. Do NOT run
    `/plan-run`.
-4. If the design statement (greenfield) or a discovery during sharding is a durable roadmap-level
+4. **Seed the project's `AGENTS.md`** (same confirm-before-write gate): append the register rule to
+   the target project's `AGENTS.md`, creating the file with just this block if none exists. The
+   block: the REGISTER rule (state the property/reason/invariant; never the plan coordinate; plan
+   vocabulary lives in PLAN/ROADMAP/ledger/commit messages only) plus a pointer to the anneal
+   denylist in PLAN's `## Notes for executors`. Idempotent: skip if the block is already present.
+   This covers agents outside `/plan-run` chains — ad-hoc sessions auto-load the repo's `AGENTS.md`
+   and never see the dispatch template.
+5. If the design statement (greenfield) or a discovery during sharding is a durable roadmap-level
    fact *not already folded in by the reconciliation step*, surface it as a `CAPTURE-CANDIDATE` for
    `docs/ROADMAP.md` or NOTES.
 
@@ -163,10 +169,11 @@ In greenfield mode, the whole session is a dialogue: elicit intent → propose s
 
 - Sharding only. Never execute a session, never run the VERIFY gate as more than discovery, never
   commit code. `/plan-run` (from `@plan-admin`) executes.
-- Writes are limited to `docs/PLAN.md` and the sub-track-boundary reconciliation of `docs/ROADMAP.md`
-   (status + folded discoveries; on approval, plus any roadmap/NOTES capture). All other writes are
-   disabled per `@architect` permissions. Roadmap writes stay bounded to the boundary delta — do not
-   rewrite roadmap structure or co-maintain it per-session.
+- Writes are limited to `docs/PLAN.md`, the sub-track-boundary reconciliation of `docs/ROADMAP.md`
+  (status + folded discoveries; on approval, plus any roadmap/NOTES capture), and the project's
+  `AGENTS.md` register-rule seed (on approval, same gate). All other writes are disabled per
+  `@architect` permissions. Roadmap writes stay bounded to the boundary delta — do not rewrite
+  roadmap structure or co-maintain it per-session.
 - Every session row must reduce to a one-line commit title. If it can't, it isn't one session.
 - Do not assume project tooling (`make`, `origin`, file layout) — discover it (survey + VERIFY
   binding), exactly as `/plan-run`'s preflight does.
@@ -177,7 +184,6 @@ In greenfield mode, the whole session is a dialogue: elicit intent → propose s
 - Roadmap reconciliation: sub-track marked done (+ any discoveries folded up), sub-track marked
   in-progress — or "none (greenfield / no roadmap / no prior PLAN)".
 - Session count, sub-track(s) sharded, `◆` and `@architect` markers placed.
-- `juncture-tier` set and the lever that decided it.
 - Any split/merge and the lever that drove it.
 - Capture candidates surfaced.
 - The suggested `/plan-run` invocation to execute the result.

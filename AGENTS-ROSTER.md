@@ -50,14 +50,10 @@ rely on prose guidance alone — encode tier in each subagent's `model:` frontma
   the execution playbook.
 
 **Subagents** (forked via the Task tool):
-- `@plan-juncture` — T0/Opus 4.8. Juncture adjudicator for `/plan-run` chains. Default tier; paged
-  by `@plan-admin` at inflection-point interface design, discovery adjudication (does this finding
-  invalidate a frozen downstream contract?), and sub-track boundary coordinate-transform. One-shot
-  return; does not implement; writes only to PLAN's `## Cross-session contracts` on inflection
-  design. Declare `juncture-tier: sonnet` in the PLAN header to opt down to `@plan-juncture-sonnet`
-  when the five commit-size levers permit (strong test suite + lower correctness-criticality).
-- `@plan-juncture-sonnet` — T1/Sonnet 4.6. Cost-economised opt-down from `@plan-juncture`. Same
-  contract; cheaper model. Activated via `juncture-tier: sonnet` in the PLAN header.
+- `@plan-juncture` — T0/Opus 4.8. Juncture adjudicator for `/plan-run` chains. Paged by `@plan-admin`
+  at inflection-point interface design, discovery adjudication (does this finding invalidate a frozen
+  downstream contract?), and sub-track boundary coordinate-transform. One-shot return; does not
+  implement; writes only to PLAN's `## Cross-session contracts` on inflection design.
 - `@explore` — T1/Sonnet 4.6. Code-structure surveys, needle-finding in large trees, open-ended
   codebase questions. Default fork choice for read-only exploration. Overrides built-in `@explore`
   to prevent silent Opus or Fable inheritance when forked from `@architect` or `@dialectic`.
@@ -86,9 +82,9 @@ rely on prose guidance alone — encode tier in each subagent's `model:` frontma
 - `@review` — post-implementation code review on a diff/commit/branch.
 
 **Multisession subsystem** — the long-arc planning and execution roster:
-`@architect`, `@plan-admin`, `@plan-juncture`, `@plan-juncture-sonnet`, and `@committer`. Lifecycle
-commands: `/roadmap-construct` (Phase 0, build the ROADMAP) → `/plan-shard` (slice a sub-track into
-a PLAN) → `/plan-run` (execute the PLAN). Reference doc: `multisession/multi-session-planning.md`.
+`@architect`, `@plan-admin`, `@plan-juncture`, and `@committer`. Lifecycle commands:
+`/roadmap-construct` (Phase 0, build the ROADMAP) → `/plan-shard` (slice a sub-track into a PLAN)
+→ `/plan-run` (execute the PLAN). Reference doc: `multisession/multi-session-planning.md`.
 
 ## Command roster
 
@@ -127,10 +123,9 @@ a PLAN) → `/plan-run` (execute the PLAN). Reference doc: `multisession/multi-s
   plan into a fresh session.
 - `/plan-run` — autonomously execute a session-sharded `docs/PLAN.md` as a 1:1 session:commit
   chain. `@plan-admin` orchestrates the mechanical loop; dispatches `@build`/`@general`/`@explore`
-  per session entry, `@committer` for commits, and pages `@plan-juncture` (Opus default) or
-  `@plan-juncture-sonnet` (opt-down via `juncture-tier: sonnet` in the PLAN header) only at
-  inflection points, contract-invalidating discoveries, and sub-track boundaries. State lives in the
-  PLAN.md ledger. Args: `[plan-path] [may-reshard|halt-at-boundaries|fully-autonomous]`.
+  per session entry, `@committer` for commits, and pages `@plan-juncture` (Opus) only at inflection
+  points, contract-invalidating discoveries, and sub-track boundaries. State lives in the PLAN.md
+  ledger. Args: `[plan-path] [may-reshard|halt-at-boundaries|fully-autonomous]`.
 - `/session-end` — end-of-session retrospective via `@session-scan`; proposes captures for approval.
 - `/test-loop` — run tests, fix failures iteratively, stop when green or loop stalls.
 - `/tier-retrospective` — gather tier-appropriate feedback on the AGENTS/REASONING layout from each

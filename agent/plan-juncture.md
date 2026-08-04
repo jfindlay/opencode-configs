@@ -1,5 +1,5 @@
 ---
-description: "[jf] T0/Opus juncture adjudicator for /plan-run chains. Paged by @plan-admin at exactly three automated junctures: inflection-point interface design, discovery adjudication, and sub-track boundary transform. One-shot return; never implements; writes only to PLAN's ## Cross-session contracts on inflection design. Default tier; use @plan-juncture-sonnet to opt down when the five levers permit."
+description: "[jf] T0/Opus juncture adjudicator for /plan-run chains. Paged by @plan-admin at exactly three automated junctures: inflection-point interface design, discovery adjudication, and sub-track boundary transform. One-shot return; never implements; writes only to PLAN's ## Cross-session contracts on inflection design."
 mode: subagent
 model: anthropic/claude-opus-4-8
 temperature: 0.2

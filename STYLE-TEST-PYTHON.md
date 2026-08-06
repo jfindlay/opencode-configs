@@ -93,6 +93,11 @@ TODO:
 - When a test class earns its keep
 - How to organise large parametrize tables
 
+## Notes
+
+- Using structlog's `cache_logger_on_first_use=True` breaks `structlog.testing.capture_logs()`. The
+  fix is to use pytest's `caplog` fixture.
+
 ## Audit invocation
 
 `/style-audit <target>` forks a read-only `@explore` against the test surface using this document

@@ -18,13 +18,14 @@ ambiguous, the template repo is normative.
 - Document **every** parameter, return, raise, and yield of every public function, and **every
   instance and class attribute** of every public class (`:ivar:` for instance attributes, `:cvar:`
   for class-level attributes). **Applies to test code as well** — tests are not exempt.
-- **Dataclass carve-out.** For pure data containers (`@dataclass`, `@dataclass(frozen=True)`,
-  `NamedTuple`, `TypedDict`, Pydantic `BaseModel`) where the field annotations and names are
+- **Dataclass exception.** For pure data containers (`@dataclass`, `@dataclass(frozen=True)`,
+  `NamedTuple`, `TypedDict`, Pydantic `BaseModel`, etc.) where the field annotations and names are
   self-documenting, a one-line class docstring is sufficient — `:ivar:` entries are not required.
   Add them only when a field's meaning or invariant is not obvious from its name and type.
 
 ## Preferences
 
+- Always full type annotations (mypy strict)
 - Always prefer `Path` from `pathlib`
 - Always prefer `match`/`case` to `if`(/`elif`/...)/`else` when the conditionals are similar enough
 - Always use an assignment expression `if (a := f()) is not None: print(a)`
@@ -51,13 +52,13 @@ TODO.
 When considering function scope, focus, and complexity (intricacy, fragility, importance):
 
 1. **[level and concern separation]** Is the function's content all at the same level? Does it
-   implement core business logic or supplemental logic? Does it mix high-level with low-level
-   logic? Does it mix critical-path code with noncritical paths?
+   implement essential business logic or supplemental logic?  Does it mix high-level with low-level
+   logic?  Does it mix critical-path code with noncritical paths?
 2. **[plurality]** Can loose-coupled or uncoupled units focusing on distinct concerns be identified
-   within the function? If the function were split, would the focus of the split functions be worth
-   the complexity of the cross calls, shared state, and data contracts between those functions? A
-   function with a high ratio of input/output data-contract complexity to implementation complexity
-   should probably be merged with one or more of its peers.
+   within the function?  If the function were split, would the focus of the split functions be worth
+   the complexity of the cross calls, shared state, and data contracts between those functions?
+   Conversely, a function with a high ratio of input/output data-contract complexity to
+   implementation complexity should probably be merged with one or more of its peers.
 3. **[side effects]** IO to/from storage/network, other threads/processes, etc. should probably not
    be mixed with local logic.
 4. **[function size]** If a function cannot naturally be split and it exceeds ~60–90 lines at

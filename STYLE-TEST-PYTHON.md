@@ -8,45 +8,35 @@ normative.
 
 ## Mechanical rules
 
-- **Framework: pytest.** No `unittest.TestCase`, no nose, no bare `assert` scripts. Use plain
-  functions and `assert` with pytest's rewriting; reach for classes only to share fixtures across a
-  small, related cluster of tests.
-- **Filesystem mocking: pyfakefs.** Use the `fs` fixture for any test that touches the filesystem.
-  Do not write to real `tmp_path` when pyfakefs would do; do not mix the two in one test.  If a test
-  is validating a project artifact, such as an example config, keep the non-`fs` related work
-  isolated.
-- **Mocking: pytest-mock.** Use the `mocker` fixture, do not use anything from `unittest.mock`.  Do
-  not use decorator mocks from `unittest.mock`. Exceptions raised in `__enter__`/`__exit__` are
-  still handled gracefully by `mocker`.  `unittest.mock` supports more mocking styles with dubious
-  value: decorators `.start()`/`.stop()`.  Do not use these and standardize on the simple `mocker`
-  UX, which forces test case simplicity.  Import `unittest.mock` only for:
-  - **Type annotations** of mock objects (`MagicMock`, `AsyncMock`, etc. as types, not factories).
-    Prefer gating these imports under `if TYPE_CHECKING:` so the runtime mocking surface remains
-    completely `mocker`-driven.
+- **Framework: pytest.** Pytest must be used for all tests. Use test classes only to organize or
+  share fixtures across a related cluster of tests.
+- **Filesystem mocking: pyfakefs.** tests that touch the filesystem must use the `fs` fixture.  If a
+  test is validating a project artifact, write it to the fake fs or `tmp_path`.  Keep non-`fs`
+  related work isolated.
+- **Mocking: pytest-mock.** Mocking must always be done with the `mocker` fixture.  It handles Do not use
+  decorator mocks from `unittest.mock`.  Contextual exceptions (raised in `__enter__`/`__exit__`) are
+  handled by `mocker`. `mocker`'s direct UX forces test case simplicity.  Import `unittest.mock`
+  only for:
+  - **Type annotations** of mock objects (`MagicMock`, `AsyncMock`, etc. as types, not factories)
+    should be import-gated under `if TYPE_CHECKING:`.
   - **`isinstance` checks** against mock types in test helpers or custom matchers.
-  - **Sentinels and helpers `mocker` does not proxy.** `mocker` covers `Mock`, `MagicMock`,
-    `NonCallableMock`, `NonCallableMagicMock`, `PropertyMock`, `AsyncMock`, `call`, `ANY`,
-    `DEFAULT`, `sentinel`, `mock_open`, `seal`, `patch`, `create_autospec`, `spy`, and `stub`.
-    Anything else (e.g. constructing `mock.call(...)` values for `pytest.mark.parametrize` outside a
-    test body) requires the direct import.
+  - **Sentinels and helpers `mocker` does not proxy.** (e.g. constructing `mock.call(...)` values
+    for `pytest.mark.parametrize` outside a test body) requires the direct import.
 - **Top-level layout.**
   - `tests/unit/` — fast, isolated, no network, no real filesystem, no real subprocesses. Mirrors
-    the package tree under test.
+    the app `src/` package tree.
   - `tests/integration/` — exercises real boundaries (filesystem, subprocess, network where
     appropriate, real config loading). Slower; may be gated behind a marker.
   - Other top-level test directories (`tests/e2e/`, `tests/perf/`) are allowed when the project
     needs them, but `unit/` and `integration/` are the baseline split.
 - **Prefer pytest affordances over hand-rolled scaffolding.**
-  - `@pytest.fixture` for setup/teardown and shared state, not `setUp`/`tearDown` methods or
-    module-level globals.
-  - `@pytest.mark.parametrize` for table-driven tests, not `for`-loops inside a test function or
-    copy-pasted test bodies.
-  - `pytest.raises`, `pytest.warns`, `pytest.approx`, `monkeypatch`, `caplog`, `capsys` — reach for
-    these before writing equivalents from scratch.
+  - `@pytest.fixture` for setup/teardown and shared state.
+  - `@pytest.mark.parametrize` for table-driven tests.
+  - `pytest.raises`, `pytest.warns`, `pytest.approx`, `monkeypatch`, `caplog`, `capsys`.
 - **`conftest.py` hoisting.** Common fixtures, hooks, and helpers live in a `conftest.py` at the
   lowest package level that covers all consumers. A fixture used by two sibling test modules belongs
-  in their shared parent's `conftest.py`, not duplicated. A fixture used across `unit/` and
-  `integration/` belongs in `tests/conftest.py`.
+  in their shared parent's `conftest.py`. A fixture used across `unit/` and `integration/` belongs
+  in `tests/conftest.py`.
 - **Docstrings and typing.** Per `STYLE-CODE.md`, tests are not exempt from the docstring and mypy
   rules. Every test function gets a one-line docstring stating what behaviour it pins down; every
   fixture gets a docstring describing what it provides and any teardown contract.
@@ -73,12 +63,12 @@ normative.
   - Use `@pytest.parameterize`
   - Factor out complex logic to a fixture.  Even fixtures should not be doing complex work except in
     extraordinary cases.
-  - Simplify test scope: generally narrower for unit tests or broader for integration tests,
+  - Simplify test scope: generally narrower for unit tests or broader for integration tests.
   - Consider it a signal to reevaluate app code with more legible API boundaries: internal API for
     unit tests, external API for integration tests.
   - Excessive mocking is also a signal.
   - Extraordinary cases justifying some test case or fixture complexity: the app code cannot be
-    isolated otherwise; the app code is intricate, fragile, or load bearing
+    isolated otherwise; the app code is intricate, fragile, or load bearing.
 - **Parameterization** should be preferred unless the parameteric is doing more work than the app
   code it's covering.  Consider that a signal the parameterization is a forced symmetry.
 TODO:

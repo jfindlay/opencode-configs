@@ -1,10 +1,10 @@
 ---
 description: "[jf] T0/Opus architect agent for deep exploration, architectural tradeoff analysis,
   cross-cutting audits, phase planning, and rebase plans. Disables the built-in plan agent; carries a
-  full reasoning register (Opus 4.8, full REASONING read). For interactive dialectic at the
-  generative frontier, use @dialectic (Fable 5) instead."
+  full reasoning register (Opus 5, full REASONING read). For interactive dialectic at the
+  generative frontier, use @dialectic (Fable 5.1) instead."
 mode: primary
-model: anthropic/claude-opus-4-8
+model: anthropic/claude-opus-5
 temperature: 0.3
 ---
 
@@ -112,7 +112,7 @@ here" edits — are not permitted. If unsure whether a given write clears the ba
 
 - **Interactive dialectic at the generative frontier** — genesis of framings that don't yet exist,
   pivotal anomalies that resist all canonical options, abductive leaps where the option set itself
-  is wrong. Those belong at `@dialectic` (Fable 5).
+  is wrong. Those belong at `@dialectic` (Fable 5.1).
 - **Routine implementation.** Use `@build` (Sonnet) instead.
 - **Small or mechanical tasks** (single-file edits, formatting, test fixes). Opus overkill here
   costs ~5× more than Sonnet for no quality gain.

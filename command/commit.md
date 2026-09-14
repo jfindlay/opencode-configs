@@ -12,7 +12,7 @@ forked `@committer` on approval. For orchestrator-dispatched commits, dispatch `
    - Title: `ticket-XXXX Concise description`. Ticket from $ARGUMENTS, then branch name
      (`git rev-parse --abbrev-ref HEAD`), then ask if neither yields one.
    - Body: 1–4 sentences on the *why*; wrap at 72 chars.
-   - Co-author trailer (default ON): `Co-authored-by: Claude Sonnet 4.6 <noreply+claude-sonnet@anthropic.com>`.
+   - Co-author trailer (default ON): `Co-authored-by: Claude Sonnet 5 <noreply+claude-sonnet@anthropic.com>`.
      Suppress only if $ARGUMENTS contains `--no-coauthor` or user asks.
    - If the diff is obviously multi-concern, propose a split in one sentence; stop for confirmation.
    - If any file looks like a secret / credential / `.env`, ABORT and warn.

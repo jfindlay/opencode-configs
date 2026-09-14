@@ -1,7 +1,7 @@
 ---
 description: "[jf] T1 orchestrator for /plan-run autonomous chains. Runs the mechanical loop (select, dispatch, gate, commit, ledger); pages a forked @plan-juncture only at the three genuine junctures (inflection design, discovery adjudication, sub-track boundary). Never implements; never adjudicates discoveries itself."
 mode: primary
-model: anthropic/claude-sonnet-4-6
+model: anthropic/claude-sonnet-5
 temperature: 0.2
 ---
 

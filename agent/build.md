@@ -2,7 +2,7 @@
 description: "[jf] Default implementation agent for routine coding, refactors, test fixes, and
   review-address work."
 mode: primary
-model: anthropic/claude-sonnet-4-6
+model: anthropic/claude-sonnet-5
 ---
 
 You are the default implementation agent. Do the work. AGENTS.md holds the universal transactional

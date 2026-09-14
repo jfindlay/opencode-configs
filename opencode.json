@@ -1,6 +1,6 @@
 {
   "$schema": "https://opencode.ai/config.json",
-  "model": "anthropic/claude-sonnet-4-6",
+  "model": "anthropic/claude-sonnet-5",
   "instructions": ["AGENTS.md"],
   "mcp": {},
   "lsp": {
@@ -148,7 +148,7 @@
         }
       }
     },
-    // Disable the built-in plan agent — replaced by @architect (Opus 4.8).
+    // Disable the built-in plan agent — replaced by @architect (Opus 5).
     // The reserved name "plan" injects a read-only system reminder that cannot be
     // overridden by permission JSON or agent prose (OpenCode 1.17.0).
     "plan": {

@@ -452,3 +452,23 @@ single-commit-primitive (`@committer`) shared with autonomous chains; the refusa
 every commit path from one definition; the Haiku tail is a small context-cleanliness win. Keep
 `/style-audit` as a fan-out to three child audits — rejected: articulation re-homed to the contract
 (`STYLE-DOC.md`), making the fan-out unnecessary; one entry point, zero stub-bounces.
+
+## 2026-09-14 — Model pins bumped: Sonnet 4.6 → 5, Opus 4.8 → 5, Fable 5 → 5.1
+
+**Context.** Anthropic shipped Claude Sonnet 5, Opus 5, and Fable 5.1 (confirmed available via
+`opencode models`); Haiku 4.5 remains current at T2, so it is untouched.
+
+**Change.** Every `model:` frontmatter pin and the `opencode.json` default bumped to the new
+release at the same tier: `agent/build.md`, `agent/explore.md`, `agent/general.md`,
+`agent/verify.md`, `agent/git-editor.md`, `agent/plan-admin.md` (Sonnet 4.6 → 5);
+`agent/architect.md`, `agent/plan-juncture.md` (Opus 4.8 → 5); `agent/dialectic.md`
+(Fable 5 → 5.1). Prose version mentions updated in step (`AGENTS.md`, `AGENTS-REASONING.md`,
+`AGENTS-HINTS.md`, `AGENTS-ROSTER.md`, `agent/architect.md`, `agent/dialectic.md`,
+`command/commit.md`, `command/config-retrospective.md`, `command/plan-shard.md`,
+`command/roadmap-construct.md`, `opencode.json` comment) including the co-author identity-string
+examples (`AGENTS-ROSTER.md`, `agent/committer.md`, `command/commit.md`) — those are illustrative
+defaults, not load-bearing history, so they track the current pin.
+
+**Left alone.** `AGENTS-LOG.md`'s own prior entries keep their historical version numbers
+(4.5, 4.7, 4.8, "Fable 5") — this file is append-only and a past entry's job is to record what was
+true at the time, not to track the current pin.

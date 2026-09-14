@@ -23,7 +23,7 @@ be committed to the repo — they exist only at the symlink target and are cover
 ## Model tiers
 
 T-1 = Fable (interactive dialectic at the generative extremity — genesis, abduction, pivotal
-anomalies). T0 = Opus 4.8 (deep planning, architectural tradeoffs, cross-cutting audits). T1 =
+anomalies). T0 = Opus 5 (deep planning, architectural tradeoffs, cross-cutting audits). T1 =
 Sonnet (default — implementation, refactors, reviews). T2 = Haiku (mechanical subagents). Default
 to T1. Encode tier in each subagent's `model:` frontmatter field — never rely on prose guidance
 alone. Full tier detail and agent roster: `AGENTS-ROSTER.md`.

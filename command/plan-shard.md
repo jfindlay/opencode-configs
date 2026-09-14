@@ -11,7 +11,7 @@ Turn a long-arc design into the executable form `/plan-run` consumes. The output
 This command produces the shards and pauses for review; it never runs `/plan-run` itself (executing
 is a separate, `@plan-admin` action).
 
-Runs from `@architect` (Opus 4.8): sharding is the same high-judgment interface-and-contract design the
+Runs from `@architect` (Opus 5): sharding is the same high-judgment interface-and-contract design the
 inflection juncture does — session boundaries, contract freezes, and tier selection.
 If invoked from a different agent, note that the judgment register expects Opus and proceed only if
 the user confirms.

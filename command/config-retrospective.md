@@ -29,7 +29,7 @@ empty or irrelevant.
 
 **`session` analytic columns.**
 - `session.agent` (text) — owning agent: `build`, `explore`, `general`, `committer`, etc.
-- `session.model` (text) — JSON, e.g. `{"id":"claude-sonnet-4-6","providerID":"anthropic"}`.
+- `session.model` (text) — JSON, e.g. `{"id":"claude-sonnet-5","providerID":"anthropic"}`.
   Tier-check with `json_extract(model, '$.id')`.
 - `session.parent_id` (text) — parent session for a forked subagent; NULL for top-level. Fork
   trees / `/plan-run` chains reconstructed by joining parent_id ordered by `time_created`.

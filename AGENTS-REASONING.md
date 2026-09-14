@@ -12,8 +12,8 @@ productively apply.
 ## Tier gating within this file
 
 Sections are ordered so that T1 agents can stop reading at a clearly-marked boundary. Everything
-above the `--- T-1/T0 ONLY BELOW ---` marker applies to T-1 (Fable 5), T0 (Opus 4.8), and T1
-(Sonnet 4.6) agents. Everything below the marker is T-1/T0-only: deep-dialectic material whose
+above the `--- T-1/T0 ONLY BELOW ---` marker applies to T-1 (Fable 5.1), T0 (Opus 5), and T1
+(Sonnet 5) agents. Everything below the marker is T-1/T0-only: deep-dialectic material whose
 execution at T1 would produce fake rigour — the four-step abductive decomposition and its Dupin
 framing are built for Fable/Opus-scale reasoning reserve, and asking Sonnet to will them into
 existence costs attention against the rules it can actually apply.

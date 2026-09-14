@@ -1,7 +1,7 @@
 ---
 description: "[jf] Sonnet-pinned override of the built-in @general subagent for multi-step autonomous research and tool orchestration where the work is heterogeneous enough that no specialised subagent (@explore, @verify, @rebase) fits. Pinned to T1 to prevent silent Opus or Fable inheritance when forked from a T0 or T-1 primary."
 mode: subagent
-model: anthropic/claude-sonnet-4-6
+model: anthropic/claude-sonnet-5
 temperature: 0.3
 ---
 

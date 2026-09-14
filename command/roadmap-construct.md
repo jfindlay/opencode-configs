@@ -13,7 +13,7 @@ where the project's constraint surface is *discovered and articulated*, not wher
 constraints are applied; it resists templating by nature, and that is correct (see "Why this isn't
 mechanized" below). Your job is to hold the design conversation well, then write the artifact.
 
-Runs from `@architect` (Opus 4.8): this is the highest-judgment, most-abductive moment in the whole
+Runs from `@architect` (Opus 5): this is the highest-judgment, most-abductive moment in the whole
 arc. If invoked from another agent, note that the judgment register expects Opus and proceed only if
 the user confirms.
 

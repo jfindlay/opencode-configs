@@ -27,13 +27,13 @@ fuller unpacking.
 
 Routing model reframes "what's the best model" as "what's the cost of this being wrong". The rule:
 
-- **Generative frontier, interactive dialectic → T-1 (Fable 5).** Genesis of framings that don't
+- **Generative frontier, interactive dialectic → T-1 (Fable 5.1).** Genesis of framings that don't
   yet exist, abduction, pivotal anomalies that resist all canonical options. The bar is not
-  "intellectually interesting" — it is "the Fable-scale reserve changes the answer." ~3× Opus 4.8,
+  "intellectually interesting" — it is "the Fable-scale reserve changes the answer." ~3× Opus 5,
   ~14× Sonnet. Session count per week: very small.
-- **Cost-of-wrong high, analytical → T0 (Opus 4.8).** Architectural tradeoffs, boundary design,
+- **Cost-of-wrong high, analytical → T0 (Opus 5).** Architectural tradeoffs, boundary design,
   cross-cutting audits, phase planning, commit-shape decisions. Session count per week: small.
-- **Cost-of-wrong moderate → T1 (Sonnet 4.6).** Implementation, refactors, test writing,
+- **Cost-of-wrong moderate → T1 (Sonnet 5).** Implementation, refactors, test writing,
   review-address cycles. ~95% of sessions.
 - **Cost-of-wrong low, judgment required → T2 (Haiku or equivalent).** Classify these files, group
   these patterns, summarize this output.

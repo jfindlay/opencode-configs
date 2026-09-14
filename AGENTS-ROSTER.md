@@ -5,18 +5,18 @@ field; when in an autonomous chain and orchestrating a committer dispatch.
 
 ## Model tier hierarchy (full detail)
 
-- **T-1 — Claude Fable 5**: interactive dialectic at the generative extremity — genesis of framings
+- **T-1 — Claude Fable 5.1**: interactive dialectic at the generative extremity — genesis of framings
   that don't yet exist, abduction, pivotal anomalies that resist all canonical options. Use only
   when the problem requires Fable-scale reasoning reserve and the interactive dialectic shape.
-  ~3× Opus 4.8 / ~14× Sonnet. Session count per week: very small.
-- **T0 — Claude Opus 4.8**: deep planning, architectural tradeoff analysis, boundary design,
+  ~3× Opus 5 / ~14× Sonnet. Session count per week: very small.
+- **T0 — Claude Opus 5**: deep planning, architectural tradeoff analysis, boundary design,
   cross-cutting audits. Use when the cost of being wrong is high and the work is analytical rather
   than generative.
 - **T0-alt — GPT-5.5 / Gemini 3.1 Pro** (as available): cross-check T0 conclusions at phase
   boundaries. Different families catch different failure modes.
-- **T1 — Claude Sonnet 4.6**: default for implementation, refactors, tests, docstring work,
+- **T1 — Claude Sonnet 5**: default for implementation, refactors, tests, docstring work,
   review-address cycles. ~95% of sessions.
-- **T1-subagent — Sonnet 4.6**: default for exploration and verification forks (`@explore`,
+- **T1-subagent — Sonnet 5**: default for exploration and verification forks (`@explore`,
   `@verify`). Tier is baked into each subagent's frontmatter `model:` field — subagents
   inherit the caller's model otherwise, so pinning is mandatory to honour the tier ladder.
 - **T2 — Haiku 4.5**: subagents with low judgment load (classify, scan, group by shape).
@@ -31,36 +31,36 @@ rely on prose guidance alone — encode tier in each subagent's `model:` frontma
 ## Agent roster
 
 **Primary agents** (invoked by `@name` or set as startup agent):
-- `@dialectic` — T-1/Fable 5. Interactive dialectic at the generative extremity: genesis, abduction,
+- `@dialectic` — T-1/Fable 5.1. Interactive dialectic at the generative extremity: genesis, abduction,
   pivotal anomalies. Temperature 0.6. Rolling-context writes allowed; all other writes require user
   approval. References `AGENTS-REASONING.md` in full; loads `AGENTS-REASONING-HINTS.md`
   proactively. NOT for audits, reviews, or routine deep work — use `@architect` for those.
-- `@architect` — T0/Opus 4.8. Deep planning, architectural tradeoffs, cross-cutting audits, phase
+- `@architect` — T0/Opus 5. Deep planning, architectural tradeoffs, cross-cutting audits, phase
   planning, rebase plans. Rolling-context writes allowed; all other writes require user approval.
   References `AGENTS-REASONING.md` in full including the T-1/T0-only section.
-- `@build` — T1/Sonnet 4.6. Default implementation: coding, refactors, test fixes, review-address
+- `@build` — T1/Sonnet 5. Default implementation: coding, refactors, test fixes, review-address
   cycles. References `AGENTS-REASONING.md` up to the T-1/T0-only marker.
-- `@plan-admin` — T1/Sonnet 4.6. Autonomous-chain driver for `/plan-run`. Runs the mechanical
+- `@plan-admin` — T1/Sonnet 5. Autonomous-chain driver for `/plan-run`. Runs the mechanical
   loop (select, dispatch, gate, commit, ledger); pages a forked `@plan-juncture` only at the three
   junctures (inflection design, discovery adjudication, sub-track boundary). Never implements;
   never adjudicates discoveries itself.
-- `@git-editor` — T1/Sonnet 4.6. General git work: rebases, commits, cherry-picks, amends,
+- `@git-editor` — T1/Sonnet 5. General git work: rebases, commits, cherry-picks, amends,
   branch/tag cleanup. Elevated git permissions; rewrites local history only and never pushes. For
   narrative-arc rebase work, paired with `/plan-rebase` which carries both the planning steps and
   the execution playbook.
 
 **Subagents** (forked via the Task tool):
-- `@plan-juncture` — T0/Opus 4.8. Juncture adjudicator for `/plan-run` chains. Paged by `@plan-admin`
+- `@plan-juncture` — T0/Opus 5. Juncture adjudicator for `/plan-run` chains. Paged by `@plan-admin`
   at inflection-point interface design, discovery adjudication (does this finding invalidate a frozen
   downstream contract?), and sub-track boundary coordinate-transform. One-shot return; does not
   implement; writes only to PLAN's `## Cross-session contracts` on inflection design.
-- `@explore` — T1/Sonnet 4.6. Code-structure surveys, needle-finding in large trees, open-ended
+- `@explore` — T1/Sonnet 5. Code-structure surveys, needle-finding in large trees, open-ended
   codebase questions. Default fork choice for read-only exploration. Overrides built-in `@explore`
   to prevent silent Opus or Fable inheritance when forked from `@architect` or `@dialectic`.
-- `@verify` — T1/Sonnet 4.6. Verifies a list of claims (typically review findings) against the
+- `@verify` — T1/Sonnet 5. Verifies a list of claims (typically review findings) against the
   actual code. Returns accurate/inaccurate/needs-discussion labels per claim. Used by
   `/address-review` when ≥5 findings require code verification.
-- `@general` — T1/Sonnet 4.6. Multi-step autonomous work with heterogeneous tools where no
+- `@general` — T1/Sonnet 5. Multi-step autonomous work with heterogeneous tools where no
   specialised subagent (`@explore`, `@verify`, `@git-editor`) fits. May edit/write. Overrides built-in
   `@general` to pin the tier — without the pin, forks from a T0 or T-1 primary would silently run
   on Opus or Fable.
@@ -173,8 +173,8 @@ When multiple content agents contributed substantively (e.g. `@explore` found th
 ### Identity string format
 
 ```
-Co-authored-by: Claude Sonnet 4.6 <noreply+claude-sonnet@anthropic.com>
-Co-authored-by: Claude Opus 4.8 <noreply+claude-opus@anthropic.com>
+Co-authored-by: Claude Sonnet 5 <noreply+claude-sonnet@anthropic.com>
+Co-authored-by: Claude Opus 5 <noreply+claude-opus@anthropic.com>
 ```
 
 Convention: version-pinned human-readable name (so the history is honest about what ran);

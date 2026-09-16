@@ -43,7 +43,16 @@ Read: { filePath: "/path/to/large-file", offset: 5160, limit: 100 }
 ```
 
 **Parallelize independent tool calls in a single turn.** If three Reads or three Greps don't
-depend on each other, issue them together.
+depend on each other, issue them together. Before starting mechanical work (a rename, a repeated
+edit across files, a multi-file survey), identify the evidence you actually need first, then batch
+the independent inspections that gather it in one turn. For mechanical transformations applied
+identically across many files, prefer a supported bulk operation (a single `sed`-equivalent tool
+pass, a scripted rewrite) over N sequential single-file edits when one exists — but never at the
+cost of the sequential feedback a genuinely dependent edit chain needs: an edit that must be
+verified before the next one is safe (a rename that could collide, a refactor step other edits build
+on) stays sequential, and a reread you need because the file changed since you last saw it is never
+"redundant" — batching independent work is not a license to skip verification or to widen any tool
+permission beyond what this file already grants.
 
 ## Git and editor safety
 
@@ -74,3 +83,12 @@ default.
 See `AGENTS-ROSTER.md` (tier ladder), `AGENTS-SUBAGENT-STRATEGY.md` (fork criteria),
 `AGENTS-SESSION.md` (session splitting at ~200 messages), `AGENTS-CAPTURE.md` (capture-candidate
 tagging).
+
+## Responding to a session-economics notice
+
+If a tool result carries a measured cost/capacity advisory (see `session-economics.js`), it is a
+request to reassess, not a stop. Respond briefly — one or two sentences — naming what remains
+uncertain, what acceptance work is still owed, and the next bounded action, then continue once that
+action is justified. Do not restructure the session, abandon uncommitted work, or treat the notice
+as evidence the work so far was wasted; a long context or repeated reads are not by themselves
+signs of waste.

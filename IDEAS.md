@@ -119,7 +119,13 @@ weakest possible enforcement mechanism.
 
 ## Idea: context-fill plugin hook for @plan-admin
 
-**Status**: deferred — gate not yet fired.
+**Status**: deferred — gate not yet fired. **Separated from session economics** (see below): this
+entry is specifically about exposing per-subagent context-fill to `@plan-admin` so it can decide
+warm-resumption-vs-commit-and-close mid-session. The lightweight cost/capacity/integrity monitor
+(`plugins/session-economics.js`) is a different, ungated piece of work — it observes and advises,
+it does not drive a resumption decision — and has been promoted out of this idea list; see
+`PLAN.md` / `AGENTS-LOG.md` for its implementation record. Do not conflate the two: a session
+economics warning firing is not evidence this gate has fired.
 
 **Gate**: do NOT start until small-commit discipline (see
 `multisession/multi-session-planning.md`) has been tried on real chains and shown insufficient —

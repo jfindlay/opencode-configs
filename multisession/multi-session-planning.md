@@ -142,6 +142,48 @@ understand is a session whose work didn't land cleanly.
 The corollary: **if a planned session can't be described in a one-line commit-title-shaped sentence,
 it's not yet one session.** Split it until each unit has a clean title.
 
+### Commit coherence versus execution footprint
+
+Two different axes get conflated under "session size," and keeping them apart matters for how
+economic measurement fits into this model. **Commit coherence** is the axis this section is about:
+one conceptual unit, ending green, describable in one commit-title-shaped sentence. It is what
+*defines* a session boundary and is decided by the five-input tuning law above — never by a cost
+figure. **Execution footprint** is a different axis: the dollars, API steps, and messages a session
+actually consumed to reach that green commit. A coherent, correctly-scoped session can still have a
+large or small footprint depending on how the work was carried out inside it — how much was batched,
+how much was re-read, whether the inner loop caught drift early or late.
+
+Conflating the two produces bad instincts in both directions: shrinking a commit because it cost
+more than expected fractures a conceptual unit that was correctly sized (footprint is not a tuning
+input, per the five-input law); or excusing a genuinely oversized commit because "the tests passed
+and it wasn't that many messages" mistakes a footprint measurement for a coherence judgment. The
+tuning law governs coherence; footprint is measured *after* the fact and feeds back only as a
+cost/value judgment left to the agent doing the work — never as a mechanical trigger that resizes
+commits.
+
+Footprint measurement resolves into three distinct dimensions, which should stay distinct rather
+than collapse into one score:
+
+- **Cost** — measurable directly: dollars spent, count of completed model API steps. Ground truth,
+  no estimation involved.
+- **Capacity** — estimated, not measured: what fraction of the model's usable context window the
+  *latest* completed request occupied. This is a last-completed-request estimate, not a claim about
+  the next request's exact occupancy, and it is not the sum of lifetime token usage — a session that
+  has run long but keeps returning to a small working set is not "full" just because its lifetime
+  token sum is large.
+- **Integrity** — qualitative, not scored: whether the session's reasoning is still tracking
+  verified current facts rather than a stale conclusion carried forward from earlier in a long or
+  compacted context. No number substitutes for rereading the artifact when integrity is in question.
+
+Instrumentation for cost and capacity **need not wait until a session threatens to overflow.**
+Measuring is cheap and orthogonal to the deferred warm-resumption/context-management machinery
+described below (that machinery is specifically about *changing execution* when small-commit
+discipline proves insufficient, and stays gated behind that proof). Exposing a measurement is not
+the same commitment as building a response mechanism around it. There is no universal optimum
+threshold for any of the three dimensions — what counts as "high cost" or "tight capacity" is
+project- and model-dependent, and a warning is a prompt to reassess, not a verdict that the session
+was run wrong.
+
 ---
 
 ## Three categories of session, by orthogonality

@@ -124,6 +124,17 @@ Read the session entry's category:
 
 One session = one dispatch = one commit. Never batch two session rows into one dispatch.
 
+Dispatch prompts stay scoped: deliver the session entry and the contract subsections it consumes as
+excerpts, not the whole PLAN — a pointer to where fuller evidence lives (the roadmap, a prior
+session's commit) is enough; the subagent reads only what its own dispatch template already grants.
+
+**Consume telemetry at the task-return boundary.** If the returned Task result carries a
+session-economics report (see `session-economics.js`), read it as informing input for *later*
+dispatch sizing — e.g. a session that ran hot might get a more scoped prompt next time — never as a
+gate on this session. Do not poll for it, do not reshard or page `@plan-juncture` because a cost
+warning fired on its own, and do not add a fourth juncture type for it. All halt, commit, scope, and
+correctness gates in steps 4–7 remain the only authorities on whether a session passed.
+
 ### 4. Verify the session contract (mechanical gate — driver only, no `@plan-juncture`)
 
 After the implementation subagent returns, the driver — NOT a paged `@plan-juncture` fork — verifies,

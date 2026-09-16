@@ -7,7 +7,13 @@ docs (PLAN.md, NOTES.md).
 
 - **Split early.** If a session exceeds ~200 messages OR has compacted more than twice, stop and
   recommend the user start a fresh session scoped to the remaining work. Compactions are lossy and
-  expensive.
+  expensive. The message count is a coarse fallback warning, not a universal optimal horizon — it
+  fires when nothing better is available, not as a claim that ~200 is the right size for every
+  project or model. Where a measured cost/capacity signal exists (see
+  `plugins/session-economics.js`), prefer it; treat either signal as a prompt to reassess, not a
+  command to abandon uncommitted work or force a compaction. Zero compactions is not itself evidence
+  of context integrity — integrity is a qualitative judgment about whether reasoning still tracks
+  verified current facts, not a count.
 - **Write a phase handoff.** Before splitting, append a short state-of-play summary to
   `docs/PLAN.md` (or project-appropriate equivalent) so the next session starts with verbatim fresh
   context, not a compacted summary.

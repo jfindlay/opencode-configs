@@ -93,6 +93,18 @@ title. Splitting is only legitimate at a contract-sharp boundary (one half freez
 other consumes); never fracture an irreducible unit (input 2) just to hit a LOC number. When you
 split or merge a session, state the lever or corollary that drove it.
 
+**Outlier check.** A one-line title is a useful test for coherence, not proof a shard is
+economical — a session can pass the corollary and still be an execution-footprint outlier (see
+`multi-session-planning.md`'s commit-coherence-versus-execution-footprint distinction). Before
+finalizing the session list, scan for three shapes and split the independently-green parts out where
+they exist: broad source/test coupling across unrelated modules in one row, a repeated mechanical
+move applied file-by-file that could be one bulk transform plus one verification row, and a
+catch-all closing row that bundles loose ends from several earlier rows. Where a broad row is
+genuinely atomic (input 2, the irreducible-complexity floor, dominates — e.g. a substrate rename
+that must land as one unit), name that explicitly in the session detail rather than splitting it.
+This check adds no new table column; it is a pass over the same rows the tuning law already
+produced.
+
 ## The target structure (what /plan-run reads)
 
 Produce `docs/PLAN.md` with exactly these sections. `/plan-run` preconditions on the starred ones.

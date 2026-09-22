@@ -29,6 +29,7 @@ ambiguous, the template repo is normative.
 - Always prefer `Path` from `pathlib`
 - Always prefer `match`/`case` to `if`(/`elif`/...)/`else` when the conditionals are similar enough
 - Always use an assignment expression `if (a := f()) is not None: print(a)`
+- Use tomllib; do not use tomli
 
 ### Decorators: when and how
 

@@ -2,7 +2,7 @@
 description: "[jf] Force a terse one-turn answer. Re-invoke per question — instructions decay across turns. Suspends reasoning-register rules for this turn only."
 ---
 
-Answer the following question with maximum brevity. This constraint applies to THIS TURN ONLY. Subsequent turns without `/q` should resume the agent's normal register; do not let this instruction color later answers.
+Answer the following question with maximum brevity. This constraint applies to THIS TURN ONLY. Subsequent turns without `/qu` should resume the agent's normal register; do not let this instruction color later answers.
 
 Question: $ARGUMENTS
 

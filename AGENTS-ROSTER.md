@@ -109,7 +109,7 @@ rely on prose guidance alone — encode tier in each subagent's `model:` frontma
 - `/format-loop` — iterative format + fix loop until clean or convergence fails; pass a scope in
   `$ARGUMENTS` to narrow it, or ask for check-only when you don't want fixes applied.
 - `/note` — capture a CAPTURE-CANDIDATE into a target docs file with per-item approval.
-- `/q` — force a terse one-turn answer; suspends reasoning-register rules for that turn only.
+- `/qu` — force a terse one-turn answer; suspends reasoning-register rules for that turn only.
 - `/plan-rebase` — plan (not execute) a narrative-arc rebase; outputs a rebase script for review.
   Also carries the execution playbook that `@git-editor` follows when the user pastes an approved
   plan into a fresh session.

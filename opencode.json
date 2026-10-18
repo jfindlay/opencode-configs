@@ -51,123 +51,99 @@
   },
   // Global: read-only bash pre-approved; edits and mutations require approval.
   // Applies to plan mode and as the base for build mode.
-  "permission": {
-    "*": "ask",
-    "read": {
-      "*": "allow"
-    },
-    "bash": {
-      "*": "ask",
-      "git status *": "allow",
-      "git status": "allow",
-      "git log *": "allow",
-      "git log": "allow",
-      "git diff *": "allow",
-      "git diff": "allow",
-      "git branch *": "allow",
-      "git branch": "allow",
-      "git remote -v": "allow",
-      "git worktree list *": "allow",
-      "git worktree list": "allow",
-      "git reflog *": "allow",
-      "git reflog": "allow",
-      "ls *": "allow",
-      "ls": "allow",
-      "pwd": "allow",
-      "which *": "allow",
-      "wc *": "allow",
-      "file *": "allow",
-      // AGENTS.md forbids these in favor of Read/Glob/Grep/Edit/Write.
-      "grep *": "deny",
-      "rg *": "deny",
-      "find *": "deny",
-      "cat *": "deny",
-      "sed *": "deny",
-      "awk *": "deny",
-      // Pipe-tail patterns. OpenCode's matcher is glob-prefix-anchored, so the
-      // leading `*` may or may not span a pipe — keep the patterns conservative
-      // and rely on the leading-token denies above to catch the common cases.
-      "* | head*": "deny",
-      "* | tail*": "deny",
-      "sqlite3 -readonly *": "allow",
-      // Type-check and compile-verify — read-only, loop frequently.
-      "venv/bin/mypy *": "allow",
-      "./venv/bin/mypy *": "allow",
-      "venv/bin/python -m py_compile *": "allow",
-      "./venv/bin/python -m py_compile *": "allow",
-    },
+  // V2 ordered permissions array. Rules resolve the same way as the old per-action maps
+  // did (last matching rule wins); this just flattens each action's map into
+  // {action, resource, effect} tuples in the same order, and renames bash->shell,
+  // write->edit (edit already covers write/patch in V2), task->subagent.
+  "permissions": [
+    { "action": "*", "resource": "*", "effect": "ask" },
+    { "action": "read", "resource": "*", "effect": "allow" },
+    { "action": "shell", "resource": "*", "effect": "ask" },
+    { "action": "shell", "resource": "git status *", "effect": "allow" },
+    { "action": "shell", "resource": "git status", "effect": "allow" },
+    { "action": "shell", "resource": "git log *", "effect": "allow" },
+    { "action": "shell", "resource": "git log", "effect": "allow" },
+    { "action": "shell", "resource": "git diff *", "effect": "allow" },
+    { "action": "shell", "resource": "git diff", "effect": "allow" },
+    { "action": "shell", "resource": "git branch *", "effect": "allow" },
+    { "action": "shell", "resource": "git branch", "effect": "allow" },
+    { "action": "shell", "resource": "git remote -v", "effect": "allow" },
+    { "action": "shell", "resource": "git worktree list *", "effect": "allow" },
+    { "action": "shell", "resource": "git worktree list", "effect": "allow" },
+    { "action": "shell", "resource": "git reflog *", "effect": "allow" },
+    { "action": "shell", "resource": "git reflog", "effect": "allow" },
+    { "action": "shell", "resource": "ls *", "effect": "allow" },
+    { "action": "shell", "resource": "ls", "effect": "allow" },
+    { "action": "shell", "resource": "pwd", "effect": "allow" },
+    { "action": "shell", "resource": "which *", "effect": "allow" },
+    { "action": "shell", "resource": "wc *", "effect": "allow" },
+    { "action": "shell", "resource": "file *", "effect": "allow" },
+    // AGENTS.md forbids these in favor of Read/Glob/Grep/Edit/Write.
+    { "action": "shell", "resource": "grep *", "effect": "deny" },
+    { "action": "shell", "resource": "rg *", "effect": "deny" },
+    { "action": "shell", "resource": "find *", "effect": "deny" },
+    { "action": "shell", "resource": "cat *", "effect": "deny" },
+    { "action": "shell", "resource": "sed *", "effect": "deny" },
+    { "action": "shell", "resource": "awk *", "effect": "deny" },
+    // Pipe-tail patterns. OpenCode's matcher is glob-prefix-anchored, so the
+    // leading `*` may or may not span a pipe — keep the patterns conservative
+    // and rely on the leading-token denies above to catch the common cases.
+    { "action": "shell", "resource": "* | head*", "effect": "deny" },
+    { "action": "shell", "resource": "* | tail*", "effect": "deny" },
+    { "action": "shell", "resource": "sqlite3 -readonly *", "effect": "allow" },
+    // Type-check and compile-verify — read-only, loop frequently.
+    { "action": "shell", "resource": "venv/bin/mypy *", "effect": "allow" },
+    { "action": "shell", "resource": "./venv/bin/mypy *", "effect": "allow" },
+    { "action": "shell", "resource": "venv/bin/python -m py_compile *", "effect": "allow" },
+    { "action": "shell", "resource": "./venv/bin/python -m py_compile *", "effect": "allow" },
     // Edits to ~/.config/opencode/ are denied: it's a runtime mirror populated by salt
     // (see AGENTS.md). All edits must land in workstation-salt and propagate via state.apply.
-    "edit": {
-      "*": "ask",
-      "~/.config/opencode/**": "deny"
-    },
-    // Writes to ~/.config/opencode/ are denied for the same reason as edits: it's a runtime
-    // mirror populated by salt. Without this, `write` falls through to the global `ask` and a
-    // new file can be created in the mirror (observed once: a build agent wrote run-plan.md there).
-    "write": {
-      "*": "ask",
-      "~/.config/opencode/**": "deny"
-    },
+    // `edit` covers edit/write/patch in V2, so the old separate edit+write maps (which were
+    // identical) collapse into one action without changing behavior.
+    { "action": "edit", "resource": "*", "effect": "ask" },
+    { "action": "edit", "resource": "~/.config/opencode/**", "effect": "deny" },
     // Allow read-only access to the user-level OpenCode config dir so agents can load
     // AGENTS-*.md, STYLE-*.md, etc. on-demand without an external_directory prompt per file.
-    "external_directory": {
-      "*": "ask",
-      "~/.config/opencode/**": "allow"
-    },
-    "glob": "allow",
-    "grep": "allow",
-    "list": "allow",
-    "lsp": "allow",
-    "question": "allow",
-    "skill": "allow",
-    "task": "allow",
-    "todoread": "allow",
-    "todowrite": "allow",
-    "webfetch": "allow"
-  },
-  "agent": {
+    { "action": "external_directory", "resource": "*", "effect": "ask" },
+    { "action": "external_directory", "resource": "~/.config/opencode/**", "effect": "allow" },
+    { "action": "glob", "resource": "*", "effect": "allow" },
+    { "action": "grep", "resource": "*", "effect": "allow" },
+    { "action": "list", "resource": "*", "effect": "allow" },
+    { "action": "lsp", "resource": "*", "effect": "allow" },
+    { "action": "question", "resource": "*", "effect": "allow" },
+    { "action": "skill", "resource": "*", "effect": "allow" },
+    { "action": "subagent", "resource": "*", "effect": "allow" },
+    { "action": "todoread", "resource": "*", "effect": "allow" },
+    { "action": "todowrite", "resource": "*", "effect": "allow" },
+    { "action": "webfetch", "resource": "*", "effect": "allow" }
+  ],
+  "agents": {
     // Architect mode: read-only by default (global), but allows writes to rolling-context docs
     // without prompting. The deny comes before the docs allows so the docs allows win
     // (last-match-wins); the deny still blocks all other ~/.config/opencode/** paths.
     "architect": {
-      "permission": {
-        "edit": {
-          "*": "ask",
-          "~/.config/opencode/**": "deny",
-          "**/docs/PLAN.md": "allow",
-          "**/docs/NOTES.md": "allow",
-          "**/docs/ROADMAP.md": "allow"
-        },
-        "write": {
-          "*": "ask",
-          "~/.config/opencode/**": "deny",
-          "**/docs/PLAN.md": "allow",
-          "**/docs/NOTES.md": "allow",
-          "**/docs/ROADMAP.md": "allow"
-        }
-      }
+      "permissions": [
+        { "action": "edit", "resource": "*", "effect": "ask" },
+        { "action": "edit", "resource": "~/.config/opencode/**", "effect": "deny" },
+        { "action": "edit", "resource": "**/docs/PLAN.md", "effect": "allow" },
+        { "action": "edit", "resource": "**/docs/NOTES.md", "effect": "allow" },
+        { "action": "edit", "resource": "**/docs/ROADMAP.md", "effect": "allow" }
+      ]
     },
     // Disable the built-in plan agent — replaced by @architect (Opus 5).
     // The reserved name "plan" injects a read-only system reminder that cannot be
     // overridden by permission JSON or agent prose (OpenCode 1.17.0).
     "plan": {
-      "disable": true
+      "disabled": true
     },
     // Build mode: inherits global permissions, but allows edits without prompting.
     // The ~/.config/opencode/** deny is preserved here — runtime edits must always go
     // through workstation-salt regardless of agent.
     "build": {
-      "permission": {
-        "edit": {
-          "*": "allow",
-          "~/.config/opencode/**": "deny"
-        },
-        "write": {
-          "*": "allow",
-          "~/.config/opencode/**": "deny"
-        }
-      }
+      "permissions": [
+        { "action": "edit", "resource": "*", "effect": "allow" },
+        { "action": "edit", "resource": "~/.config/opencode/**", "effect": "deny" }
+      ]
     }
   }
 }

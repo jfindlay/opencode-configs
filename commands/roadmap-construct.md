@@ -1,7 +1,7 @@
 ---
 description: "[jf] Prime @architect to co-construct a long-arc docs/ROADMAP.md from free-form intent: the project-lifetime static-frame view that /plan-shard later slices into per-sub-track PLANs and /plan-run executes. Orients on the full multiplan lifecycle (construct → {shard → apply → reconcile}* loop) and the juncture coordinate-transform, but treats roadmap construction as the abductive discovery act it is — not a procedure to mechanize. Args: optional intent seed or source path."
 agent: architect
-subtask: false
+subagent: false
 ---
 
 # /roadmap-construct

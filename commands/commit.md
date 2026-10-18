@@ -4,7 +4,7 @@ description: "[jf] Inspect uncommitted changes, draft a conventional commit mess
 
 Interactive draft/approve loop for direct user-driven commits. Delegates mechanical git work to a
 forked `@committer` on approval. For orchestrator-dispatched commits, dispatch `@committer` directly
-(see `agent/committer.md`). Scope hint: $ARGUMENTS
+(see `agents/committer.md`). Scope hint: $ARGUMENTS
 
 1. **Inspect in parallel:** `git status`, `git diff`, `git diff --cached`, `git log --oneline -n 20`.
 

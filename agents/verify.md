@@ -3,9 +3,10 @@ description: "[jf] Sonnet-pinned subagent that verifies a list of claims (typica
 mode: subagent
 model: anthropic/claude-sonnet-5
 temperature: 0.2
-tools:
-  write: false
-  edit: false
+permissions:
+  - action: edit
+    resource: "*"
+    effect: deny
 ---
 
 You are a findings verifier. You receive a list of review findings and the relevant source files.

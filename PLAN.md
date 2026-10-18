@@ -69,15 +69,15 @@ Expected files:
 - `multisession/multi-session-planning.md`: explain commit coherence versus execution footprint;
   distinguish cost, capacity, and integrity; instrumentation need not wait for overflow. Keep
   warm-resumption/context-management machinery deferred. Do not prescribe a universal optimum.
-- `command/plan-shard.md`: add a short outlier check for broad source/test coupling, repeated moves,
+- `commands/plan-shard.md`: add a short outlier check for broad source/test coupling, repeated moves,
   and catch-all closers. Split independently green outcomes; justify genuinely atomic broad work.
   A one-line title is a useful test, not proof a shard is economical. No new mandatory table columns.
-- `agent/build.md`: refine the existing batching rule rather than duplicate it. Identify the initial
+- `agents/build.md`: refine the existing batching rule rather than duplicate it. Identify the initial
   evidence needed; batch independent inspections; prefer supported bulk transformations for mechanical
   work; retain sequential feedback and post-edit verification. Do not prohibit necessary rereads or
   widen existing tool permissions. Respond briefly to a measured warning with remaining uncertainty,
   acceptance work, and the next bounded action; continue when that action is justified.
-- `command/plan-run.md`: deliver scoped contract excerpts and evidence pointers; consume telemetry
+- `commands/plan-run.md`: deliver scoped contract excerpts and evidence pointers; consume telemetry
   at task-return boundaries to inform later dispatches. No executive polling loop, automatic
   resharding, or additional juncture forks merely because a cost warning fired. All current halt,
   commit, scope, and correctness gates remain authoritative.
@@ -91,7 +91,7 @@ the current artifact and distinguish evidence from interpretation. No automatic 
 routine extra review agent. These checks preserve reasoning fidelity; they do not curate context.
 
 Keep each addition short and non-duplicative. Do not edit `AGENTS-HINTS.md` without separate per-item
-approval. Touch `agent/plan-admin.md` only if necessary to align the affected guidance; unrelated
+approval. Touch `agents/plan-admin.md` only if necessary to align the affected guidance; unrelated
 roster/halt-policy inconsistencies are out of scope. Append implemented changes and their rationale
 to `AGENTS-LOG.md` after verification, not before.
 
@@ -194,10 +194,10 @@ separate authorization. Retire this PLAN after accepted completion, not while li
 
 - [x] Guidance consolidated and reviewed for scope/conflicts. Touched:
   `multisession/multi-session-planning.md` (commit-coherence-vs-execution-footprint subsection),
-  `command/plan-shard.md` (outlier check, no new columns), `agent/build.md` (batching refinement +
-  notice-response section), `command/plan-run.md` (task-return telemetry consumption, no new
+  `commands/plan-shard.md` (outlier check, no new columns), `agents/build.md` (batching refinement +
+  notice-response section), `commands/plan-run.md` (task-return telemetry consumption, no new
   juncture type), `AGENTS-SESSION.md` (message count reframed as coarse fallback), `IDEAS.md`
-  (separated from the deferred context-fill idea). `agent/plan-admin.md` and `AGENTS-HINTS.md` were
+  (separated from the deferred context-fill idea). `agents/plan-admin.md` and `AGENTS-HINTS.md` were
   not touched — not needed to align the affected guidance.
 - [x] Monitor implemented; deterministic tests reported passing at preflight. This did not test
   actual plugin loading and is not evidence that the runtime registered its hooks.

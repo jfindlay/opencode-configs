@@ -1,7 +1,7 @@
 ---
 description: "[jf] Autonomously execute a session-sharded plan file as a 1:1 session:commit chain. @plan-admin orchestrates the mechanical loop; dispatches @build/@general/@explore per session entry, @committer for commits, and pages a forked @plan-juncture (Opus) only at inflection points, contract-invalidating discoveries, and sub-track boundaries. A row marked (F/C) by /plan-shard runs as a feature-stage then completion-stage pair sharing one intent capsule and one commit; ordinary rows are unaffected. State lives in the committed plan ledger. Args: [plan-path] [may-reshard|halt-at-boundaries]. Plan path defaults to docs/PLAN.md."
 agent: plan-admin
-subtask: false
+subagent: false
 ---
 
 # /plan-run

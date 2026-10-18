@@ -261,8 +261,8 @@ activated at the agent level for one of the two.
 
 | Failure mode | Layer | Intervention |
 |---|---|---|
-| `cd X && cmd` | Agent prompt | `agent/build.md` restates the `workdir` rule at activation time |
-| `sed -i` for edits | Agent prompt | `agent/build.md` restates the `Edit` tool rule |
+| `cd X && cmd` | Agent prompt | `agents/build.md` restates the `workdir` rule at activation time |
+| `sed -i` for edits | Agent prompt | `agents/build.md` restates the `Edit` tool rule |
 | Interactive editor hangs | Plugin hook | `no-interactive-editor.js` sets env defaults structurally |
 
 **The principle**: for a failure mode where (a) the cost of occurrence is high (kills the session,
@@ -358,4 +358,4 @@ commensurate evidence) rides through and is reported at the step-3 review; halts
 irreconcilable — something incredibly wrong that the agent cannot reconcile against the PLAN's
 provisions, anticipations, or quantifications. This is the premise that motivates the whole
 discovery-and-adjustment apparatus and the juncture adjudication. See
-`multisession/multi-session-planning.md` and `command/run-plan.md` for the mechanics.
+`multisession/multi-session-planning.md` and `commands/run-plan.md` for the mechanics.

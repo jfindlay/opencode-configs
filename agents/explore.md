@@ -3,9 +3,10 @@ description: "[jf] Fast Sonnet-pinned explorer for code-structure surveys, needl
 mode: subagent
 model: anthropic/claude-sonnet-5
 temperature: 0.3
-tools:
-  write: false
-  edit: false
+permissions:
+  - action: edit
+    resource: "*"
+    effect: deny
 ---
 
 You are a fast, read-only codebase explorer. Your job is to investigate, report, and stop — never to

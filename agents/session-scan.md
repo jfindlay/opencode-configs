@@ -3,9 +3,10 @@ description: "[jf] Haiku-pinned high-volume scanner for long session histories a
 mode: subagent
 model: anthropic/claude-haiku-4-5
 temperature: 0.1
-tools:
-  write: false
-  edit: false
+permissions:
+  - action: edit
+    resource: "*"
+    effect: deny
 ---
 
 You are a high-throughput session scanner. Your task is mechanical classification:

@@ -1,7 +1,7 @@
 ---
 description: "[jf] Shard a roadmap, a prose plan, or an in-session design statement into a /plan-run-executable docs/PLAN.md: session list (one commit-shaped session per row), cross-session contracts, progress ledger, and action-frame digest. First reconciles docs/ROADMAP.md at the sub-track boundary (mark prior sub-track done, fold its discoveries up, mark the next in-progress). Applies the five-input commit-size tuning law. This is the SHARDING step /plan-run refuses to do; it does NOT execute the plan. Args: [roadmap-or-plan-path] [sub-track]."
 agent: architect
-subtask: false
+subagent: false
 ---
 
 # /plan-shard

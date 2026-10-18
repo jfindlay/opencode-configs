@@ -3,44 +3,42 @@ description: "[jf] Narrow session-close commit subagent for autonomous chains. R
 mode: subagent
 model: anthropic/claude-haiku-4-5
 temperature: 0.1
-permission:
-  bash:
-    "*": "deny"
-    "git status": "allow"
-    "git status *": "allow"
-    "git diff": "allow"
-    "git diff *": "allow"
-    "git log": "allow"
-    "git log *": "allow"
-    "git show *": "allow"
-    "git rev-parse *": "allow"
-    "git add *": "allow"
-    "git commit -m *": "allow"
-    "ls": "allow"
-    "ls *": "allow"
-    # Explicit denies — these belong to @git-editor, not here.
-    "git commit --amend": "deny"
-    "git commit --amend *": "deny"
-    "git commit --no-verify": "deny"
-    "git commit --no-verify *": "deny"
-    "git commit --no-gpg-sign": "deny"
-    "git commit --no-gpg-sign *": "deny"
-    "git push": "deny"
-    "git push *": "deny"
-    "git rebase": "deny"
-    "git rebase *": "deny"
-    "git reset *": "deny"
-    "git clean *": "deny"
-    "git restore *": "deny"
-    "git checkout *": "deny"
-    "git switch *": "deny"
-    "git branch -*": "deny"
-    "git tag *": "deny"
-  edit: "deny"
-  write: "deny"
-  webfetch: "deny"
-  task: "deny"
-  todowrite: "deny"
+permissions:
+  - { action: shell, resource: "*", effect: deny }
+  - { action: shell, resource: "git status", effect: allow }
+  - { action: shell, resource: "git status *", effect: allow }
+  - { action: shell, resource: "git diff", effect: allow }
+  - { action: shell, resource: "git diff *", effect: allow }
+  - { action: shell, resource: "git log", effect: allow }
+  - { action: shell, resource: "git log *", effect: allow }
+  - { action: shell, resource: "git show *", effect: allow }
+  - { action: shell, resource: "git rev-parse *", effect: allow }
+  - { action: shell, resource: "git add *", effect: allow }
+  - { action: shell, resource: "git commit -m *", effect: allow }
+  - { action: shell, resource: "ls", effect: allow }
+  - { action: shell, resource: "ls *", effect: allow }
+  # Explicit denies — these belong to @git-editor, not here.
+  - { action: shell, resource: "git commit --amend", effect: deny }
+  - { action: shell, resource: "git commit --amend *", effect: deny }
+  - { action: shell, resource: "git commit --no-verify", effect: deny }
+  - { action: shell, resource: "git commit --no-verify *", effect: deny }
+  - { action: shell, resource: "git commit --no-gpg-sign", effect: deny }
+  - { action: shell, resource: "git commit --no-gpg-sign *", effect: deny }
+  - { action: shell, resource: "git push", effect: deny }
+  - { action: shell, resource: "git push *", effect: deny }
+  - { action: shell, resource: "git rebase", effect: deny }
+  - { action: shell, resource: "git rebase *", effect: deny }
+  - { action: shell, resource: "git reset *", effect: deny }
+  - { action: shell, resource: "git clean *", effect: deny }
+  - { action: shell, resource: "git restore *", effect: deny }
+  - { action: shell, resource: "git checkout *", effect: deny }
+  - { action: shell, resource: "git switch *", effect: deny }
+  - { action: shell, resource: "git branch -*", effect: deny }
+  - { action: shell, resource: "git tag *", effect: deny }
+  - { action: edit, resource: "*", effect: deny }
+  - { action: webfetch, resource: "*", effect: deny }
+  - { action: subagent, resource: "*", effect: deny }
+  - { action: todowrite, resource: "*", effect: deny }
 ---
 
 You are the session-close commit subagent. You are invoked by an orchestrating agent (typically

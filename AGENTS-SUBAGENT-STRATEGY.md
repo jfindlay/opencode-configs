@@ -27,6 +27,27 @@ Do NOT fork for:
 
 See `AGENTS-HINTS.md` for the derivation of the three-axis rule.
 
+## Planned driver-owned handoff
+
+`/plan-run`'s feature/completion (F/C) pattern (see `multisession/multi-session-planning.md`) is a
+calculated exception to the one session per commit and a green project state at the end of every
+session rules. 
+
+The implementation session runs its *own* loop to completion — it reaches a designed stopping point
+(`handoff-ready`), not a loop interruption — and writes a complete intent capsule before any handoff
+occurs. The driver (`@plan-admin`) then dispatches a *fresh* completion context whose scope is the
+capsule, not "pick up this interactive debugging session." Each stage owns its own steering
+end-to-end; only the boundary between stages is cold, and that boundary was planned (by
+`/plan-shard`'s conditional branch) before either stage started, not reached for because the first
+context got expensive or stuck.
+
+The three-axis test still applies to each stage's *internal* work (an F or C context forking
+`@explore` mid-investigation follows the same rules as any other context). What the F/C pattern adds
+is a planned, driver-owned phase transition between two bounded stages — never a tool for escaping an
+in-progress interactive loop. A feature-stage return (`handoff-ready`) is a checkpoint, not
+completion of the delivery unit; the unit is not done until the completion stage and the full gate
+both pass.
+
 ## Subagent prompt template
 
 Every subagent prompt should include:

@@ -105,6 +105,41 @@ that must land as one unit), name that explicitly in the session detail rather t
 This check adds no new table column; it is a pass over the same rows the tuning law already
 produced.
 
+## Conditional feature/completion branch
+
+After sizing a row with the tuning law above, assess one more question per row: is codebase/test-
+suite breadth combined with this project's coverage, typing, formatting, and conformance rules
+likely to produce a long compliance tail once the feature behavior itself is implemented? This is a
+qualitative judgment, not a size threshold, a mandatory two-session tax, or an automatic response to
+a cost warning — most rows, including most large ones, stay single-stage.
+
+Select the **feature/completion (F/C) pattern** for a row only when both hold:
+
+1. The compliance-tail risk is material — the row touches enough surface, or the project's gate is
+   exacting enough, that closing every branch case, coverage percentage, type-strictness rule, and
+   conformance check is a substantially separate effort from implementing the behavior.
+2. The feature's intent is cleanly separable — the design, the observable behavior, and the
+   non-negotiable invariants can be written down completely enough that a fresh context can close
+   the compliance tail without reinterpreting what the feature means.
+
+State the reason for the branch in the row's Session detail when selected. Do not select it for
+small or tightly steered rows, and do not select it merely because a row is expensive — an
+unfinished, intricately coupled design that cannot be faithfully handed off stays single-stage
+(using warm resumption inside that one session if it runs long), per the cold-handoff-versus-warm-
+resumption distinction in `multisession/multi-session-planning.md`.
+
+When selected, the row becomes a **paired unit**: still exactly one session-list row, one entry in
+`## Cross-session contracts`, and one final ledger outcome (`done` only once both stages and the
+full gate pass) — the pairing is internal to how the row executes, not a second row. Mark the row's
+Session title with a trailing `(F/C)` tag; this is the only session-list change, and its absence
+means the row runs single-stage exactly as before (full backward compatibility for ordinary rows).
+
+For a paired row, add a **Completion appendix** to its Session detail entry (see the target
+structure below) and ensure the PLAN carries a `## Completion handoffs` section (empty at shard
+time, like `## Action-frame digest`) for `/plan-run` to populate at the F→C boundary. Shard time
+prepares the shape only; the concrete intent-capsule fields the driver writes at execution time are
+defined in `/plan-run`.
+
 ## The target structure (what /plan-run reads)
 
 Produce `docs/PLAN.md` with exactly these sections. `/plan-run` preconditions on the starred ones.
@@ -115,14 +150,24 @@ Produce `docs/PLAN.md` with exactly these sections. `/plan-run` preconditions on
 - **`## Session list`** ★ — one commit-shaped session per row. Columns: `#` | `Session` (commit-title
   shaped) | `Cat` (A substrate / B algorithm / C optimization / I integrative) | `Tier` (Opus only
   where cost-of-wrong demands) | `Consumes` (contract names) | `Expected files`. Mark sub-track-final
-   rows `◆` and inflection points `@architect`.
+   rows `◆` and inflection points `@architect`. Mark a row selected for the conditional
+   feature/completion branch above with a trailing `(F/C)` on the Session title; absent by default,
+   which is the fully backward-compatible case for ordinary rows.
 - `## Session detail` — per-row deliverable, ≥1 KAT (a row whose deliverable can't be a KAT has an
   undefined contract — flag it), subtleties, deferrals. Lower-fidelity sketches for rows after the
   substrate session are correct, not lazy: sessions inside a sub-track are crisply specified only
   after the substrate freezes. The integrative (Cat I) session's deliverable includes the
   planning-register anneal: durable files free of plan coordinates, denylist grep clean, any leaked
   coordinates translated into standalone prose (the integrative session is already "where contracts
-  get their public form" — the anneal is the same act).
+  get their public form" — the anneal is the same act). A row marked `(F/C)` additionally carries a
+  **Completion appendix**: the shared one-sentence goal; two stage-specific done conditions (F:
+  `handoff-ready` — behavior, substantive success/error/integrity tests, and focused docs
+  implemented, narrowest meaningful project-managed checks run and reported; C: full gate — complete
+  branch coverage, typing, lint/format, and documentation/shape/layering conformance, named KATs
+  passing); and the handoff/checkpoint requirements (base commit, the row's own expected files, and
+  a pointer to `/plan-run`'s intent-capsule template for the fields the driver fills in at execution
+  time from F's return). No new feature scope belongs in the Completion appendix — it is a closure
+  and acceptance contract, not a second deliverable list.
 - **`## Cross-session contracts`** ★ — one subsection per contract, each tagged compiler- / test- /
   prose-enforced, with Defined-in and Consumed-by. The inflection juncture fork writes the resolved
   substrate interface into the relevant subsection at execution time; mark not-yet-frozen ones
@@ -131,6 +176,10 @@ Produce `docs/PLAN.md` with exactly these sections. `/plan-run` preconditions on
   All rows `pending` at shard time. `/plan-run` maintains this.
 - **`## Action-frame digest`** ★ — empty at shard time (`*(none yet)*`). The externalized action
   frame `/plan-run` appends to and the juncture forks consume.
+- `## Completion handoffs` — present (may be empty, `*(none yet)*`) only when at least one row is
+  marked `(F/C)`; omit the section entirely when no row uses the pattern, which keeps ordinary plans
+  unchanged. `/plan-run` writes one intent-capsule entry here per paired unit, at the F→C boundary,
+  using the template defined there.
 - `## Discoveries & risks` — carried *down* from the roadmap Discoveries log and any risk register,
   phrased as `/plan-run` reads for discovery adjudication (internal-continue / additive-reshard /
   destructive-HALT). The reverse flow — discoveries accrued in a completed `PLAN.md` folded back *up*
@@ -196,6 +245,7 @@ In greenfield mode, the whole session is a dialogue: elicit intent → propose s
 - Roadmap reconciliation: sub-track marked done (+ any discoveries folded up), sub-track marked
   in-progress — or "none (greenfield / no roadmap / no prior PLAN)".
 - Session count, sub-track(s) sharded, `◆` and `@architect` markers placed.
+- Any row marked `(F/C)` and the reason the conditional feature/completion branch was selected.
 - Any split/merge and the lever that drove it.
 - Capture candidates surfaced.
 - The suggested `/plan-run` invocation to execute the result.

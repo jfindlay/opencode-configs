@@ -1,5 +1,5 @@
 ---
-description: "[jf] Autonomously execute a session-sharded plan file as a 1:1 session:commit chain. @plan-admin orchestrates the mechanical loop; dispatches @build/@general/@explore per session entry, @committer for commits, and pages a forked @plan-juncture (Opus) only at inflection points, contract-invalidating discoveries, and sub-track boundaries. State lives in the committed plan ledger. Args: [plan-path] [may-reshard|halt-at-boundaries]. Plan path defaults to docs/PLAN.md."
+description: "[jf] Autonomously execute a session-sharded plan file as a 1:1 session:commit chain. @plan-admin orchestrates the mechanical loop; dispatches @build/@general/@explore per session entry, @committer for commits, and pages a forked @plan-juncture (Opus) only at inflection points, contract-invalidating discoveries, and sub-track boundaries. A row marked (F/C) by /plan-shard runs as a feature-stage then completion-stage pair sharing one intent capsule and one commit; ordinary rows are unaffected. State lives in the committed plan ledger. Args: [plan-path] [may-reshard|halt-at-boundaries]. Plan path defaults to docs/PLAN.md."
 agent: plan-admin
 subtask: false
 ---
@@ -41,6 +41,26 @@ override a false precondition mid-run.
      the bound command is a combined gate (e.g. `tox -m analyze`), one green run satisfies 4a AND 4b
      (and any lint/format/coverage it enforces) — note this in the ledger.
 
+## Terminology: paired units (feature/completion)
+
+`/plan-shard` may mark a session-list row `(F/C)` when it selected the conditional
+feature/completion branch (see `/plan-shard`'s Conditional feature/completion branch section). For
+such a row:
+
+- **F-stage / C-stage** — two execution contexts dispatched in sequence for the same row, sharing
+  one intent and producing one commit. Both are dispatched at T1 to `@build` (or `@general`, per the
+  same judgment as any other code-change dispatch in step 3) — no new agent type, no tier escalation.
+- **`handoff-ready`** — F's return state. It means the row is NOT done and NOT green; it is a
+  mid-unit checkpoint. A `handoff-ready` return never marks the ledger row `done`.
+- **Intent capsule** — the six-field record the driver writes into PLAN's `## Completion handoffs`
+  from F's structured return, before dispatching C. See the Intent-capsule template below.
+- **Checkpoint** — the capsule plus its base-commit and fingerprint fields, which together let a cold
+  resume verify it is looking at the same in-flight unit rather than inferring from filenames alone.
+
+A row with no `(F/C)` marker runs exactly as before — single dispatch, single verify, single commit.
+Everything that follows about paired units is inert for such rows; this command does not change
+their behavior.
+
 ## Invariant: state lives on disk, not in context
 
 Every loop iteration re-derives its state from PLAN (session list + ledger + action-frame digest).
@@ -53,11 +73,22 @@ This invariant is enforced mechanically: every iteration ends with both a sessio
 ledger commit (step 6b), so the tree is clean and the committed ledger+digest exactly matches the
 last committed session. A cold resume never has to reconcile uncommitted state against the code.
 
+**The one documented exception** is the F/C in-flight boundary (see Precondition 5's in-flight
+exception and step 3b below): between F's return and C's completion, both the implementation diff
+and PLAN's `## Completion handoffs` entry may be dirty and uncommitted by design. This is not a
+violation of the invariant — it is a recorded, fingerprinted, resumable state, not an untracked one.
+State still lives on disk (the capsule); it is simply not yet committed, and it is committed only
+once, in the normal post-green ledger commit that follows C. Resume from it only via the Precondition
+5 validation below; never by assumption from chat history.
+
 ## Preconditions (refuse and stop if any fail)
 
 1. Running from `@plan-admin`. Else: stop, tell the user to switch.
 2. PLAN (bound in Preflight) exists and contains a `## Session list` table and a `## Cross-session
-contracts` section.
+contracts` section. If any row is marked `(F/C)`, PLAN must also contain a `## Completion handoffs`
+section (may be empty, `*(none yet)*`); if absent, add it empty and commit via `@committer`
+("Initialize PLAN completion handoffs") before starting the loop, exactly as precondition 4 does for
+the action-frame digest. Plans with no `(F/C)`-marked row need not have this section at all.
 3. PLAN contains a `## Progress ledger` table (see Ledger spec). If absent, stop and tell the user
 to add it (one-time upgrade from the prose Progress section).
 4. PLAN contains a `## Action-frame digest` section (may be empty at chain start). If absent, add it
@@ -70,6 +101,19 @@ uncommitted work.
      has never been committed, commit it first via `@committer` ("Initialize PLAN ledger") before
      starting the loop. This establishes the clean baseline rather than demanding one that doesn't
      exist yet.
+   - **In-flight F/C exception:** a dirty tree is also acceptable, without committing anything
+     first, when it exactly matches a recorded entry in PLAN's `## Completion handoffs`: the same
+     unit's base commit, the same expected files, and a diff fingerprint — computed over the
+     implementation diff only, untracked additions included, PLAN's own checkpoint container
+     excluded — that matches the one recorded in the capsule. Identical filenames alone never
+     validate this; the fingerprint must match. Validate PLAN's own contract/ledger structure
+     separately from the fingerprint check. Any mismatch — an unrelated edit present, the wrong base
+     commit, no capsule entry at all, or a stale/absent fingerprint — is NOT this exception: refuse
+     and surface for human reconciliation. Never `git reset`, `git stash`, commit, or otherwise
+     overwrite the drift automatically; an interruption before a valid checkpoint, or midway through
+     unrecorded C edits, does not authorize a blind resume either — reconcile by explicit inspection.
+     When the exception validates, resume directly at the C-stage dispatch for that unit (step 3b),
+     skipping step 1's normal row selection for this one iteration.
 6. VERIFY commands (bound in Preflight) are resolved. The verify gate depends on them.
 
 ## The loop
@@ -83,6 +127,14 @@ Repeat until all session-list rows are `done` in the ledger, or a halt condition
 - If none is runnable but `pending` rows remain → halt (`BLOCKED: dependency deadlock`), surface the
   offending rows.
 - If none remain → the chain is complete; go to Completion.
+- **Paired-unit check.** If the selected row is marked `(F/C)`, check PLAN's `## Completion
+  handoffs` for an entry for this row:
+  - No entry → this iteration dispatches the **F-stage** (step 3 as normal, F-stage dispatch
+    template).
+  - A valid entry already present (matches this row's base commit and expected files; this is the
+    normal in-loop case, not the cold-resume case Precondition 5 covers) → this iteration dispatches
+    the **C-stage** directly (step 3b), skipping the inflection check in step 2 (already resolved, if
+    applicable, before F was dispatched).
 
 ### 2. Check for a halt-before marker (inflection point)
 
@@ -122,7 +174,14 @@ Read the session entry's category:
   directly (cheap cases where the interface is already written into contracts), or dispatches
   `@general` for heterogeneous setup work (e.g. S0 skeleton). Use judgment.
 
-One session = one dispatch = one commit. Never batch two session rows into one dispatch.
+One session-list row = one dispatch = one commit — except a row marked `(F/C)`, which is two
+dispatches (F-stage then C-stage) sharing that row's single eventual commit (see step 3b). Never
+batch two different rows into one dispatch, and never split an unmarked row into two dispatches.
+
+For a row marked `(F/C)`, dispatch the F-stage using the **F-stage dispatch template** (see
+Feature/completion dispatch templates below) in place of the standard Dispatch template; route to
+`@build`/`@general` by the same category judgment above. Do not run the step-4 verify gate against
+F's return — step 3b governs what happens next.
 
 Dispatch prompts stay scoped: deliver the session entry and the contract subsections it consumes as
 excerpts, not the whole PLAN — a pointer to where fuller evidence lives (the roadmap, a prior
@@ -135,10 +194,41 @@ gate on this session. Do not poll for it, do not reshard or page `@plan-juncture
 warning fired on its own, and do not add a fourth juncture type for it. All halt, commit, scope, and
 correctness gates in steps 4–7 remain the only authorities on whether a session passed.
 
+### 3b. Paired units only: capsule the F-stage return, then dispatch C
+
+Runs only when the row just dispatched was an F-stage (step 3's `(F/C)` branch). Unmarked rows and
+C-stage dispatches skip straight to step 4.
+
+a. **Read F's structured return.** Confirm it actually reports `handoff-ready` with the four-point
+   report the F-stage template requires (goal/invariants, design and qualifications, KATs and
+   results, remaining work). A return that claims `done`/`green`/`verified` without the full gate
+   actually having run green, or that reports a known feature-correctness failure, is NOT
+   handoff-ready — dispatch one bounded F-fix iteration (shared fix-loop budget, see Fix-loop below)
+   and re-check; exhausting the budget here halts (`BLOCKED: session does not converge`) exactly as
+   step 4f would.
+b. **Do not run the full verify gate yet.** The narrowest-meaningful checks F reports are taken at
+   face value; a full gate may have been run by F diagnostically, but the long closure tail is C's
+   job, not a reason to gate here. This is a deliberate asymmetry with step 4, not a shortcut.
+c. **Write the intent capsule** into PLAN's `## Completion handoffs`, using the Intent-capsule
+   template below, transcribing F's structured report into the six fields. The driver organizes; it
+   does not invent intent. If F's report is missing a field or reveals a known semantic failure, this
+   is not handoff-ready either — treat as in (a).
+d. **Do not commit this write.** The implementation diff and this capsule write both stay dirty and
+   uncommitted — this is the documented exception to "every iteration ends with a commit" (see
+   Precondition 5's in-flight exception and the Invariant section above). There is no step-6b-style
+   ledger commit here.
+e. **Dispatch the C-stage immediately**, in the same iteration, using the **C-stage dispatch
+   template** below, routed to the same tier/agent judgment as the F-stage. The C-stage works
+   directly in the dirty tree F left — it does not start from a clean checkout.
+f. Proceed to step 4 once C returns, gating the **combined F+C diff** as a single unit.
+
 ### 4. Verify the session contract (mechanical gate — driver only, no `@plan-juncture`)
 
 After the implementation subagent returns, the driver — NOT a paged `@plan-juncture` fork — verifies,
-mechanically:
+mechanically. For an unmarked row this runs once, after its single dispatch. For a row marked
+`(F/C)` this runs exactly once as well — after C returns (step 3b.f) — against the **combined F+C
+diff**; it never runs against F's return alone, and reaching C is never itself counted as a Fix-loop
+iteration or used to widen the Fix-loop budget (planned F→C is not a retry — see Fix-loop below).
 
 a. **Tests green.** Run VERIFY_TEST. Red → go to Fix-loop (step 4f).  b. **Types clean.** Run
 VERIFY_TYPES. Red → Fix-loop. (When VERIFY is one combined gate — e.g. `tox -m analyze` — a single
@@ -151,9 +241,21 @@ be dirty here if an inflection-point design write (step 2) preceded the dispatch
 of the session commit (step 5) and is committed separately in step 6b. Any other unexpected file →
 potential scope drift; inspect. If the extra file is plainly part of the unit (e.g. an
 `__init__.py`), allow and note it in the ledger; if it touches another session's surface → halt
-(`BLOCKED: scope drift`).  e. **Discovery check — page `@plan-juncture` when flagged.** Did the subagent
+(`BLOCKED: scope drift`).
+
+**Defect check — paired units only, before the discovery check.** Did the C-stage report a
+substantive defect in the feature's own behavior (not a cross-session contract problem — see the
+discovery check below for that)? C does not fix this by reinterpreting intent. Dispatch one fresh,
+bounded **F-fix** subagent: scoped to the named defect plus the original intent capsule, sharing the
+unit's existing Fix-loop budget (cap 2 total across the whole unit, F-stage, C-stage, and any fixes).
+Re-dispatch C after the fix (back to step 3b.e.) rather than letting C patch around it; this is a
+corrective dispatch, not a second planned F-stage, and it never resets the budget. No defect
+reported → continue to the discovery check.
+
+e. **Discovery check — page `@plan-juncture` when flagged.** Did the subagent
 report a discovery that contradicts a *downstream* contract (a frozen interface, a KAT, a named
-prose invariant)?
+prose invariant)? (A contract-changing discovery made during a C-stage follows this same path —
+it is never resolved unilaterally by C.)
    - **No discovery flagged:** continue to step 5.
    - **Discovery flagged:** fork `@plan-juncture` (subagent) with juncture type `discovery-adjudication`.
      Include the discovery, the affected contract(s), the affected downstream sessions, and the full
@@ -171,17 +273,27 @@ prose invariant)?
        re-shard is never permitted. Also append a digest entry for this iteration (non-trivial — a
        discovery was flagged).  f. **Fix-loop.** On red tests/types: dispatch one `@build` fix subagent with
        the failure output. Re-verify. Cap at 2 fix iterations; on the 3rd failure → halt (`BLOCKED:
-       session does not converge`). Do not let the fix-loop run unbounded.
+       session does not converge`). Do not let the fix-loop run unbounded. For a paired unit, this
+       budget is one pool shared across the F-stage, the C-stage, and any bounded F-fix dispatches
+       from the defect check above — the planned F→C handoff itself never consumes or resets the
+       budget; only corrective dispatches do. On non-convergence, preserve the intent capsule and
+       checkpoint in PLAN exactly as they stand (do not revert or clear them) and halt — a future
+       cold resume reconciles from that state per Precondition 5's in-flight exception.
 
 ### 5. Commit the session via @committer
 
-Only when steps 4a–4e pass. Dispatch `@committer` per the autonomous-chain carve-out in AGENTS.md
-with:
+Only when steps 4a–4e pass. For a paired unit this is the **feature commit** — one commit for the
+combined F+C diff; there is no separate commit for F's partial work, and nothing is committed at the
+F→C boundary itself. Dispatch `@committer` per the autonomous-chain carve-out in AGENTS.md with:
 - `SESSION CONTRACT`: the session entry's commit-title + one-line why.
 - `EXPECTED FILES`: the entry's expected-files list (plus any allowed extras from 4d).  PLAN is
   never in this list — instruct the committer to stage only the session's expected files explicitly
   (not `git add -A`) and to refuse if PLAN appears staged.
 - `COMMIT TITLE HINT`: the entry's commit title.
+- `CO_AUTHOR`: the content agent(s) that produced the diff, per AGENTS-ROSTER.md's attribution
+  convention. For a paired unit where F and C ran on the same model (the normal case — both T1), this
+  naturally dedupes to one trailer; do not invent a phase-specific identity string. Record which
+  phase contributed what in PLAN's capsule and ledger note, not in a new commit-trailer scheme.
 
 `@committer` stages exactly those files or refuses. On refusal:
 - `empty diff` / `scope drift` / `incomplete` → the verify gate and committer disagree; halt
@@ -195,7 +307,10 @@ with:
 On a successful session commit:
 
 a. **Ledger:** write to PLAN's `## Progress ledger`:
-   - Mark the session row `done`, record the commit short-hash.
+   - Mark the session row `done`, record the commit short-hash. For a paired unit, `done` is reached
+     only here — after the combined gate passed and the single feature commit landed — never on an
+     F-stage `handoff-ready` return. Note both stage identifiers (e.g. `<N>F`, `<N>C`) and mark the
+     unit's `## Completion handoffs` entry `Status: consumed`.
    - Mark any contracts the session FROZE (substrate interfaces, KAT additions) as frozen, so later
      iterations treat them as fixed.
    - Note any allowed scope extras and any logged discoveries.
@@ -309,6 +424,128 @@ DONE WHEN
 - Exactly these files are modified: <expected files>.
 ```
 
+## Feature/completion dispatch templates (paired units only)
+
+Used only for a row marked `(F/C)` by `/plan-shard` (see Terminology above). Both stages are
+dispatched to `@build` (or `@general` for heterogeneous setup work, per the same category judgment as
+step 3) — pinned T1, the same tier as every other implementation dispatch in this loop. No new agent
+type and no tier escalation exist for this pattern.
+
+### F-stage (feature) dispatch
+
+```
+Working directory: <project root>
+Thoroughness: medium
+Read-only: NO (this is an implementation session).
+
+You are executing the FEATURE STAGE of a paired feature/completion unit from <PLAN>: session <N> —
+"<title>". Read ONLY: the <N> entry in <PLAN>, its Completion appendix, and the "## Cross-session
+contracts" subsections it Consumes. Do NOT read the Roadmap appendix. Do NOT start any other
+session. Do NOT commit — leave the tree dirty.
+
+DELIVERABLE
+<the entry's bullet list, verbatim>
+
+CONTRACTS YOU CONSUME / PRODUCE
+<as in the standard Dispatch template above>
+
+HANDOFF-READY, NOT DONE
+Implement behavior, the substantive success/error/integrity tests, and focused docs. Run the
+narrowest meaningful project-managed checks and report the exact commands and results; a full
+project gate run is optional and diagnostic only — its long closure tail belongs to the completion
+stage, not to you. Return `handoff-ready`, never `done`, `green`, or `verified`, unless the full
+gate has actually run green. A known feature-correctness failure is not a compliance handoff — report
+it plainly; do not paper over it to look handoff-ready, and do not deliberately leave an obvious test
+gap for the completion stage to find.
+
+REPORT (the driver turns this into the intent capsule — be complete)
+1. One-sentence goal; observable behavior and non-negotiable integrity invariants.
+2. The design you implemented and any qualifications learned while coding/testing that aren't
+   obvious from the diff.
+3. KAT names and exact files, the important cases already tested, the commands you ran and their
+   results, and any known failures or gaps.
+4. What closure work you believe remains, and anything semantically unresolved.
+
+REGISTER (durable artifacts)
+In code, tests, and human docs, state the actual property, reason, or invariant — never the
+plan coordinate. Plan vocabulary (session ids, categories, "frozen contract", sub-track
+names, PLAN/ROADMAP references, "F-stage"/"C-stage") belongs in PLAN, the ledger, and commit
+messages only.
+
+Do not commit, freeze contracts, or start another unit.
+```
+
+### C-stage (completion) dispatch
+
+```
+Working directory: <project root>
+Thoroughness: very thorough
+Read-only: NO (this is an implementation session, continuing an already-dirty tree).
+
+You are executing the COMPLETION STAGE of a paired feature/completion unit from <PLAN>: session <N>
+— "<title>". The feature stage already implemented behavior and substantive tests, uncommitted, in
+the current working tree — do not discard or re-derive it. Read ONLY: the intent capsule for unit
+<N> in PLAN's "## Completion handoffs", the <N> entry in <PLAN> and its Completion appendix, and the
+"## Cross-session contracts" subsections it Consumes. Do NOT read the Roadmap appendix or any other
+unit's entry — the capsule is the complete intent; trust it. Do NOT start any other unit. Do NOT
+commit — leave the tree dirty with green tests.
+
+INTENT CAPSULE
+<the full six-field capsule for unit <N>, verbatim — see Intent-capsule template below>
+
+YOUR SCOPE
+Run the full project gate. Complete missing branch cases and necessary regression tests, typing,
+lint/format, and documentation/shape/layering conformance. Small behavior-preserving corrections are
+permitted within the unit's expected files. Do NOT weaken assertions, lower coverage, add
+convenience exclusions, change public behavior, or redesign the feature to obtain green.
+
+IF YOU FIND A DEFECT
+A substantive defect in the feature's behavior is not yours to fix by reinterpreting intent — name it
+plainly in your return; do not patch around it. A discovery that would invalidate a frozen downstream
+contract is also not yours to resolve — name the affected contract plainly. The driver routes both: a
+bounded feature-fix dispatch for the former, the existing juncture-adjudication path for the latter.
+
+REGISTER (durable artifacts)
+In code, tests, and human docs, state the actual property, reason, or invariant — never the
+plan coordinate, exactly as the feature stage was instructed.
+
+DONE WHEN
+- All KATs named in the capsule, and any you added, pass.
+- <VERIFY_TEST> and <VERIFY_TYPES> are green (the full project gate; orchestrator substitutes the
+  bound commands, e.g. `~/.local/bin/tox -m analyze`).
+- Exactly the unit's expected files are modified.
+
+RETURN
+Name any corrections you made, why they preserve the feature's intent rather than changing it, any
+new qualifications learned, and the exact gate results.
+```
+
+### Intent-capsule template (written by the driver, not a subagent)
+
+After an F-stage returns `handoff-ready` (step 3b.c), the driver transcribes its structured REPORT
+into one entry in PLAN's `## Completion handoffs`, before dispatching C:
+
+```
+### <N> — feature/completion handoff
+**Status:** checkpoint-written
+**Base commit:** <the commit this unit started from>
+**Expected files:** <the row's expected files, verbatim>
+**Fingerprint:** <a content fingerprint of the implementation diff as of F's return — untracked
+  additions included, PLAN's own checkpoint container excluded; exact enough that an unrelated edit
+  or a stale resume is detected, never "same filenames" alone>
+**Goal:** <one sentence — the meaningful goal, observable behavior, non-negotiable invariants>
+**Design & qualifications:** <what F implemented and learned; reasons not obvious in the diff>
+**KATs:** <names, exact files, important cases already tested, commands/results, known failures>
+**Remaining closure work:** <what F believes is left, and the permitted correction envelope for C>
+**Acceptance contract:** <full gate, required KATs, expected files, any named deferred non-goals>
+```
+
+The driver organizes F's report into these fields; it does not invent intent. Missing intent or a
+known semantic failure in F's report is not handoff-ready — send it back to F for one bounded
+iteration (shared Fix-loop budget) rather than filling gaps with guesses. Mark `Status: consumed`
+once the unit reaches `done` in step 6a. The capsule stays in PLAN as part of its committed history
+after that — it is a record, not scratch state, and is never deleted to "clean up."
+
 ## Juncture fork template (`@plan-juncture` subagent)
 
 ```
@@ -350,16 +587,21 @@ CONSTRAINTS:
 
 ## Fix-loop dispatch
 
-When dispatching a `@build` fix subagent (step 4f or the anneal-fix in step 7), include one line
-in the prompt: "REGISTER rule applies — see dispatch template." Fix forks edit durable files and
-the same plan-coordinate prohibition applies.
+When dispatching a `@build` fix subagent (step 4f, the F-fix defect-check dispatch, or the
+anneal-fix in step 7), include one line in the prompt: "REGISTER rule applies — see dispatch
+template." Fix forks edit durable files and the same plan-coordinate prohibition applies. A bounded
+F-fix dispatch for a paired unit additionally includes the unit's intent capsule and the named
+defect — it is scoped to that defect, not a re-opening of the whole feature stage.
 
 ## Constraints
 
 - Runs from `@plan-admin` only. Implementation is always dispatched down-tier.
 - `@plan-juncture` (Opus) is paged as a subagent only at the three junctures (inflection design,
   discovery adjudication, sub-track boundary). It is never resident for the loop.
-- One session-list row → one session commit + one ledger commit. No batching.
+- One session-list row → one session commit + one ledger commit. No batching — except a row marked
+  `(F/C)`, whose F-stage and C-stage are two dispatches sharing that one session commit (step 3b),
+  never two commits. This is the only replacement of the one-dispatch rule, and it applies only to
+  rows `/plan-shard` explicitly marked `(F/C)`.
 - The driver gates mechanically (4a–4d); `@plan-juncture` adjudicates discoveries (4e fork); subagents
   implement and never self-commit; `@committer` commits and never verifies. Roles stay separate (per
   AGENTS.md autonomous-chain carve-out).
@@ -370,14 +612,21 @@ the same plan-coordinate prohibition applies.
   fidelity to the PLAN; halts are reserved for the irreconcilable, never for mere deviation.
 - PLAN is committed only as its own rolling-context commit (step 6b), never folded into a session
   commit. After each full iteration the tree is clean and the committed ledger+digest matches the
-  last committed session — this is the resumability invariant precondition 5 enforces.
+  last committed session — this is the resumability invariant precondition 5 enforces. The one
+  documented exception is the F/C in-flight boundary (step 3b.d): the capsule write there is
+  deliberately left uncommitted until the unit's single post-gate commit, per Precondition 5's
+  in-flight exception.
 - This command does not push, does not rewrite history, does not edit source itself.
+- Old single-stage plans are unaffected: a plan with no `(F/C)`-marked row behaves exactly as before
+  this pattern existed.
 
 ## Exit report
 
 - Sessions completed this run (with commit hashes), sessions remaining.
 - Juncture fork count: how many times `@plan-juncture` was paged (inflection / discovery / boundary), and the
   verdict from each.
+- Any paired `(F/C)` units run this pass: unit id, whether both stages completed or one is left
+  in-flight, and the checkpoint location in `## Completion handoffs` for a cold resume.
 - Any halt: class, the surfaced detail, and the resume instruction.
 - Ledger path and last-updated row.
 - Capture candidates surfaced during the run (per AGENTS.md three-axis test).

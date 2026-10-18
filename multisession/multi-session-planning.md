@@ -131,6 +131,51 @@ This fallback (and the context-fill instrument it depends on) is **deliberately 
 small-commit discipline is shown to be insufficient for the codebases actually in scope. Building it
 before then is instrumenting a cliff the small-commit discipline has already engineered around.
 
+### The F/C exception to the cold-handoff prohibition
+
+The warm-resumption fallback above exists because an *uncontrolled* cold handoff — a session ends
+mid-thought, in-flight, and a fresh fork is left to reconstruct intent from the working tree alone —
+loses exactly the design context a handoff most needs. That reasoning does not change. What the
+feature/completion pattern (see [Delivery unit vs. execution
+context](#delivery-unit-vs-execution-context-when-one-unit-needs-two-contexts) above) adds is a
+second, narrow, and fully controlled kind of cold handoff, which the uncontrolled case was never
+meant to prohibit:
+
+- **Uncontrolled cold handoff (still prohibited):** mid-reasoning, no written capture of intent, the
+  next context reconstructs from the diff alone. Use warm resumption instead.
+- **Planned F/C handoff (the narrow exception):** the feature context reaches a designed stopping
+  point — not mid-thought, but the end of its own bounded stage — and writes a complete intent
+  capsule (goal, invariants, design rationale, tests and results, remaining work, acceptance
+  contract) before any handoff occurs. The fresh completion context is cold with respect to the
+  feature session's *conversation*, but warm with respect to its *intent*, because the intent was
+  captured in full rather than left to be inferred.
+
+The criteria:
+1. The feature/fix itself is complex enough on its own and/or
+2. The project's build, introspection, test, and/or certification infrastructure is complex enough
+
+ — that requiring bijectivity among each of a single feature/fix session<=>commit<=>green check
+results in a long tail session with escalating or even divergent token costs due to turn thrashing.
+For example, a project requires complete testing coverage and even a small diff can cascade hundreds
+of turns at the end of an already exhausted session as the agent chases down each code path
+affected.
+
+The following handoff scheme was designed to forestall this token and session waste:
+1. The implementation session (`F`) completes the nominal code changes as well as designs and
+   usually provides the initial implementation of the tests that cover those changes meaningfully.
+2. The driver agent upon the recommendations of the feature implementation agent (`F`) devises a
+   scoped handoff contract capsule to be included in the completion agent's (`C`) prompt.
+
+The distinguishing question is the same one that separates the two fallbacks above: is the reasoning
+*separable with written intent*, or is it *non-separable feature reasoning still in flux*?
+Unfinished, intricately coupled design work that cannot be faithfully written down stays with the
+feature agent — using warm resumption if the context is running long — rather than being
+cold-transferred just because the context is expensive. The F/C pattern is for the opposite case:
+the design is settled and written; what remains is a separable, mostly mechanical closure tail. Do
+not use the F/C pattern as a cost-driven excuse to cold-transfer an unresolved design, and do not use
+warm resumption to avoid writing down an intent capsule when the tail genuinely is separable — each
+fallback addresses a different failure mode and neither substitutes for the other.
+
 ### Why commits and sessions align
 
 This isn't an accident. A good commit and a good session share the same shape because both are
@@ -183,6 +228,40 @@ the same commitment as building a response mechanism around it. There is no univ
 threshold for any of the three dimensions — what counts as "high cost" or "tight capacity" is
 project- and model-dependent, and a warning is a prompt to reassess, not a verdict that the session
 was run wrong.
+
+### Delivery unit vs. execution context: when one unit needs two contexts
+
+A fourth axis, orthogonal to coherence and footprint, is worth naming explicitly: the **delivery
+unit** (one conceptual unit, ending green, landing as one commit and one ledger row) is not always
+produced by exactly one **execution context** (one forked session with one continuous working
+memory). Ordinarily the two coincide — one session produces one commit — and nothing in this
+section changes that default; it remains the shape of the overwhelming majority of sessions.
+
+Some units carry a long **compliance tail**: the feature behavior is a small, clear piece of work,
+but closing out every branch case, coverage percentage, type-strictness requirement, lint rule, and
+documentation/shape/layering conformance rule the project enforces is a separate, often much larger,
+mostly mechanical effort. When that tail is large enough to threaten the coherent-context window on
+its own, *and* the feature's intent is cleanly separable from the closure work (the *what* and *why*
+can be written down completely; only the *grind* remains), the unit may be executed as a **planned
+feature/completion (F/C) pair**: two execution contexts, sharing one intent, producing one delivery
+unit.
+
+This is a qualitative judgment made during graph construction (see `/plan-shard`'s conditional
+feature/completion branch), not a size threshold, a universal two-session tax, or an automatic
+response to a cost warning. Most units, including most large ones in a well-maintained codebase,
+stay single-stage. The F/C split earns its cost only when the tail is both material and separable.
+
+**The fidelity contract.** F implements behavior, the substantive tests, and the design decisions,
+then hands off at a `handoff-ready` checkpoint — never `done`, `green`, or `verified`. C does not
+redesign; it closes the gate: completes branch coverage, typing, lint/format, and conformance checks
+within F's design, using the intent F left behind. A substantive defect C discovers is not C's to
+fix by reinterpreting intent — it returns as a bounded fix request to a fresh F-fix context sharing
+the same intent; a discovery that would change a cross-session contract follows the existing
+juncture-adjudication path, exactly as it would for a single-stage unit. The pair still produces
+exactly one commit and one ledger row — the delivery unit remains the unit of composition; only its
+internal execution has two contexts instead of one. The concrete handoff mechanism (the intent
+capsule, the checkpoint, the gate sequencing) lives in `/plan-run`, which is the operational owner
+of this pattern; this section states the rationale and the contract, not the mechanics.
 
 ---
 

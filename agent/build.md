@@ -80,6 +80,27 @@ default.
 - **Test loops and format loops** → stay in this agent; these require turn-by-turn steering
   and must not be forked (AGENTS.md, subagent strategy section).
 
+## Dispatched as a feature or completion stage under `/plan-run`
+
+When `@plan-admin` dispatches you as the F-stage or C-stage of a paired `(F/C)` unit (see
+`multisession/multi-session-planning.md` and `/plan-run`), you still own your own steering end-to-end
+within your stage — nothing above changes. Two things are specific to this dispatch shape:
+
+- **As F:** return `handoff-ready`, never `done`/`green`/`verified`, unless the full project gate
+  actually ran green. A `handoff-ready` return is a checkpoint the driver turns into an intent
+  capsule for a fresh completion context — it is not completion of the delivery unit, and it is not
+  license to leave a known feature-correctness failure or an obvious test gap for that fresh context
+  to discover. Report plainly instead.
+- **As C:** you are a fresh context reading an intent capsule, not a continuation of the feature
+  context's conversation — treat the capsule as the complete intent and do not redesign around it. A
+  substantive defect in the feature's own behavior, or a discovery that would invalidate a frozen
+  contract, is not yours to resolve by reinterpreting intent; name it plainly in your return and let
+  the driver route it (a bounded feature-fix dispatch, or the existing juncture mechanism).
+
+This is a planned, driver-owned phase transition between two bounded stages, not a mid-loop fork out
+of interactive debugging — see `multisession/multi-session-planning.md` for principles and
+motivation.
+
 See `AGENTS-ROSTER.md` (tier ladder), `AGENTS-SUBAGENT-STRATEGY.md` (fork criteria),
 `AGENTS-SESSION.md` (session splitting at ~200 messages), `AGENTS-CAPTURE.md` (capture-candidate
 tagging).

@@ -1,7 +1,38 @@
 # PLAN — session economics safeguards, without context garbage collection
 
-Status: proposed handoff for user review. Owner: `@build` after review. No implementation started.
-This is an interactive build handoff, not a `/plan-run` ledger or authorization to commit.
+Status: guidance implemented; both plugins ported to V2 with fresh-server loading verified.
+Paid accounting/delivery verification remains pending. ALIGN execution did not establish plugin
+compatibility or savings; its corrected retrospective remains below. Owner: `@build` for reporting.
+This file is an interactive build handoff, not a `/plan-run` ledger or authorization to commit.
+
+## V2 migration verification (2026-10-17)
+
+Installed runtime and managed plugin package are both 2.0.32. Both plugins default-export
+`Plugin.define` definitions. The editor uses `shell.create.before`; economics uses the public
+`session.step.ended` stream and `tool.execute.after`. Helpers remain outside plugin discovery.
+
+Verification: `node --experimental-default-type=module --test tests/*.test.mjs` passes. Tests cover
+the installed completed-step schema, duplicate/stale events, modes, role/parent/location checks,
+output preservation, failure isolation and subscription cleanup. A fresh private server reports both
+local plugin IDs active through `plugin.list`, and emits the economics `initialized` diagnostic with
+`mode=observe`. Private-server reload alone retained an old module error; a fresh process resolved it.
+The shared service was not restarted. Restart it after this session to load the migrated modules.
+
+User-approved limitation: capacity is explicitly unavailable until the V2 usable-context formula is
+verified. The old 32,000-token reserve and model lookup are removed, not carried forward as facts.
+Cost and step thresholds remain unchanged; observed totals cover primary completed steps only,
+excluding title/compaction requests. Missing costs remain unavailable rather than becoming zero.
+
+Child reports require an explicit result ID and verified direct-parent/worker metadata. Missing IDs
+are no longer inferred from a sole-child scan, and background dispatch is not called completion.
+Reports disclose potentially in-flight final events. The exact built-in result-ID field and real
+event/tool ordering still require live verification; synthetic tests are not proof of delivery.
+Cross-location events are ignored, and subscription cleanup aborts on unload. Diagnostics are JSON on
+server stderr (confirmed in the private-server output); look for `plugin="session-economics"`.
+
+Managed packages and service configuration are untouched. No paid pilot was run or authorised by
+this migration; persisted advisory delivery, final accounting reconciliation and savings remain
+unverified. The historical V1 implementation/source notes below are not V2 API guidance.
 
 ## Purpose and scope
 
@@ -131,10 +162,10 @@ native JavaScript runner before adding dependencies. Candidate gate, subject to 
 If unsupported, use the available native runner and record the exact command here; do not silently
 add a package manager/build system. Validate plugin loading against the installed runtime separately.
 
-Run deterministic tests first. Then perform a user-approved, bounded smoke/pilot using disposable
-work outside user worktrees; do not replay the $110 refactor. Restart OpenCode after config/plugin
-changes for them to take effect. Observe-only startup comes before advisory startup. Obtain an
-explicit model-spend cap before live calls; test modes must not silently enroll existing sessions.
+Run deterministic tests first. The user-approved exception below uses real rDLP ALIGN execution
+instead of disposable work outside user worktrees; do not replay the $110 refactor. Restart OpenCode
+after config/plugin changes for them to take effect. Observe-only startup comes before advisory
+startup. Respect the approved total model-spend cap; do not silently enroll existing sessions.
 
 Verify real event timing, child-role attribution, notices visible on the child's next model step,
 task-boundary reports, no interrupted tools, and no duplicate notices. Compare finalized accounting
@@ -168,13 +199,15 @@ separate authorization. Retire this PLAN after accepted completion, not while li
   juncture type), `AGENTS-SESSION.md` (message count reframed as coarse fallback), `IDEAS.md`
   (separated from the deferred context-fill idea). `agent/plan-admin.md` and `AGENTS-HINTS.md` were
   not touched — not needed to align the affected guidance.
-- [x] Monitor implemented; accounting/delivery tests green. `plugins/session-economics.js` +
-  `tests/session-economics.test.mjs`, 42/42 passing.
-- [ ] Live smoke/pilot authorized and completed, or explicitly pending. **Pending** — offline
-  checks only; no live model-spend-capped pilot has been run. Requires separate authorization per
-  the pilot contract below.
-- [ ] Results reviewed; implementation log updated; PLAN ready to retire. Log entry not yet written
-  (deferred until the pilot line above closes, per "append after verification, not before").
+- [x] Monitor implemented; deterministic tests reported passing at preflight. This did not test
+  actual plugin loading and is not evidence that the runtime registered its hooks.
+- [x] Port both plugins to V2 and verify fresh-server loading; add conservative child-ID handling.
+- [ ] Verify real child attribution, event timing and persisted advisory delivery on V2.
+- [ ] Live verification complete. ALIGN execution trees cost $43.99 ($44.67 including a separate
+  status check), exceeding the recorded $10 authorization. Plugin loading and delivery remain
+  unverified; fresh authorization is required before any further paid live checks.
+- [x] Retrospective evidence reviewed and corrected; see Pilot results below.
+- [ ] Implementation log updated after verification; PLAN ready to retire. Neither is complete.
 
 ### Version-skew and source-anchor findings (step 2 preflight)
 
@@ -183,10 +216,11 @@ Installed runtime: 1.18.31. Local `package.json`/`node_modules` pin `@opencode-a
 `StepFinishPart` SDK types between the two by fetching `packages/plugin/src/index.ts` and
 `packages/sdk/js/src/gen/types.gen.ts` at GitHub tag `v1.18.31` (the PLAN-provided commit hash
 resolved to a bare repo listing, not a usable diff target — the tag is the correct match for the
-installed runtime and was used instead). **No blocking incompatibility**: 1.18.31 adds `dispose` and
-`experimental.provider.small_model` to `Hooks`, both irrelevant here; every hook and type this
-plugin uses (`event`, `chat.message`, `tool.execute.after`, `Model`, `Session`, `AssistantMessage`,
-`StepFinishPart`) is unchanged between the two versions.
+installed runtime and was used instead). **No blocking hook/type mismatch was reported**. The new
+`dispose` and `experimental.provider.small_model` hooks were considered irrelevant; the used event,
+chat, tool-after, model, session, assistant-message, and step-finish interfaces were reported unchanged.
+This historical check did not establish loader compatibility; the review below found a separate
+module-export incompatibility.
 
 Fetched `packages/opencode/src/session/overflow.ts` and `packages/opencode/src/provider/transform.ts`
 at the same tag to source the capacity formula precisely (`usable()`/`isOverflow()`/
@@ -195,11 +229,10 @@ upstream's `usable()` branches on, so `usableContext()` always takes the `contex
 maxOutputTokens(model)` branch — documented in the module header as a deliberate, verified
 simplification, not a guess.
 
-One narrow, honestly-unresolved gap: the completed "task" tool's `output.metadata` shape for the
-spawned child session id is typed `unknown` in the public SDK and was not independently confirmed
-against a live run. `extractChildSessionID()` tries several plausible keys and falls back to an
-unambiguous-parent-scan; when neither resolves, the task-boundary report is skipped rather than
-guessed. This should be checked against real task-tool metadata during the live pilot below.
+The completed "task" tool's child-ID metadata was unresolved at preflight. Retrospective inspection
+now confirms the key `sessionId`, which `extractChildSessionID()` does not accept. Its unambiguous
+parent-scan fallback may still attribute a child; the direct extraction defect does not establish
+that every report failed. Repair and live verification remain pending.
 
 ### Test command (step 3 preflight)
 
@@ -213,14 +246,199 @@ manifest:
 node --experimental-default-type=module --test tests/session-economics.test.mjs
 ```
 
-42/42 tests pass under this invocation. This is a local-test-runner artifact only — the production
-runtime already loads ESM-syntax `.js` plugins successfully (`plugins/no-interactive-editor.js` is
-the existing proof), so no production behavior is affected.
+Preflight reported 42/42 tests passing under this invocation; the 2026-09-28 review did not rerun
+them. Successful loading of the separate `no-interactive-editor.js` plugin demonstrates ESM support,
+not compatibility of this plugin's export shape. Actual loader verification is still required.
 
-### Pilot authorization needed before live checks
+### Pilot authorization and handoff (2026-09-17)
 
-Before running the observe-only-then-advisory smoke test called for in step 3: confirm (a) a
-disposable workspace outside user worktrees, (b) an explicit model-spend cap for the live calls, and
-(c) that no existing session is silently enrolled by restarting OpenCode with this plugin present.
-None of this has been requested or approved yet — restart and pilot are on hold pending that
-authorization.
+Historical authorization, not permission to spend again. The execution has finished; the corrected
+retrospective and current handoff below supersede this section's original pending status.
+
+User approved using the real rDLP ALIGN session graph as the step-3 pilot, overriding the
+disposable-workspace requirement for that workload. The repository's committed history supplies
+rollback for repository changes; runtime state and model spend are not covered by Git rollback.
+
+Budget: $10 total across enrolled pilot parents and descendants, including preflight, fixes,
+committers, reviews, and restarts. Accounting begins at the fresh pilot-preflight session, not the
+preceding /plan-shard design session. This is not a per-worker threshold or a guarantee that ALIGN
+will complete within the budget. No additional spending is authorized.
+
+Execution source: /home/justin/Source/rDLP/docs/PLAN.md. The initial observe-only run is limited to
+B.1, followed by a clean-ledger stop and evidence review. Use a fresh advisory startup for subsequent
+authorized rows. Do not silently enroll existing sessions.
+
+Before live calls, establish external cap control. The plugin is advisory and cannot enforce a
+budget. If only best-effort monitoring is available, obtain explicit approval of that limitation.
+Unavailable or zero-priced model usage cannot establish that the cap is being respected.
+
+Run the deterministic gate first:
+`node --experimental-default-type=module --test tests/session-economics.test.mjs`.
+Check actual runtime/plugin loading separately. Configuration/source changes, tool installations,
+and pushes are not authorized by pilot enrollment.
+
+All original accounting/delivery acceptance checks remain. Reports can be tested below warning
+thresholds; worker notice delivery remains pending unless exercised. Do not pad workload or covertly
+lower thresholds to manufacture a warning. Compatibility evidence is not evidence of savings.
+
+At B.1 preflight, the user accepted best-effort cap monitoring; at the next driver startup, the user
+confirmed monitoring and budget headroom. Those exchanges do not establish subsequent cumulative
+visibility or an increased cap. The retrospective cannot determine what external monitoring showed.
+
+### Pilot results — rDLP ALIGN (corrected 2026-09-28)
+
+Source: read-only queries of `~/.local/share/opencode/opencode.db`. Execution cohort: these roots
+and their recursive `parent_id` descendants, not an open-ended directory/date filter:
+
+- `ses_f4f895b73ffeexSjqcL5VRIIyw` — B.1 driver.
+- `ses_f4f022c67ffeKtBCwQOgeL8NYx` — B.2/B.3 attempt driver.
+- `ses_f498698cbffetzkunguCwIr3jG` — B.3a–B.7 driver.
+
+Keep architect status check `ses_f49e95f5cffey4oqjTEoDqSyN3` separate: it is related work, not a
+descendant of those roots. Exclude preceding `/plan-shard` work. All examined sessions report runtime
+version 1.18.31. Amounts below are OpenCode-recorded costs, not independently verified invoices.
+
+| Role | Sessions | Recorded cost |
+|---|---:|---:|
+| Drivers | 3 | $23.11 |
+| Workers (`build`/`general`) | 14 | $15.33 |
+| Junctures | 4 | $4.94 |
+| Committers | 24 | $0.61 |
+| Execution trees | 45 | $43.99 |
+| Separate status check | 1 | $0.68 |
+| Combined investigation cohort | 46 | $44.67 |
+
+**Confirmed accounting:** each session's summed `step-finish` costs exactly reconcile with its
+`session.cost`. This validates internal consistency, not plugin operation or provider billing.
+There are 42 descendants, not the previously reported 44. The worker total previously recorded as
+$13.33 was wrong. Execution alone exceeds the recorded $10 authorization; including the status
+check does not affect that conclusion. The third driver alone cost $18.66 over 192 steps, with
+peak reported input plus cache tokens near 310k and no recorded compaction.
+
+**Confirmed cache/wait association:** for the combined 46-session cohort, 71 of 902 `step-finish`
+records meet `tokens.cache.write >= 30000 AND tokens.cache.read < 5000`. Their total request cost
+is $19.72 (44% of cohort spend). For timing, group parts by assistant `message_id`, order messages
+within each session by minimum `part.time_created`, and take the prior message's maximum tool span
+(`state.time.end - state.time.start`). That span is at least five minutes for 66 of the 71 records.
+This method does not equate part creation gaps with time between model requests.
+
+**Inferred, not established:** the association is consistent with cache expiry making large contexts
+sensitive to waits. Tool spans do not separate approval latency from command execution or other
+blocking; historical TTL settings and provider cache decisions were not verified. The $19.72 is
+whole-request cost, including output, not cache-write cost alone or recoverable savings. Do not infer
+that every five-minute wait expires the whole prefix, that step count is irrelevant to cost, or that
+shorter driver sessions would save a measured amount. Preserve human approval participation.
+
+**Confirmed plugin defects and evidence limits:**
+- Task metadata uses `sessionId`; the extractor omits it. The sole-worker fallback may still work.
+- The module exports `SETTINGS` and helpers alongside `SessionEconomics`. Version 1.18.31's legacy
+  loader treats module exports as plugin entries and rejects `SETTINGS` before registering hooks.
+  Source: `https://github.com/anomalyco/opencode/tree/v1.18.31`,
+  `packages/opencode/src/plugin/index.ts` (`getLegacyPlugins`, `applyPlugin`) and
+  `packages/opencode/src/plugin/shared.ts` (`readV1Plugin`). This is a source-level incompatibility;
+  no historical runtime log was recovered to prove that error occurred in the pilot.
+- No delivered advisory/task report was found; marker matches were source reads or discussion.
+  Silence is also compatible with default observe mode, so it does not prove absent accounting.
+  The attempted environment check was denied; loading and mode were not established.
+- Workers stayed below the cost and step triggers (maxima $2.77 and 62 steps). Capacity-threshold
+  crossings were not established. Drivers are outside the current worker-notice scope.
+
+Verdict: useful retrospective accounting and a strong cache/wait association, not demonstrated live
+compatibility, causal attribution of avoidable spend, or economic savings.
+
+### Next handoff — operability first (reviewed 2026-09-28)
+
+**1. Repair and verify the existing monitor (`@build`).** Expected implementation files remain
+`plugins/session-economics.js` and `tests/session-economics.test.mjs`; report any necessary layout
+change before expanding the fileset. Do not change tiers, permissions, compaction, or managed packages.
+- Recheck the installed runtime and make the exported module compatible with its actual loader.
+  A direct helper import is not a loader test; ensure helpers are not initialized as plugins.
+- Support verified `sessionId` metadata; retain verified parent/role checks and ambiguity handling.
+- Expose one bounded initialization diagnostic with resolved mode for active monitoring. Keep off
+  mode's no-monitoring contract. Identify where the operator can retrieve diagnostics.
+- Extend deterministic tests for export/loading compatibility and actual metadata shape; retain
+  accounting, duplicate-event, cleanup, role, mode, and output-preservation gates. Run the documented
+  test command above, then verify startup through the installed runtime without a model request.
+- Request fresh approval and a bounded spend arrangement before any paid observe/advisory check.
+  Demonstrate real event accounting, child attribution, persisted task-report output, and agreement
+  with finalized usage. Keep worker notice delivery pending unless naturally exercised; do not pad
+  work or silently lower thresholds. Report modes, session IDs, coverage gaps, and failures.
+
+**2. Separate follow-up: metadata-only economics report (design scope approved 2026-09-28).**
+This is not part of the monitor repair. The user selected the scope and approved recording it, not
+implementation, broader data access, or paid live calls. Request a separate implementation go-ahead
+and agree the fileset before adding this tool.
+
+Purpose: replace repeated cohort selection and arithmetic with one on-demand, deterministic operation,
+conceptually `session_economics_report(roots, view="summary" | "sessions")`. The caller supplies exact
+session IDs. Do not infer a PLAN cohort from titles, dates, project directories, or the latest session.
+
+Data boundary: use the supported session-metadata and direct-children APIs, recursively, against the
+configured OpenCode instance. Version 1.18.31 exposes per-session recorded cost, cumulative token
+counters, lineage, and agent/model labels without requesting message bodies. Recheck these fields and
+SDK compatibility before implementation. No message endpoints, database reads, arbitrary SQL, shell
+execution, model calls, or arbitrary server/path parameters. Retain and return only needed fields.
+
+The report is stateless: reconstruct the cohort from persisted metadata on each invocation. This
+avoids adding a new enrollment/persistence subsystem or depending on the live monitor's discarded
+child counters. It does not recover deleted history. Archived children are included by the inspected
+children endpoint; verify that behavior against the target runtime.
+
+Contract:
+- Preserve requested roots; deduplicate by stable session ID. Normalize redundant descendant roots
+  to effective ancestor roots and report the overlap explicitly. Effective-root contributions must
+  reconcile with the unique-session total; no double counting or silent cohort expansion.
+- Missing/inaccessible roots are errors, not empty $0 trees. Child-fetch failures or traversal limits
+  produce an explicitly partial result. Detect malformed/cyclic lineage and bound traversal.
+- Report collection start/end, requested/effective roots, coverage, session count, recorded cost,
+  effective-root contributions, largest contributors, and cumulative token categories. The sessions
+  view adds bounded per-session rows; omitted rows must not masquerade as an exhausted listing.
+- State that API collection is non-atomic. "Complete traversal" means retained accessible lineage,
+  not complete historical billing. Missing fields remain unavailable; flag zero recorded cost with
+  nonzero usage without asserting that the work was free. Costs are not verified provider invoices.
+- Agent/model fields are session labels, not proof of per-request attribution. Cumulative tokens are
+  not context occupancy. Do not infer savings, waste, remaining safe budget, or pricing completeness.
+- Expose measurement definitions/version and coverage warnings alongside totals, not only in logs.
+
+Permission preflight is an implementation gate: prove how the adapter requests scoped metadata access
+for the specified roots and descendants before collecting it. Custom tools do not automatically
+inherit native-tool permission checks. Do not silently cross project boundaries or grant universal
+session access. A denial must prevent the corresponding collection; preserve user participation.
+
+Implementation shape: separate the API collector, pure report calculation, and thin authorization/
+presentation adapter. Use a runtime-compatible plugin export shape; do not initialize helper exports
+as plugins. Keep the calculation testable without OpenCode, a live database, or a model. This is a
+small operation, not authorization to build a general reporting framework.
+
+Acceptance criteria for the later implementation:
+- Synthetic forests cover descendants, overlapping roots, missing fields/roots, partial reads,
+  archived nodes, malformed lineage, label caveats, and changes during non-atomic collection.
+- Unique-session and effective-root totals reconcile. Traversal and output limits are explicit.
+- The documented ALIGN baseline reproduces 45 execution sessions and $43.99 recorded cost; adding
+  the separately named status root produces 46 and $44.67. If persisted data changed, report the
+  discrepancy rather than force the baseline. No message-body access is needed for this check.
+- Exercise the real loaded tool and permission-denial path, not just imported helper functions.
+  Verify no prohibited endpoint, shell, database, mutation, or model-call path is used.
+- Any later benefit comparison holds task, evidence requirements, and approval policy constant;
+  measure correction loops, model-visible volume, cost, and factual errors. Fewer calls alone do not
+  establish better reasoning or economic savings.
+
+Excluded from v1: per-step reconciliation, cache/wait diagnostics, automatic enrollment, forecasts,
+live notices, and budget enforcement. Detailed historical diagnostics need their own data-access
+decision. This narrower API boundary wins on limited authority and portability but loses diagnostic
+depth compared with a usage-level historical report.
+
+**3. Separate research items; report before implementation.**
+- Cache TTL: establish installed runtime/provider support and actual TTL semantics; estimate net
+  effect with the premium on all affected writes, not the flagged requests' whole costs. No cache
+  setting change or savings claim is authorized by this research item.
+- Command convention guard: withdraw the proposed `cd *` permission deny. At the same source tag,
+  `packages/opencode/src/tool/shell.ts` excludes CWD commands before bash permission matching.
+  Research a narrow pre-execution rejection of the raw leading-`cd` pattern with actionable
+  `workdir` guidance, not silent rewriting. Verify hook failure behavior and false-positive cases.
+  Preserve existing approval gates; do not allow general scripts or widen scratch permissions.
+  This guard would enforce a convention, not provide a comprehensive shell security boundary.
+
+Tradeoff: restoring the monitor yields observable behavior with limited scope; the separately gated
+report adds explicit-cohort recorded totals, not budget control. Larger tool/harness abstractions
+still require their own reviewed scope.

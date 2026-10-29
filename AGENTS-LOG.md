@@ -472,3 +472,22 @@ defaults, not load-bearing history, so they track the current pin.
 **Left alone.** `AGENTS-LOG.md`'s own prior entries keep their historical version numbers
 (4.5, 4.7, 4.8, "Fable 5") — this file is append-only and a past entry's job is to record what was
 true at the time, not to track the current pin.
+
+## 2026-10-29 — Model pins bumped to 5.5; T-1 moves from Fable 5.1 to GPT-6 Astra
+
+**Context.** Anthropic shipped Claude Sonnet 5.5, Opus 5.5, and Haiku 5.5 (confirmed via
+`opencode models`). Separately, the user chose to move T-1 (`@dialectic`) off Claude Fable 5.1 to
+OpenAI's GPT-6 Astra — the first cross-family pin in the tier ladder.
+
+**Change.** Every `model:` pin and the `opencode.json` default bumped within tier: Sonnet 5 → 5.5
+(`build`, `explore`, `general`, `verify`, `git-editor`, `plan-admin`), Opus 5 → 5.5 (`architect`,
+`plan-juncture`), Haiku 4.5 → 5.5 (`committer`, `session-scan`); `dialectic` →
+`openai/gpt-6-astra` (base variant, not Pro/Fast). Prose version mentions and co-author examples
+updated in step, as in the 2026-09-14 entry. Model-family-generic phrasing ("Fable-scale reserve",
+"Fable/Opus-scale") rewritten tier-relative ("T-1-scale", "T-1/T0-scale") so the next T-1 swap
+doesn't need a prose sweep. Cost ratios recomputed from listed prices: Astra matches Fable's
+$10/$50 but Opus 5.5 dropped to $4/$20, giving ~2.5× Opus / ~5× Sonnet (the prior "~14× Sonnet"
+figure was already stale against Sonnet 5's $2/$10).
+
+**Left alone.** Prior log entries; `PLAN-V2-PERMISSIONS.md` (in-flight plan doc, its Haiku 4.5
+probe-agent references belong to that plan's own execution).

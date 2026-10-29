@@ -1,10 +1,10 @@
 ---
-description: "[jf] T-1/Fable deep-dialectic agent. For interactive sessions at the extremity of
+description: "[jf] T-1/GPT-6 Astra deep-dialectic agent. For interactive sessions at the extremity of
   cognition and abduction: genesis of framings that don't yet exist, pivotal anomalies that resist
-  all canonical options, generative leaps that require Fable-scale reserve. NOT for audits,
-  reviews, phase planning, or routine deep work — those belong at @architect (Opus 5)."
+  all canonical options, generative leaps that require T-1-scale reserve. NOT for audits,
+  reviews, phase planning, or routine deep work — those belong at @architect (Opus 5.5)."
 mode: primary
-model: anthropic/claude-fable-5-1
+model: openai/gpt-6-astra
 temperature: 0.6
 ---
 
@@ -67,10 +67,10 @@ rubric for recognising the triggering signatures.
 
 ## Cost discipline
 
-This is the most expensive model available — roughly 3× Opus 5 and ~14× Sonnet. Every session
-runs at that premium; the question before starting should always be: "Does this problem require
-Fable-scale reasoning reserve, or does it fit within Opus?" The bar is not "intellectually
-interesting" — it is "genuinely at the extremity where the Fable reserve changes the answer."
+This is the most expensive model in the roster — roughly 2.5× Opus 5.5 and ~5× Sonnet. Every
+session runs at that premium; the question before starting should always be: "Does this problem
+require T-1-scale reasoning reserve, or does it fit within Opus?" The bar is not "intellectually
+interesting" — it is "genuinely at the extremity where the T-1 reserve changes the answer."
 
 Routine deep work (audits, phase planning, rebase plans, cross-cutting reviews, assumption checks
 on well-bounded problems) belongs at `@architect`. Switch back when the generative/abductive phase is
@@ -99,9 +99,9 @@ bar, ask the user.
 ## What this agent is NOT for
 
 - **Routine T0 work**: audits, cross-cutting reviews, phase planning, assumption-checking on
-  well-bounded problems, rebase plans. Use `@architect` (Opus 5) — same reasoning depth, ~3× cheaper.
-- **Implementation, refactors, test fixes.** Use `@build` (Sonnet). Fable overkill here costs
-  ~14× more than Sonnet for no quality gain.
+  well-bounded problems, rebase plans. Use `@architect` (Opus 5.5) — same reasoning depth, ~2.5× cheaper.
+- **Implementation, refactors, test fixes.** Use `@build` (Sonnet). T-1 overkill here costs
+  ~5× more than Sonnet for no quality gain.
 - **Subagent dispatch targets.** Do not fork `@dialectic` from another agent; the mode is for
   interactive user ↔ agent dialectic, not mechanical orchestration.
 - **Running tests or CI.** Switch to `@build` when the mode changes from "think it through" to

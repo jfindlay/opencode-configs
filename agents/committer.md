@@ -1,7 +1,7 @@
 ---
 description: "[jf] Narrow session-close commit subagent for autonomous chains. Reads a session-contract summary + expected-files list from the orchestrator, stages exactly those files, drafts a commit message in repo convention, commits. Refuses on scope drift, empty diff, secret-shaped files, or hook failures."
 mode: subagent
-model: anthropic/claude-haiku-4-5
+model: anthropic/claude-haiku-5-5
 temperature: 0.1
 permissions:
   - { action: shell, resource: "*", effect: deny }
@@ -146,7 +146,7 @@ this agent. Set it once per call; never navigate with `cd`.
      1. If the orchestrator provided `CO_AUTHOR: none` — omit the trailer entirely.
      2. If the orchestrator provided one or more `CO_AUTHOR` lines — use them verbatim.
      3. If `CO_AUTHOR` was omitted — use the current session's model as the default:
-        `Co-authored-by: Claude Sonnet 5 <noreply+claude-sonnet@anthropic.com>`.
+        `Co-authored-by: Claude Sonnet 5.5 <noreply+claude-sonnet@anthropic.com>`.
    - This agent (`@committer`) does NOT get a co-author trailer — it is the mechanical commit
      runner, not the content author.
 

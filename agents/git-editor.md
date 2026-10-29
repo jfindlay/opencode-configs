@@ -1,7 +1,7 @@
 ---
 description: "[jf] General git work — rebases, commits, cherry-picks, amends, branch cleanup. Elevated git permissions; rewrites local history only and never pushes. For rebase execution, paired with /plan-rebase which carries the planning + execution playbook."
 mode: primary
-model: anthropic/claude-sonnet-5
+model: anthropic/claude-sonnet-5-5
 temperature: 0.2
 permissions:
   - { action: shell, resource: "*", effect: ask }

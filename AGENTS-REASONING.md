@@ -12,10 +12,10 @@ productively apply.
 ## Tier gating within this file
 
 Sections are ordered so that T1 agents can stop reading at a clearly-marked boundary. Everything
-above the `--- T-1/T0 ONLY BELOW ---` marker applies to T-1 (Fable 5.1), T0 (Opus 5), and T1
-(Sonnet 5) agents. Everything below the marker is T-1/T0-only: deep-dialectic material whose
+above the `--- T-1/T0 ONLY BELOW ---` marker applies to T-1 (GPT-6 Astra), T0 (Opus 5.5), and
+T1 (Sonnet 5.5) agents. Everything below the marker is T-1/T0-only: deep-dialectic material whose
 execution at T1 would produce fake rigour — the four-step abductive decomposition and its Dupin
-framing are built for Fable/Opus-scale reasoning reserve, and asking Sonnet to will them into
+framing are built for T-1/T0-scale reasoning reserve, and asking Sonnet to will them into
 existence costs attention against the rules it can actually apply.
 
 **T-1 agents** (currently: `dialectic`): read the whole file; treat all sections as rules in force.
@@ -114,7 +114,7 @@ demands them — not as default structure.
 ## --- T-1/T0 ONLY BELOW ---
 
 T1 agents: stop reading. The section below is deep-dialectic material (modes of inference, the
-four-step abductive decomposition, the Dupin framing) calibrated for Fable/Opus-scale reasoning
+four-step abductive decomposition, the Dupin framing) calibrated for T-1/T0-scale reasoning
 reserve. If your current work encounters a pivotal anomaly that eliminative and generalizing modes
 cannot accommodate, surface it and recommend the user escalate to `@architect` (or `@dialectic` if the
 problem is at the generative frontier) — do not attempt the abductive decomposition at T1.

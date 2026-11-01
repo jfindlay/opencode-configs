@@ -2,7 +2,6 @@
 description: "[jf] Narrow session-close commit subagent for autonomous chains. Reads a session-contract summary + expected-files list from the orchestrator, stages exactly those files, drafts a commit message in repo convention, commits. Refuses on scope drift, empty diff, secret-shaped files, or hook failures."
 mode: subagent
 model: anthropic/claude-haiku-5-5
-temperature: 0.1
 permissions:
   - { action: shell, resource: "*", effect: deny }
   - { action: shell, resource: "git status", effect: allow }

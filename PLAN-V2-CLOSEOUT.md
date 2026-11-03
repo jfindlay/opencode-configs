@@ -261,6 +261,11 @@ Bindings and approvals recorded at chain start (2026-11-03), run config: default
 - VERIFY_TYPES (syntax-only, not a static typecheck): the `node --check` loop over
   `plugins/*.js lib/*.js tests/*.mjs` from the Verify gate section (baseline green). Also
   `git diff --check` (baseline green).
+- Parser command (amended after S1): add `--standalone` — plain `opencode debug config|agents`
+  reads the background service's cached config and returned pre-patch rules after the patch was
+  live on disk. S1's before-snapshots were taken without `--standalone`, after-snapshots with it
+  (different server instances); the delta was clean regardless, and the committed opencode.json
+  diff was read directly and equals the patch.
 - Parser command: JSONC via the runtime's own loader, `opencode debug config` (JSONC is not strict
   JSON; no standalone JSONC parser is installed, and comment-stripping is forbidden). Agent
   frontmatter via `opencode debug agents` plus PyYAML 6.0.3 `yaml.safe_load` on the frontmatter
@@ -278,14 +283,25 @@ Bindings and approvals recorded at chain start (2026-11-03), run config: default
 
 | # | Session | Status | Commit | Froze |
 |---|---|---|---|---|
-| S1 | Land the reviewed permission-config patch | pending | — | — |
+| S1 | Land the reviewed permission-config patch | done | a2f02d3 | Integrated config |
 | S2 | Reconcile V2 migration and integration guidance | pending | — | — |
 | S3 | Verify plugin adapters and fix demonstrated compatibility defects | pending | — | — |
 | S4 | Record bounded live plugin acceptance | pending | — | — |
 
 ## Action-frame digest
 
-*(none yet)*
+### S1 — 2026-11-03
+Discovery/flex: Plain `opencode debug config|agents` returns the running service's cached config;
+fresh parses after an edit need `--standalone`. Parsed agents showed `temperature` for only 5 of
+the 9 patched files before the patch (loader quirk, uninvestigated). `commands/config-retrospective.md`
+line 7 and other docs still call `~/.config/opencode/` a salt "runtime mirror"; it is a symlink to
+this repo.
+Affected: none (Integrated config frozen as designed; stale prose is already in S2's file scope).
+Deferred: yes — S2 should correct the "runtime mirror" framing and any 'denies are in force'
+statements; S2/S3/S4 live-state checks must use `--standalone` or a private server.
+Texture: S1's KATs are config-delta checks, not test files; the driver verified them from
+`git diff`, a `temperature` grep, and the subagent's parsed-delta report. Owner's post-closeout
+edit-policy intent is logged under Discoveries & risks.
 
 ## Discoveries & risks
 

@@ -284,7 +284,7 @@ Bindings and approvals recorded at chain start (2026-11-03), run config: default
 | # | Session | Status | Commit | Froze |
 |---|---|---|---|---|
 | S1 | Land the reviewed permission-config patch | done | a2f02d3 | Integrated config |
-| S2 | Reconcile V2 migration and integration guidance | pending | — | — |
+| S2 | Reconcile V2 migration and integration guidance | done | 36c9864 | Checked integration guidance |
 | S3 | Verify plugin adapters and fix demonstrated compatibility defects | pending | — | — |
 | S4 | Record bounded live plugin acceptance | pending | — | — |
 
@@ -302,6 +302,28 @@ statements; S2/S3/S4 live-state checks must use `--standalone` or a private serv
 Texture: S1's KATs are config-delta checks, not test files; the driver verified them from
 `git diff`, a `temperature` grep, and the subagent's parsed-delta report. Owner's post-closeout
 edit-policy intent is logged under Discoveries & risks.
+
+### S2 — 2026-11-03
+Discovery/flex: The retrospective's V1 store crib failed validation (V1 tables stop 2026-10-16/17;
+V2 uses `session_v2`/`session_message`) and was rewritten as a read-API-first 2.2.5 recipe,
+agreement-checked on the 100 newest sessions (zero API/store mismatches). On 2.2.5 the delegation
+tool is named `subagent` and the child id sits at `state.metadata.sessionID` in the persisted
+message record (all 54 resolvable links had `parentID` equal to the caller). No permission-decision
+history exists to inspect (`permission` table = saved approvals; `event` table empty).
+Affected: none (Checked integration guidance frozen). Plugin code already matches `subagent` and
+`sessionID`, but only against the persisted API view, not the plugin's own event view.
+Deferred: yes — S3 must still resolve `event.result.output` vs `result.content` and the metadata
+fallback with version-matched evidence from the plugin's event/hook view, not infer from the
+persisted view. Unmeasured and owner-owned: whether an `edit ~/.config/opencode/**` deny matches the
+repo path through the symlink; saved-allow vs deny; cause of the small top-level cost gap vs the
+message sum ($0.00002–$0.00192).
+Texture: Protocol deviation accepted for adjudication at the boundary: the plan asked for a
+consistent SQLite `.backup` before inspection; the store is ~19 GB with a 7.7 GB /tmp tmpfs and a
+92%-full root disk, so the worker ran only bounded `sqlite3 -readonly` queries on the live store and
+copied/wrote nothing. A tool-output block of another session's content appeared once in the
+worker's transcript, not in any file. A proposed `AGENTS-HINTS.md` correction (V1-layout join; stale
+`/run-plan` references) sits in NOTES.md awaiting per-item human approval — it is the standing
+closeout exception.
 
 ## Discoveries & risks
 

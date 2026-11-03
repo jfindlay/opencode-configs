@@ -251,9 +251,30 @@ are labeled, untested properties remain untested, and no savings or stronger san
 
 ## Progress ledger
 
-Bindings and approvals to record before use: workdir; base commit; VERIFY_TEST; syntax-only
-VERIFY_TYPES; parser command; CLI/server/plugin versions; edit-policy confirmation; live budget and
-protocol. Current approval is **plan-file creation only**.
+Bindings and approvals recorded at chain start (2026-11-03), run config: default self-continue at ◆
+(no `halt-at-boundaries`; owner chose this explicitly):
+
+- Workdir: `/home/justin/Source/opencode-config`. Base commit: `ad1604f`. Tree clean at start.
+- VERIFY_TEST: `node --experimental-default-type=module --test tests/*.test.mjs` (Node v22.22.1;
+  baseline 36 pass / 0 fail). Separate from VERIFY_TYPES — not a combined gate; 4a and 4b run
+  independently.
+- VERIFY_TYPES (syntax-only, not a static typecheck): the `node --check` loop over
+  `plugins/*.js lib/*.js tests/*.mjs` from the Verify gate section (baseline green). Also
+  `git diff --check` (baseline green).
+- Parser command: JSONC via the runtime's own loader, `opencode debug config` (JSONC is not strict
+  JSON; no standalone JSONC parser is installed, and comment-stripping is forbidden). Agent
+  frontmatter via `opencode debug agents` plus PyYAML 6.0.3 `yaml.safe_load` on the frontmatter
+  block. Pre-patch snapshots at `/tmp/opencode/s1/{config,agents}.before.json` (outside repo).
+- CLI version: `opencode v2.2.5`. Private-server and managed plugin-package versions: not yet
+  recorded (S3 task).
+- Edit-policy confirmation (Approved edit policy): **owner confirmed the full ten-file patch** on
+  2026-11-03 ("1 is fine"), after being told the consequence (build may edit via the live
+  `~/.config/opencode/` path without prompting). Owner added a follow-on intent: after this work,
+  general `@build` agents should not have uncontrolled write access to `~/.config/opencode` or
+  `~/Source/opencode-config/`; they attribute the earlier deny to remnants of a salt-based
+  two-step change procedure. That follow-on is NOT part of this graph and was not authorized as a
+  patch-scope change; it is recorded under Discoveries & risks as an owner-owned open item.
+- Live budget and protocol: **UNSET / UNAPPROVED**. S4 stays blocked.
 
 | # | Session | Status | Commit | Froze |
 |---|---|---|---|---|
@@ -287,6 +308,12 @@ protocol. Current approval is **plan-file creation only**.
   storage adapter or telemetry subsystem is additive-reshard, not an incidental docs edit.
 - **Global-hint correction needed — human approval gate.** Record a precise proposed correction;
   use /note or /session-end with per-item approval. Do not silently include AGENTS-HINTS.md.
+- **Post-closeout edit-policy intent — open, owner-owned (recorded 2026-11-03).** Owner stated that
+  after this work general `@build` agents should not have uncontrolled write access to
+  `~/.config/opencode` or `~/Source/opencode-config/`. The reviewed patch (S1) does the opposite
+  for the live-path deny and leaves `build`'s `edit * allow`; the owner confirmed the patch
+  anyway. A narrower policy needs a separate owner-approved change; surface at exit as a closeout
+  exception, do not implement under this graph.
 - **Optional hardening — deferred.** Saved-allow versus deny measurement; shell restrictions for
   read-only agents; general's edit policy; environment-file read policy; obsolete no-op rules and
   sampling variants. Preserve findings, but do not turn these into migration prerequisites.

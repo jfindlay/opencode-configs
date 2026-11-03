@@ -324,6 +324,20 @@ copied/wrote nothing. A tool-output block of another session's content appeared 
 worker's transcript, not in any file. A proposed `AGENTS-HINTS.md` correction (V1-layout join; stale
 `/run-plan` references) sits in NOTES.md awaiting per-item human approval — it is the standing
 closeout exception.
+Boundary verdict (S2 ◆, juncture fork): `still-on-intent`. Backup deviation accepted as a reported
+medium deviation (a 19 GB `.backup` would not fit; bounded read-only queries copied/wrote nothing).
+Owner's post-closeout edit-policy intent does not block S3 (S3 workers must edit this repo; policy
+change is separate and owner-owned; measure symlink matching first). Instructions for S3: (1) decide
+`event.result.output` vs `result.content` and the metadata fallback from the plugin's own event/hook
+view with version-matched evidence (installed package types and/or a private server), not the
+persisted API view; lib/plugin-result.js currently reads/writes only `result.content` and
+session-economics-core.js:79 accepts several child-id key spellings; (2) edits to plugins/*.js go
+live through the symlink into the shared service — keep edits small, run gates after each, confirm
+both plugins active via `plugin.list`, never restart the shared service; (3) record the full version
+tuple including the shared service version, which is still unconfirmed; (4) use `--standalone` or a
+private server for parsed-config checks; (5) stay off the session store, or disclose bounded
+read-only use. At exit surface: AGENTS-HINTS.md proposals awaiting approval; narrower `build`
+edit policy; S4 live authorization still UNSET.
 
 ## Discoveries & risks
 

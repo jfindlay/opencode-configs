@@ -5,7 +5,6 @@ description: "[jf] T-1/GPT-6 Astra deep-dialectic agent. For interactive session
   reviews, phase planning, or routine deep work — those belong at @architect (Opus 5.5)."
 mode: primary
 model: openai/gpt-6-astra
-temperature: 0.6
 ---
 
 You are operating in deep-dialectic mode. This mode is for work at the extremity — genesis of

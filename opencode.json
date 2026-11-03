@@ -96,12 +96,9 @@
     { "action": "shell", "resource": "./venv/bin/mypy *", "effect": "allow" },
     { "action": "shell", "resource": "venv/bin/python -m py_compile *", "effect": "allow" },
     { "action": "shell", "resource": "./venv/bin/python -m py_compile *", "effect": "allow" },
-    // Edits to ~/.config/opencode/ are denied: it's a runtime mirror populated by salt
-    // (see AGENTS.md). All edits must land in workstation-salt and propagate via state.apply.
     // `edit` covers edit/write/patch in V2, so the old separate edit+write maps (which were
     // identical) collapse into one action without changing behavior.
     { "action": "edit", "resource": "*", "effect": "ask" },
-    { "action": "edit", "resource": "~/.config/opencode/**", "effect": "deny" },
     // Allow read-only access to the user-level OpenCode config dir so agents can load
     // AGENTS-*.md, STYLE-*.md, etc. on-demand without an external_directory prompt per file.
     { "action": "external_directory", "resource": "*", "effect": "ask" },
@@ -119,12 +116,11 @@
   ],
   "agents": {
     // Architect mode: read-only by default (global), but allows writes to rolling-context docs
-    // without prompting. The deny comes before the docs allows so the docs allows win
-    // (last-match-wins); the deny still blocks all other ~/.config/opencode/** paths.
+    // without prompting. The ask comes before the docs allows so the docs allows win
+    // (last-match-wins).
     "architect": {
       "permissions": [
         { "action": "edit", "resource": "*", "effect": "ask" },
-        { "action": "edit", "resource": "~/.config/opencode/**", "effect": "deny" },
         { "action": "edit", "resource": "**/docs/PLAN.md", "effect": "allow" },
         { "action": "edit", "resource": "**/docs/NOTES.md", "effect": "allow" },
         { "action": "edit", "resource": "**/docs/ROADMAP.md", "effect": "allow" }
@@ -137,12 +133,9 @@
       "disabled": true
     },
     // Build mode: inherits global permissions, but allows edits without prompting.
-    // The ~/.config/opencode/** deny is preserved here — runtime edits must always go
-    // through workstation-salt regardless of agent.
     "build": {
       "permissions": [
-        { "action": "edit", "resource": "*", "effect": "allow" },
-        { "action": "edit", "resource": "~/.config/opencode/**", "effect": "deny" }
+        { "action": "edit", "resource": "*", "effect": "allow" }
       ]
     }
   }

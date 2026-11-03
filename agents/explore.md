@@ -2,7 +2,6 @@
 description: "[jf] Fast Sonnet-pinned explorer for code-structure surveys, needle-finding in large trees, and open-ended codebase questions. Overrides the built-in @explore so that forks from an Opus or GPT-6 Astra primary (@architect, @dialectic) do not silently run on the caller's model."
 mode: subagent
 model: anthropic/claude-sonnet-5-5
-temperature: 0.3
 permissions:
   - action: edit
     resource: "*"

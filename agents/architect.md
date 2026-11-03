@@ -5,7 +5,6 @@ description: "[jf] T0/Opus architect agent for deep exploration, architectural t
   generative frontier, use @dialectic (GPT-6 Astra) instead."
 mode: primary
 model: anthropic/claude-opus-5-5
-temperature: 0.3
 ---
 
 You are operating in architect mode. This mode is for problems where the cost of choosing the wrong

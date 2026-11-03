@@ -1,0 +1,347 @@
+# PLAN — finish the OpenCode V2 configuration upgrade
+
+Status: proposed graph, written with user approval; not executed. Approval to write this file does
+not authorize the permission change, paid validation, or commits. Review before execution.
+
+Working repository: `~/Source/opencode-config` (singular). This file owns the closeout execution
+graph. `PLAN.md` retains the economics design, historical evidence, and authorization record;
+it is not replaced. No ROADMAP is needed for this bounded closeout.
+
+## Purpose (design intent)
+
+Finish the V2 migration without redoing completed conversion or expanding it into a security
+redesign. Land the permission-study patch, reconcile integration guidance with verified V2 behavior,
+and establish that the already-ported plugins work on the chosen runtime.
+
+Confirmed starting facts:
+
+- Native permission arrays, agent/command directory conversion, and both plugin ports are present.
+- The completed permission graph measures 2.2.5. The installed CLI also reported 2.2.5 during this
+  investigation; the shared service version was not independently checked.
+- `../opencode-permtest/patches/opencode-config.diff` passes `git apply --check` at config HEAD
+  `f51798e`. It removes nine agent temperatures and three live-config edit denies, nothing else.
+- On 2.2.5, obsolete temperature fields are ignored and the tested agent permissions are enforced.
+  The permissions-disabling behavior was measured on 2.0.32, not reproduced on 2.2.5.
+- Both plugins loaded on a fresh 2.0.32 private server. Real child attribution, event timing, and
+  persisted advisory delivery remain unverified. No current plugin defect is yet established.
+
+Authoritative evidence: `../opencode-permtest/docs/FINDINGS.md`, especially its evidence classes and
+patch description; the closing ledger in `../opencode-permtest/docs/PLAN.md`; and `PLAN.md`'s V2
+verification section. Historical incident explanations remain inferred, not proven.
+
+Done means: the approved patch is integrated; current integration instructions are checked and
+corrected where needed; deterministic gates pass; bounded live plugin acceptance is recorded with
+version and evidence. Without live authorization, stop at offline-complete, not migration-verified.
+
+Excluded: new permission probes, broad hardening, model-tier changes, sampling restoration, capacity
+estimation, cache-TTL research, an economics-report tool, a new shell guard, context management, and
+claims of economic savings. Preserve the existing economics exclusions and observe-only default.
+
+## Verify gate
+
+Proposed bindings, approved for inclusion in this plan; the executor must verify availability and
+record the actual bindings before its first row. No gate was run while writing this plan.
+
+```sh
+# VERIFY_TEST — existing native Node runner, no package-manager scripts required.
+node --experimental-default-type=module --test tests/*.test.mjs
+
+# VERIFY_TYPES — syntax-only companion; this repository has no configured static typecheck gate.
+for file in plugins/*.js lib/*.js tests/*.mjs; do
+  node --experimental-default-type=module --check "$file" || exit
+done
+```
+
+Run from the config repository with the shell tool's workdir parameter. Also require
+`git diff --check` and the row-specific checks below. Calling the second binding VERIFY_TYPES does
+not establish type safety. If installed Node cannot run these commands, stop to agree a replacement;
+do not add dependencies or modify the runtime-managed manifest to make a gate exist.
+
+Config checks additionally parse JSONC and agent YAML with available, verified parsers and compare
+the exact intended rule/frontmatter delta. Do not parse JSONC by naively stripping comment text.
+Record the exact parser invocation in the ledger; absence of a parser is not a passed check.
+
+Live validation is outside these deterministic gates. No row before S4 authorizes paid test calls.
+Ordinary implementation-agent usage is distinct from the separately budgeted validation workload.
+
+## Session list
+
+| # | Session | Cat | Tier | Consumes | Expected files |
+|---|---|---|---|---|---|
+| S1 | Land the reviewed permission-config patch | B | T1 | Evidence baseline; approved edit policy | `opencode.json`; `agents/{architect,dialectic,explore,general,git-editor,plan-admin,plan-juncture,session-scan,verify}.md` |
+| S2 | Reconcile V2 migration and integration guidance ◆ | I | T1 | Integrated config | `PLAN-V2-MIGRATION.md`; `PLAN-V2-PERMISSIONS.md` if still tracked; `PLAN.md`; `commands/config-retrospective.md`; `NOTES.md`; `AGENTS-LOG.md` |
+| S3 | Verify plugin adapters and fix demonstrated compatibility defects | B | T1 | Integrated config; checked integration guidance | `plugins/no-interactive-editor.js`; `plugins/session-economics.js`; `lib/plugin-result.js`; `lib/session-economics-core.js`; `tests/no-interactive-editor.test.mjs`; `tests/plugin-result.test.mjs`; `tests/session-economics.test.mjs`; `tests/plugin-context.mjs`; `PLAN.md` |
+| S4 | Record bounded live plugin acceptance ◆ | I | T1 | Verified plugin adapters; live authorization | `PLAN.md`; `NOTES.md`; `AGENTS-LOG.md` |
+
+Execution order: `S1 -> S2 ◆ -> S3 -> S4 ◆`. Expected files bound scope; not every path needs changes.
+This graph's ledger/digest updates are separate driver-owned bookkeeping.
+
+Sizing: ambient complexity is modest, but runtime adapters and live global settings have high
+cost-of-error. The ten-file patch is one irreducible, already-reviewed change. Its breadth does not
+justify splitting identical temperature deletions. Strong deterministic tests favor a separate
+offline plugin session; weak live-test determinism requires keeping all comparable observations in
+one bounded validation session. Documentation reconciliation has its own independently green result.
+The split costs startup overhead but keeps uncertainty and paid validation out of the patch session.
+All rows are single-stage; there is no material, separable compliance tail warranting F/C. No new
+substrate needs an @architect inflection. Contract-changing discoveries still require review.
+
+## Session detail
+
+### S1 — Land the reviewed permission-config patch
+
+Before applying, obtain explicit confirmation of this consequence: removing the edit denies allows
+`build` to edit the live `~/.config/opencode` directory without an approval prompt. The removal was
+previously chosen by the owner, but the final study explicitly left this consequence to reconfirm.
+If declined, revise the patch scope with the owner; do not silently substitute another policy.
+
+Recheck the patch against the actual clean tree. Apply only its ten-file delta. Keep all unaffected
+rules in order and preserve model pins, prompts, external-directory rules, and other settings.
+Do not add a blanket deny workaround or claim temperature removal fixes security on 2.2.5.
+
+Known-answer checks:
+
+- No active agent frontmatter retains `temperature`; the committer was already clean.
+- Exactly the three specified config-path edit denies and associated obsolete comments disappear.
+- Parsed permissions, agent settings, and frontmatter differ only by the approved patch delta.
+- Existing tests and syntax checks pass. No live permission probe runs against the real config.
+
+Freeze **Integrated config**. Commit the patch separately from documentation and unrelated work.
+
+### S2 — Reconcile V2 migration and integration guidance
+
+Replace current warnings that assert broken subagent denies with the version-scoped findings.
+Distinguish loaded-config verification from attempted-call measurements. Preserve the historical
+incident as history; do not retrofit certainty into its explanation. Record completion of the
+permission investigation and integrated patch before retiring `PLAN-V2-MIGRATION.md`. Confirm the
+superseded staging plan is removed; see the clean-tree bootstrap below.
+
+Validate `commands/config-retrospective.md`'s database/API assumptions, not just its terminology.
+Prefer supported V2 read APIs for discovery. If database inspection is needed, make a consistent
+backup with an appropriate SQLite backup mechanism, then inspect read-only; do not copy a live WAL
+database piecemeal. Do not write, delete, or repair the live store. Keep private transcript data out
+of committed evidence. Verify session linkage, message/tool outcome representation, timestamps,
+cost fields, and the claim about permission-event visibility against the actual source used.
+
+If the crib remains valid, record that bounded verification without cosmetic rewrites. If not,
+correct the command to a demonstrated V2 query/API recipe. Do not build a generic telemetry system.
+`AGENTS-HINTS.md` has related historical schema guidance: propose any necessary correction in
+`NOTES.md`, but do not edit that file without separate per-item /note or /session-end approval.
+An unresolved conflicting active instruction must remain visible as a closeout exception.
+
+Reconcile the active handoff in `PLAN.md`: plugin ports and initial loading are done; real V2
+delivery remains pending. Label V1 SDK references as historical, remove already-fixed items from
+the active next-work list, and correct unconditional restart advice to current reload guidance.
+Retain the economics design, corrected pilot history, authorization record, and unrelated deferrals.
+Append a concise V2 migration entry to `AGENTS-LOG.md`; do not rewrite its historical entries.
+
+Known-answer checks: a current V2 sample can be inspected with the documented recipe; linkage and
+outcome interpretation agree with the API/evidence. Every remaining open migration item has a named
+owner/gate. No active summary presents 2.0.32-only findings as 2.2.5 facts. Changed durable prose
+passes the register check. Freeze **Checked integration guidance**.
+
+### S3 — Verify plugin adapters and fix demonstrated compatibility defects
+
+Use the runtime's public V2 contracts and installed package types. Record CLI, private-server,
+and managed plugin-package versions; version skew alone is not proof of a defect. Do not upgrade or
+commit runtime-managed packages, lockfiles, or service configuration.
+
+Inspect the two existing plugins rather than porting them again. Verify event envelopes, location
+filtering, step identities/costs, child-result identifiers, session metadata, hook result structure,
+registration, and cleanup. Specifically resolve `event.result.output` versus `result.content` and
+the metadata fallback in child-ID extraction using version-matched evidence. Do not change it from
+an inference alone. Extend regression tests for demonstrated gaps; keep pure helpers outside plugin
+discovery. Record a no-change result if the adapters are already correct.
+
+Known-answer checks cover explicit child attribution; no sole-child guessing; background dispatch
+not counting as completion; duplicate/out-of-order accounting; missing data staying unavailable;
+location exclusion; bounded notices; failure isolation; output/metadata/attachment preservation;
+off/observe/advisory behavior; and subscription cleanup. Observe must not alter model-visible
+results. Capacity remains unavailable. Do not equate synthetic tests with persisted delivery proof.
+
+Freeze **Verified plugin adapters**, including the live acceptance checklist and version tuple.
+If no source change is necessary, commit the verified contract/evidence update to `PLAN.md`; do not
+manufacture code changes to produce a commit. Changes to core economics semantics require review.
+
+### S4 — Record bounded live plugin acceptance
+
+**Blocked until Live authorization is explicit.** No previous pilot budget or approval carries over.
+Record the approved dollar ceiling, model/provider, maximum dispatches/retries/steps, token limits,
+timeout, test modes, and exact disposable scenarios before any paid validation request. Budget must
+include parent, child, auxiliary, retry, and status-check model usage. Use an independent accounting
+source, not the monitor under test, and disclose any unobservable usage. If a credible bounded-spend
+protocol cannot be established, do not launch. A local timeout alone is not a cost guarantee.
+
+Workspace side effects must stay in a disposable sandbox, such as
+`../opencode-permtest/scenarios/v2-closeout/sandbox/`, never real user worktrees or live config.
+Use an isolated config copy and private server, reusing the study's verified isolation approach.
+Do not copy credentials or `service.json` into committed artifacts, clear shared saved approvals,
+restart the shared service, enroll existing sessions, or run real project workloads. No network
+mutation, push, or permission-bypass probe belongs in this session. Temporary artifacts stay outside
+the config commit's expected files; persist only sanitized evidence and necessary regression cases.
+
+Within one unchanged version tuple:
+
+1. Confirm both plugin IDs are active and observe-mode initialization succeeds. Verify the editor
+   environment hook and unload/reload cleanup without model calls where the API permits it.
+2. Exercise a bounded foreground worker with known direct-parent/role metadata and a background
+   control. Establish actual event/tool-return ordering; background dispatch must not emit a false
+   completed-child report.
+3. Compare observed step IDs/cost contributions against finalized API records for the same interval.
+   Labels must disclose attachment-time coverage and any final events still in flight; do not demand
+   lifetime totals or count descendants/auxiliary requests as worker primary steps.
+4. Exercise advisory mode using disposable test configuration. A temporary low threshold may live
+   only in the disposable copy; record that delta and do not change production thresholds. Verify
+   persisted content, preserved results/attachments, no duplicates, and next-step visibility.
+5. Record failures, exclusions, spend, version tuple, and accepted limitations. A smoke test proves
+   compatibility only, not savings or comprehensive permission enforcement.
+
+Do not expand a failed check into an unbounded repair loop. A demonstrated adapter defect adds a
+bounded fix-and-retest row through discovery handling; stop paid work until the revised protocol and
+remaining budget are approved. Freeze **Live acceptance** only after the actual checks pass.
+
+Update V2 acceptance in `PLAN.md` and append the implementation outcome to `AGENTS-LOG.md`.
+Preserve unrelated economics follow-ups; retire that plan only after its own remaining obligations
+are accepted or explicitly deferred. Keep this graph through the final ledger/review checkpoint.
+Run the register check over changed durable files before the final boundary review.
+
+## Cross-session contracts
+
+### Evidence baseline — prose-enforced
+
+Defined before execution by the completed permission study; consumed by S1 and all later rows.
+Evidence is version-scoped and retains confirmed/inferred/unmeasured labels. Parent agent permission
+rules are not child agent rules. This statement does not generalize to every session-scoped API
+override. No new claim that a saved allow cannot defeat a deny is empirically established here.
+
+### Approved edit policy — prose-enforced, not yet authorized
+
+Defined by explicit owner confirmation before S1; consumed by S1. Covers unprompted live-config
+editing by build after removing the three denies. Writing or approving this graph is not that
+confirmation. Record the owner's decision in the ledger header.
+
+### Integrated config — test/prose-enforced; to be frozen at S1
+
+Defined in S1; consumed by S2, S3, and S4. The approved patch is parsed and reviewed, unrelated
+rule ordering/settings are preserved, and source changes are committed independently of docs.
+
+### Checked integration guidance — test/prose-enforced; to be frozen at S2
+
+Defined in S2; consumed by S3 and S4. Current migration status and the retrospective's demonstrated
+data-access recipe are accurate. Historical evidence remains labeled and pending permissions or
+captures remain explicit. The economics design and authorization history survive reconciliation.
+
+### Verified plugin adapters — test/prose-enforced; to be frozen at S3
+
+Defined in S3; consumed by S4. Existing JS interfaces and deterministic tests establish conservative
+accounting/delivery behavior for the recorded runtime contract. No compiler-enforced contract is
+claimed: the repository's JavaScript gate is not a static typecheck. Synthetic evidence is not live
+delivery evidence. Observe-only mode, unavailable capacity, and bounded metadata remain invariant.
+
+### Live authorization — prose-enforced, not yet authorized
+
+Defined by the owner before S4; consumed only by S4. Budget: **UNSET**. Protocol: **UNAPPROVED**.
+Approval must name scope and bounded dispatch limits; no inferred authorization from a plan resume.
+An unresolved gate leaves S4 pending and the final outcome offline-complete, not fully verified.
+
+### Live acceptance — evidence/prose-enforced; to be frozen at S4
+
+Defined in S4; consumed by final review. Sanitized recorded observations demonstrate plugin loading,
+attribution/accounting and persisted advisory delivery on the stated version tuple. Partial totals
+are labeled, untested properties remain untested, and no savings or stronger sandbox claim is made.
+
+## Progress ledger
+
+Bindings and approvals to record before use: workdir; base commit; VERIFY_TEST; syntax-only
+VERIFY_TYPES; parser command; CLI/server/plugin versions; edit-policy confirmation; live budget and
+protocol. Current approval is **plan-file creation only**.
+
+| # | Session | Status | Commit | Froze |
+|---|---|---|---|---|
+| S1 | Land the reviewed permission-config patch | pending | — | — |
+| S2 | Reconcile V2 migration and integration guidance | pending | — | — |
+| S3 | Verify plugin adapters and fix demonstrated compatibility defects | pending | — | — |
+| S4 | Record bounded live plugin acceptance | pending | — | — |
+
+## Action-frame digest
+
+*(none yet)*
+
+## Discoveries & risks
+
+- **Dirty starting tree — execution HALT.** At planning time `PLAN-V2-MIGRATION.md` and
+  `multisession/multi-session-planning.md` were dirty; `PLAN-V2-PERMISSIONS.md` and `service.json`
+  were untracked. Preserve all content until explicitly dispositioned. This new plan adds another
+  untracked file. The /plan-run fresh-plan exception does not cover the other dirty files.
+- **Version drift — destructive-HALT for evidence reuse.** Freeze and record the validation tuple.
+  A different runtime does not invalidate source automatically, but requires explicit re-baselining
+  before applying old behavioral claims or comparing live observations. Do not silently disable
+  updates or retain an old release indefinitely; controlled upgrades trade speed for reproducibility.
+- **Permission intent declined — destructive-HALT.** Reconcile with the owner before policy changes.
+- **Runtime-managed incompatibility — additive-reshard or HALT.** Surface the actual incompatible
+  API/package; no package-manager churn or service edits under this graph's source-file scope.
+- **Plugin defect preserves existing contracts — internal-continue in S3.** Fix with a regression
+  test. Changed accounting semantics or a larger lifecycle design requires juncture review.
+- **Live defect or uncertain spend — stop paid work; additive-reshard.** No automatic retry budget,
+  no real workload substitute, and no paid check when the gate is unresolved.
+- **Retrospective schema differs — internal-continue if a bounded supported recipe suffices.** A new
+  storage adapter or telemetry subsystem is additive-reshard, not an incidental docs edit.
+- **Global-hint correction needed — human approval gate.** Record a precise proposed correction;
+  use /note or /session-end with per-item approval. Do not silently include AGENTS-HINTS.md.
+- **Optional hardening — deferred.** Saved-allow versus deny measurement; shell restrictions for
+  read-only agents; general's edit policy; environment-file read policy; obsolete no-op rules and
+  sampling variants. Preserve findings, but do not turn these into migration prerequisites.
+
+## Notes for executors
+
+### Clean-tree bootstrap and permissions
+
+Use an interactive @build session to inspect and explicitly disposition the pre-existing dirty work
+before invoking /plan-run. Do not stash, reset, discard, or fold it into the patch automatically.
+The owner can authorize separate commits for existing tracked edits. Review and remove the
+superseded untracked staging plan before chain startup; if it has become tracked, S2 may delete it.
+Retain `service.json` as runtime state, never commit it; agree an appropriate local exclusion with
+the owner if it blocks clean-tree preflight. Do not print its potentially sensitive values.
+Commit this plan separately with approval, or use the driver's documented fresh-plan initialization
+only after other preflight dirt is resolved. This write authorized no commits or cleanup.
+
+Edits in this repository are live through `~/.config/opencode`. Use the repository path, preserve
+unrelated settings, and review each diff. Load the OpenCode skill and relevant V2 documentation
+before implementation; the current docs may differ from the measured version. Never use the combined
+legacy/native schema alone to decide V2 behavior. Do not run /plan-run from the permtest repository.
+
+The @plan-admin driver owns sequencing, gates, and ledger commits. Use T1 implementation workers
+(@build or @general); investigation may fork @explore read-only. T0 @plan-juncture handles the
+boundary/discovery workflow. Use @committer for approved autonomous-chain commits; never push.
+
+The driver must pass the pending human authorization gates explicitly. Its discretion to continue
+after a technical boundary review cannot supply a budget, approve a policy change, or waive a gate.
+General does not inherit build's edit allow; do not bypass prompts with broad saved approvals.
+
+### Register and evidence
+
+State properties, reasons, or invariants directly in source, tests, and durable docs. Plan coordinates
+belong only in rolling docs, ledger/digest, and commit messages. Apply this in every dispatch; no change
+to the universal AGENTS.md is authorized just to seed the rule.
+
+Anneal denylist for changed durable text: session-coordinate references matching `\bS[1-4]\b`,
+`◆`, `frozen contract`, `sub-track`, and references to this closeout plan. Classify hits rather than
+blindly deleting legitimate domain literals or historical changelog entries. Exclude rolling plans
+and NOTES from the scan. Document generation commands legitimately describing the planning subsystem
+are not leaks; new implementation explanations must nevertheless stand on their own.
+
+Keep evidence compact: exact commands and versions, outcomes, sanitized identifiers when needed,
+coverage boundaries, and residual risks. No secrets, raw user transcripts, fabricated test counts,
+or model self-report substituted for observed behavior. Capture new costly-to-lose findings in
+NOTES rather than enlarging the universal guidance without approval.
+
+### Handoff
+
+After review, clean-tree preparation, and explicit permission-policy confirmation, execute from
+@plan-admin in `~/Source/opencode-config`:
+
+```text
+/plan-run PLAN-V2-CLOSEOUT.md halt-at-boundaries
+```
+
+Do not launch S4 until its independent authorization is recorded. Pause for human review after the
+final boundary; retain the ledger until its evidence and residual obligations have accepted homes.

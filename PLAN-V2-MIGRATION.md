@@ -78,18 +78,80 @@ semantics), and the published schema at `https://opencode.ai/config.json`.
   match the source files' rule counts exactly.
 - `git status`/`git diff --stat` confirm every rename was tracked as a move (not delete+add), so
   history is preserved.
-- **Not yet done**: no running OpenCode instance was restarted against this config in this session.
-  The schema/doc-level verification above is strong but is not the same as confirming the service
-  actually loads this file and resolves a representative sample of rules (e.g., a `git push` attempt
-  from `@git-editor` still denies, `@explore` still can't write) the way it did before. Recommend an
-  `opencode service restart` plus one smoke check per agent file touched (`@committer`,
-  `@git-editor`, `@explore`, `@verify`, `@session-scan`) before treating this as fully closed.
+
+### Live verification after service restart — FOUND A REGRESSION (not in our config; in the engine)
+
+Ran smoke tests against a restarted OpenCode 2.0.32 instance: direct self-test of the
+`~/.config/opencode/**` edit-deny (global rule, primary session), plus forked-subagent probes on
+`@general`, `@explore`, `@verify`, `@session-scan`, `@committer` that actually executed tool calls
+(shell commands, Write, webfetch, question) rather than reasoning about them.
+
+Results:
+
+| Layer | Context | Result |
+|---|---|---|
+| Global top-level deny (`shell: grep *`) | forked subagent (`@general`) | enforced correctly |
+| Global top-level allow (`question: *`) | forked subagent (`@general`) | enforced correctly |
+| Agent-level override, `opencode.json` `agents.build` | primary session (self-test) | enforced correctly |
+| Agent-level override, markdown frontmatter `permissions:` | forked subagent (`@session-scan`, `@committer`) | **NOT enforced** — Write/git push/webfetch all succeeded despite explicit `deny` rules |
+| Agent-level override, moved the same rule into `opencode.json` `agents.committer.permissions` | forked subagent (`@committer`) | **NOT enforced** — rules out frontmatter YAML parsing as the cause |
+
+**What is established**: the forked `committer` and `session-scan` subagents performed operations
+their own `deny` rules forbid. That is solid, because the files they wrote existed on disk
+afterwards. So their deny rules were not enforced in those runs.
+
+**What is NOT established** (corrected after review): *why*. The earlier reading — "subagents use
+global rules only" — has confounds. The subagent cannot see approval prompts, so "no prompt" is
+uninformative. A configured deny and a user Reject both return `permission.rejected`. And
+"global only" and "inherits the parent session's agent rules" predict identical outcomes for every
+probe run (the parent session allows edits). Full analysis and the discriminating test design:
+`PLAN-V2-PERMISSIONS.md`.
+
+**Practical impact — treat these subagents' deny rules as unenforced until measured**:
+
+- `@committer`: all three of its explicit denies (`git push`, `webfetch`, `edit`) were bypassed in
+  the live test. It currently has no engine-enforced restriction when forked.
+- `@session-scan`: its `edit *: deny` was bypassed (Write succeeded).
+- `@verify`: not directly confirmed — it refused the probe on its own judgment (correctly treating
+  the test framing as a possible prompt-injection attempt) before any tool call was attempted, so
+  no tool-level result was observed. Given it shares the identical shape (non-built-in ID, `mode:
+  subagent`, frontmatter-only `permissions:`) with the two confirmed-broken agents, assume it has
+  the same gap until proven otherwise.
+- `@explore` is incidentally fine: it overrides the *built-in* `explore` agent ID, which carries a
+  separate hardcoded restrictive default policy (per the V2 permissions doc's "Defaults" table)
+  that doesn't depend on our config merging correctly. This is a coincidence of naming, not a
+  property of our fix.
+- `@git-editor` is `mode: primary`, so based on the one confirmed-working primary-agent-override
+  test (`build`'s `~/.config/opencode/**` deny), its own frontmatter denies (git push, webfetch)
+  are expected to still work. Not directly tested (primary-mode agents can't be forked from this
+  session to probe) — recommend a direct manual check by switching to `@git-editor` and attempting
+  `git push`.
+
+No test artifacts were left behind: the temporary `opencode.json` control override was reverted,
+and all `/tmp/opencode/*-permission-test.txt` scratch files were removed. `git status` is clean.
 
 ## Progress
 
 - [x] Mechanical renames and deprecated-field renames.
-- [x] `tools:` regression fixed on the three affected subagents.
+- [x] `tools:` regression fixed on the three affected subagents *in config*.
 - [x] Global and per-agent permission blocks converted to native V2 arrays.
 - [x] Directory layout renamed and live cross-references updated.
-- [ ] Live verification after a service restart (see "Verification performed" above).
-- [ ] Retire this file once live verification passes and the diff has been reviewed/committed.
+- [x] Live verification after a service restart: forked subagents' own deny rules were not
+  enforced (see above); the cause is unresolved.
+- [ ] Run the permission test harness in `PLAN-V2-PERMISSIONS.md`: S0 bootstrap by hand (it
+  creates `~/Source/opencode-permtest`), then `/plan-run docs/PLAN.md halt-at-boundaries` from
+  `@plan-admin` there. It also covers the `@git-editor` primary check (via `opencode run --agent`),
+  `@verify` (with a neutral-prompt override, so a refusal can't mask the result), and whether the
+  `~/.config/opencode/**` edit deny matches through the symlink at all.
+- [x] Harness S0–S5 done (2026-10-31). Confirmed: a `temperature:` field in agent frontmatter
+  disables that agent's `permissions` list (primary agent, 4/4 conditions), which is the leading
+  explanation for the unenforced `committer`/`session-scan` denies. The chain was re-scoped to
+  configuration verification: S6 (subagent resolution), S10 (patched-copy verification of the real
+  agents), S11 (findings + final patch). Decided patch content: delete `temperature` from every
+  agent; remove the `~/.config/opencode/**` edit deny and its stale workstation-salt comments.
+- [ ] Delete the staging copy `PLAN-V2-PERMISSIONS.md` (superseded by
+  `~/Source/opencode-permtest/docs/PLAN.md` since S0).
+- [ ] Apply the harness's proposed `opencode-config` patch (separate, reviewed session). Until
+  then, treat `@committer`/`@verify`/`@session-scan` as **not sandboxed**: their restrictions rest
+  on the model's own judgment, not on the engine.
+- [ ] Retire this file once the patch is applied and the diff has been reviewed/committed.

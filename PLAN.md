@@ -1,22 +1,37 @@
 # PLAN — session economics safeguards, without context garbage collection
 
-Status: guidance implemented; both plugins ported to V2 with fresh-server loading verified.
-Paid accounting/delivery verification remains pending. ALIGN execution did not establish plugin
-compatibility or savings; its corrected retrospective remains below. Owner: `@build` for reporting.
+Status: guidance implemented; both plugins ported to V2 and initial loading verified (fresh
+2.0.32 private server; active in the 2.2.5 background service on 2026-11-03). Real V2 delivery is
+still pending: child attribution, event timing, persisted advisory delivery and final accounting
+reconciliation are unverified, and no paid check is currently authorized. ALIGN execution did not
+establish plugin compatibility or savings; its corrected retrospective remains below.
+Owner: `@build` for reporting and for the offline adapter checks; any paid live check needs a fresh
+owner authorization with a bounded spend arrangement first.
 This file is an interactive build handoff, not a `/plan-run` ledger or authorization to commit.
 
-## V2 migration verification (2026-10-17)
+## V2 migration verification (2026-10-17, runtime 2.0.32)
 
-Installed runtime and managed plugin package are both 2.0.32. Both plugins default-export
-`Plugin.define` definitions. The editor uses `shell.create.before`; economics uses the public
-`session.step.ended` stream and `tool.execute.after`. Helpers remain outside plugin discovery.
+Installed runtime and managed plugin package were both 2.0.32 at the time. Both plugins
+default-export `Plugin.define` definitions. The editor uses `shell.create.before`; economics uses
+the public `session.step.ended` stream and `tool.execute.after`. Helpers remain outside plugin
+discovery.
 
 Verification: `node --experimental-default-type=module --test tests/*.test.mjs` passes. Tests cover
 the installed completed-step schema, duplicate/stale events, modes, role/parent/location checks,
 output preservation, failure isolation and subscription cleanup. A fresh private server reports both
 local plugin IDs active through `plugin.list`, and emits the economics `initialized` diagnostic with
 `mode=observe`. Private-server reload alone retained an old module error; a fresh process resolved it.
-The shared service was not restarted. Restart it after this session to load the migrated modules.
+The shared service was not restarted in that session.
+
+Current status (2026-11-03, runtime 2.2.5): the background service lists both local plugin IDs
+(`no-interactive-editor`, `session-economics`) with `state.status` `active` for this repository
+(`opencode api GET "/api/plugin?location[directory]=<repo path>"`). That shows the modules loaded,
+not that their hooks fire or deliver. Reload guidance from the V2 plugin docs: edits under watched
+config directories reload automatically and replace the active plugin generation; restart
+(`opencode service restart`) only after a change to an unwatched local dependency or a package
+version. Whether edits made through the `~/.config/opencode` symlink are watched has not been
+measured, so after changing plugin code confirm through `plugin.list` that the module is active
+(and the new behavior present) before relying on it; restart the service only if it is not.
 
 User-approved limitation: capacity is explicitly unavailable until the V2 usable-context formula is
 verified. The old 32,000-token reserve and model lookup are removed, not carried forward as facts.
@@ -63,6 +78,11 @@ Do not infer wasted work from spend, repeated reads, or a long context alone.
 
 ## Implementation sequence
 
+Historical design record written against the V1 runtime (1.18.31) and its SDK; steps 1–2 are
+implemented, and the V1 SDK/hook/source references here and in the sections below are not V2 API
+guidance. The V2 contracts in use are in the verification section above; real V2 delivery is the
+only part still open (see the active handoff and Progress).
+
 ### 1. Consolidate guidance in existing homes
 
 Expected files:
@@ -101,8 +121,9 @@ Expected new files: `plugins/session-economics.js`, `tests/session-economics.tes
 Keep tests outside the auto-discovered plugin directory. Prefer one dependency-free implementation
 module, matching the existing JavaScript plugin. Do not introduce a framework or configuration file.
 
-Before coding, verify installed runtime/SDK versions and hook contracts. Investigation found runtime
-1.18.31 but local plugin/SDK 1.15.3. Use supported SDK/events, not production reads of `opencode.db`.
+Before coding, verify installed runtime/SDK versions and hook contracts. (V1 era: investigation
+found runtime 1.18.31 but local plugin/SDK 1.15.3.) Use supported SDK/events, not production reads
+of `opencode.db`.
 Do not update or commit OpenCode-managed `package.json`, lockfiles, or `node_modules` to fix skew.
 If a required contract differs, report the narrow incompatibility before expanding this design.
 
@@ -163,9 +184,10 @@ If unsupported, use the available native runner and record the exact command her
 add a package manager/build system. Validate plugin loading against the installed runtime separately.
 
 Run deterministic tests first. The user-approved exception below uses real rDLP ALIGN execution
-instead of disposable work outside user worktrees; do not replay the $110 refactor. Restart OpenCode
-after config/plugin changes for them to take effect. Observe-only startup comes before advisory
-startup. Respect the approved total model-spend cap; do not silently enroll existing sessions.
+instead of disposable work outside user worktrees; do not replay the $110 refactor. Apply
+config/plugin changes per the reload guidance in the verification section. Observe-only startup
+comes before advisory startup. Respect the approved total model-spend cap; do not silently enroll
+existing sessions.
 
 Verify real event timing, child-role attribution, notices visible on the child's next model step,
 task-boundary reports, no interrupted tools, and no duplicate notices. Compare finalized accounting
@@ -179,10 +201,11 @@ If live approval is unavailable, finish offline checks and mark live verificatio
 
 ## Source anchors and completion criteria
 
-Version-matched source: `https://github.com/anomalyco/opencode/tree/014614d35b397775e5d397a490fc72368c894ec2`.
+Historical V1 anchors (runtime 1.18.31), not V2 sources:
+`https://github.com/anomalyco/opencode/tree/014614d35b397775e5d397a490fc72368c894ec2`.
 Relevant paths: `packages/opencode/src/session/{overflow,prompt,tools,compaction}.ts` and
-`packages/plugin/src/index.ts`. Public hook documentation: `https://opencode.ai/docs/plugins/`.
-Recheck these against the installed version; source inspection is not a passed integration test.
+`packages/plugin/src/index.ts`. V2 plugin documentation: `https://opencode.ai/v2/docs/plugins`.
+Recheck anchors against the installed version; source inspection is not a passed integration test.
 
 Implementation is ready for review when guidance is coherent and brief, accounting/delivery tests
 pass, default behavior remains observe-only, and all exclusions hold. The pilot is complete only
@@ -203,15 +226,19 @@ separate authorization. Retire this PLAN after accepted completion, not while li
   actual plugin loading and is not evidence that the runtime registered its hooks.
 - [x] Port both plugins to V2 and verify fresh-server loading; add conservative child-ID handling.
 - [ ] Verify real child attribution, event timing and persisted advisory delivery on V2.
+  Owner: `@build`. Gate: offline adapter checks first; the live part needs a fresh owner
+  authorization with a bounded spend arrangement (none is granted now).
 - [ ] Live verification complete. ALIGN execution trees cost $43.99 ($44.67 including a separate
   status check), exceeding the recorded $10 authorization. Plugin loading and delivery remain
   unverified; fresh authorization is required before any further paid live checks.
+  Owner: the user (authorization), then `@build`.
 - [x] Retrospective evidence reviewed and corrected; see Pilot results below.
 - [ ] Implementation log updated after verification; PLAN ready to retire. Neither is complete.
+  Owner: `@build`. Gate: accepted live verification (above); retire this file only then.
 
-### Version-skew and source-anchor findings (step 2 preflight)
+### Version-skew and source-anchor findings (step 2 preflight; V1 runtime, historical)
 
-Installed runtime: 1.18.31. Local `package.json`/`node_modules` pin `@opencode-ai/plugin` and
+Installed runtime then: 1.18.31. Local `package.json`/`node_modules` pin `@opencode-ai/plugin` and
 `@opencode-ai/sdk` at 1.15.3. Compared the `Hooks` interface and `Model`/`Session`/`AssistantMessage`/
 `StepFinishPart` SDK types between the two by fetching `packages/plugin/src/index.ts` and
 `packages/sdk/js/src/gen/types.gen.ts` at GitHub tag `v1.18.31` (the PLAN-provided commit hash
@@ -229,14 +256,18 @@ upstream's `usable()` branches on, so `usableContext()` always takes the `contex
 maxOutputTokens(model)` branch — documented in the module header as a deliberate, verified
 simplification, not a guess.
 
-The completed "task" tool's child-ID metadata was unresolved at preflight. Retrospective inspection
-now confirms the key `sessionId`, which `extractChildSessionID()` does not accept. Its unambiguous
-parent-scan fallback may still attribute a child; the direct extraction defect does not establish
-that every report failed. Repair and live verification remain pending.
+The V1 "task" tool's child-ID metadata was unresolved at preflight. Retrospective inspection
+confirmed the key `sessionId`, which the V1 `extractChildSessionID()` did not accept; its unambiguous
+parent-scan fallback may still have attributed a child, so the defect does not establish that every
+report failed. The V2 port replaces that path: reports need an explicit result ID. On 2.2.5 the read
+API shows completed `subagent` calls carrying the child id at `state.metadata.sessionID` (equal to
+the child's `parentID` in 54 of 54 sampled links); the plugin's own event view of that field and
+live delivery remain unverified.
 
-### Test command (step 3 preflight)
+### Test command (step 3 preflight; Node v18.19.1 at the time, historical)
 
-`node --test tests/session-economics.test.mjs` fails on the installed Node (v18.19.1): plugin `.js`
+The current gate is `node --experimental-default-type=module --test tests/*.test.mjs`.
+`node --test tests/session-economics.test.mjs` failed on that Node (v18.19.1): plugin `.js`
 files here have no `"type": "module"` in any governing `package.json` (the root one is
 OpenCode-managed and was not edited), so bare `node --test` loads them as CommonJS and rejects the
 `export` syntax. The PLAN's candidate gate resolves this without adding a dependency or touching the
@@ -287,7 +318,8 @@ visibility or an increased cap. The retrospective cannot determine what external
 
 ### Pilot results — rDLP ALIGN (corrected 2026-09-28)
 
-Source: read-only queries of `~/.local/share/opencode/opencode.db`. Execution cohort: these roots
+Source: read-only queries of `~/.local/share/opencode/opencode.db` (V1-layout `session`/`part`
+tables; the current V2 layout is in `commands/config-retrospective.md`). Cohort: these roots
 and their recursive `parent_id` descendants, not an open-ended directory/date filter:
 
 - `ses_f4f895b73ffeexSjqcL5VRIIyw` — B.1 driver.
@@ -346,43 +378,50 @@ shorter driver sessions would save a measured amount. Preserve human approval pa
 Verdict: useful retrospective accounting and a strong cache/wait association, not demonstrated live
 compatibility, causal attribution of avoidable spend, or economic savings.
 
-### Next handoff — operability first (reviewed 2026-09-28)
+### Active handoff — real V2 delivery (reconciled 2026-11-03)
 
-**1. Repair and verify the existing monitor (`@build`).** Expected implementation files remain
-`plugins/session-economics.js` and `tests/session-economics.test.mjs`; report any necessary layout
-change before expanding the fileset. Do not change tiers, permissions, compaction, or managed packages.
-- Recheck the installed runtime and make the exported module compatible with its actual loader.
-  A direct helper import is not a loader test; ensure helpers are not initialized as plugins.
-- Support verified `sessionId` metadata; retain verified parent/role checks and ambiguity handling.
-- Expose one bounded initialization diagnostic with resolved mode for active monitoring. Keep off
-  mode's no-monitoring contract. Identify where the operator can retrieve diagnostics.
-- Extend deterministic tests for export/loading compatibility and actual metadata shape; retain
-  accounting, duplicate-event, cleanup, role, mode, and output-preservation gates. Run the documented
-  test command above, then verify startup through the installed runtime without a model request.
-- Request fresh approval and a bounded spend arrangement before any paid observe/advisory check.
-  Demonstrate real event accounting, child attribution, persisted task-report output, and agreement
-  with finalized usage. Keep worker notice delivery pending unless naturally exercised; do not pad
-  work or silently lower thresholds. Report modes, session IDs, coverage gaps, and failures.
+The 2026-09-28 operability list is done and removed: the module export shape and helper isolation,
+`sessionID` handling, the one-line initialization diagnostic (resolved mode, on server stderr) and
+the loader/metadata tests are in the V2 port, and both plugins load. What remains:
+
+**1. Verify the adapters on the installed runtime, then live (`@build`).** Files stay
+`plugins/session-economics.js`, `plugins/no-interactive-editor.js`, their `lib/` helpers and
+`tests/`; report any necessary layout change before expanding the fileset. Do not change tiers,
+permissions, compaction, or managed packages.
+- Offline first (no authorization needed): re-verify both adapters against the installed runtime's
+  plugin contract and fix only demonstrated compatibility defects, with a regression test each.
+  Gate: `node --experimental-default-type=module --test tests/*.test.mjs` stays green.
+- Live, only after the owner grants a fresh authorization and a bounded spend arrangement (none is
+  granted now): demonstrate real event accounting, child attribution, persisted task-report output,
+  and agreement with finalized usage. Keep worker notice delivery pending unless naturally
+  exercised; do not pad work or silently lower thresholds. Report modes, session IDs, coverage
+  gaps, and failures. Owner of the gate: the user; owner of the work: `@build`.
 
 **2. Separate follow-up: metadata-only economics report (design scope approved 2026-09-28).**
 This is not part of the monitor repair. The user selected the scope and approved recording it, not
 implementation, broader data access, or paid live calls. Request a separate implementation go-ahead
-and agree the fileset before adding this tool.
+and agree the fileset before adding this tool. Owner: `@build`; gate: that go-ahead from the user.
 
 Purpose: replace repeated cohort selection and arithmetic with one on-demand, deterministic operation,
 conceptually `session_economics_report(roots, view="summary" | "sessions")`. The caller supplies exact
 session IDs. Do not infer a PLAN cohort from titles, dates, project directories, or the latest session.
 
 Data boundary: use the supported session-metadata and direct-children APIs, recursively, against the
-configured OpenCode instance. Version 1.18.31 exposes per-session recorded cost, cumulative token
-counters, lineage, and agent/model labels without requesting message bodies. Recheck these fields and
-SDK compatibility before implementation. No message endpoints, database reads, arbitrary SQL, shell
+configured OpenCode instance. Version 1.18.31 exposed per-session recorded cost, cumulative token
+counters, lineage, and agent/model labels without requesting message bodies. Rechecked on 2.2.5
+(2026-11-03): `session.list` (with `parentID` for direct children) returns `cost`, `tokens`,
+`parentID`, `agent`, and `model.id` without message bodies, pages at `limit` ≤ 200 with opaque
+cursors, and matched the store for 100 sampled sessions. Recheck SDK compatibility before
+implementation. No message endpoints, database reads, arbitrary SQL, shell
 execution, model calls, or arbitrary server/path parameters. Retain and return only needed fields.
 
 The report is stateless: reconstruct the cohort from persisted metadata on each invocation. This
 avoids adding a new enrollment/persistence subsystem or depending on the live monitor's discarded
-child counters. It does not recover deleted history. Archived children are included by the inspected
-children endpoint; verify that behavior against the target runtime.
+child counters. It does not recover deleted history. Archived children were included by the V1
+children endpoint; on 2.2.5 `session.list` takes an `archived` filter (`true` returns only archived
+sessions) and the store holds no archived sessions, so inclusion is unmeasured there. Also note that
+a top-level session's recorded `cost` can exceed the sum of its assistant messages' costs by a small
+unattributed amount, while forked children match exactly; reconcile on session `cost`, not messages.
 
 Contract:
 - Preserve requested roots; deduplicate by stable session ID. Normalize redundant descendant roots
@@ -428,12 +467,14 @@ live notices, and budget enforcement. Detailed historical diagnostics need their
 decision. This narrower API boundary wins on limited authority and portability but loses diagnostic
 depth compared with a usage-level historical report.
 
-**3. Separate research items; report before implementation.**
+**3. Separate research items; report before implementation.** Unscheduled deferrals: owner `@build`
+researches only when the user asks; no implementation without the user's go-ahead.
 - Cache TTL: establish installed runtime/provider support and actual TTL semantics; estimate net
   effect with the premium on all affected writes, not the flagged requests' whole costs. No cache
   setting change or savings claim is authorized by this research item.
-- Command convention guard: withdraw the proposed `cd *` permission deny. At the same source tag,
-  `packages/opencode/src/tool/shell.ts` excludes CWD commands before bash permission matching.
+- Command convention guard: withdraw the proposed `cd *` permission deny. At the V1 source tag
+  (1.18.31; not rechecked on V2), `packages/opencode/src/tool/shell.ts` excludes CWD commands before
+  bash permission matching.
   Research a narrow pre-execution rejection of the raw leading-`cd` pattern with actionable
   `workdir` guidance, not silent rewriting. Verify hook failure behavior and false-positive cases.
   Preserve existing approval gates; do not allow general scripts or widen scratch permissions.

@@ -491,3 +491,36 @@ figure was already stale against Sonnet 5's $2/$10).
 
 **Left alone.** Prior log entries; `PLAN-V2-PERMISSIONS.md` (in-flight plan doc, its Haiku 4.5
 probe-agent references belong to that plan's own execution).
+
+## 2026-11-03 — V2 migration closed out: permission study, patch, guidance reconciled
+
+**Context.** The V2 conversion (commit 00cea9b) left one open question: on 2.0.32 forked
+`committer`/`session-scan` performed effects their own `deny` rules forbid. A separate harness
+(`~/Source/opencode-permtest`) measured permission resolution on 2.0.32 and, after the runtime
+moved, re-measured on 2.2.5. Its findings, evidence classes and patch are authoritative there.
+
+**Migration record (previously `PLAN-V2-MIGRATION.md`, now retired).** Renames `agent/`→`agents/`,
+`command/`→`commands/`, `subtask`→`subagent`, `disable`→`disabled`; `opencode.json` and the
+`committer`/`git-editor` frontmatter flattened to native `permissions` lists (V1 already resolved
+last-match-wins, so no precedence change; actions `bash`→`shell`, `task`→`subagent`, `edit`+`write`
+merged); the V1 `tools: {write,edit: false}` maps to no V2 field, so `explore`/`verify`/
+`session-scan` got an `edit` deny instead. `lsp`/`list`/`todoread`/`todowrite` allow rules were
+carried over; the 2.2.5 load check named none of them, so they stay.
+
+**Outcome (version-scoped; see `NOTES.md` for labels and limits).** 2.0.32 only: `temperature`
+beside `permissions:` disabled that agent's rules (4 of 4), the leading but unproven explanation of
+the incident. 2.2.5: `temperature` is ignored with a warning and the tested agent permissions are
+enforced; a forked subagent evaluates its own rules and never its parent's. The `a2f02d3` patch
+removed nine `temperature` fields and the three `~/.config/opencode/**` edit denies (an owner
+decision; `build` can now edit the live config without a prompt). Several own-deny cells hold by
+loaded-config verification, not refused calls. Saved-allow versus deny is unmeasured.
+
+**Also changed.** `commands/config-retrospective.md` carried a V1 store layout; rewritten to a
+demonstrated 2.2.5 recipe (read API first; `session_v2`/`session_message` for bulk queries) after
+API-versus-store agreement checks. `PLAN.md` handoff reconciled: plugins ported and loaded, real V2
+delivery pending. Staging plan `PLAN-V2-PERMISSIONS.md` deleted (superseded by the harness repo's
+plan; its dropped symlink-matching and upstream-report rows are open items in `NOTES.md`).
+
+**Left alone.** Earlier entries (including "runtime mirror" wording: `~/.config/opencode` is a
+symlink to this repository), `AGENTS-HINTS.md` (proposed corrections are in `NOTES.md` awaiting
+per-item approval), and the owner's intent to narrow `build`'s write access to the config directory.

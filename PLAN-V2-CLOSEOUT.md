@@ -285,7 +285,7 @@ Bindings and approvals recorded at chain start (2026-11-03), run config: default
 |---|---|---|---|---|
 | S1 | Land the reviewed permission-config patch | done | a2f02d3 | Integrated config |
 | S2 | Reconcile V2 migration and integration guidance | done | 36c9864 | Checked integration guidance |
-| S3 | Verify plugin adapters and fix demonstrated compatibility defects | pending | — | — |
+| S3 | Verify plugin adapters and fix demonstrated compatibility defects | done | e750415 | Verified plugin adapters |
 | S4 | Record bounded live plugin acceptance | pending | — | — |
 
 ## Action-frame digest
@@ -338,6 +338,33 @@ tuple including the shared service version, which is still unconfirmed; (4) use 
 private server for parsed-config checks; (5) stay off the session store, or disclose bounded
 read-only use. At exit surface: AGENTS-HINTS.md proposals awaiting approval; narrower `build`
 edit policy; S4 live authorization still UNSET.
+
+### S3 — 2026-11-03
+Discovery/flex: Four demonstrated adapter defects on 2.2.5, each fixed with regression tests (36→47
+tests): (1) `session.step.ended` carries no envelope location, so location-gated accounting was
+inert; (2) `session.deleted` carries none, so per-session state leaked; (3) a foreground `subagent`
+call moved to the background returns `status: "running"` and was reported as a completion; (4)
+`appendNotice` on a result with no `content` hid the `output` text the host would have shown. Fixes
+verify location once at enrolment (`session.created` or `session.get`) and accept later unlocated
+events only for enrolled sessions; core accounting rules, thresholds, observe-only default,
+unavailable capacity and bounded notices unchanged. `event.result.output` vs `result.content`
+resolved from the 2.2.5 binary's embedded source plus a private 2.2.5 server: `output` is the
+structured result (IDs read from it), `content` the model-visible text (notices written there);
+child ID is `output.sessionID`, fallback `metadata.sessionID` valid; other key spellings unevidenced
+but kept (every candidate is verified against caller-as-parent and worker role).
+Affected: none (Verified plugin adapters frozen; the location-gating change preserves the
+location-exclusion contract, tested). Juncture fork not paged: worker named no contract-changing
+discovery and the plan classes a defect fix preserving existing contracts as internal-continue.
+Deferred: yes — S4 must treat the real `session.step.ended` envelope (no location) as UNOBSERVED
+(inferred from host source; a model call is needed to emit step events) and must show a
+`task-boundary` log line with non-null cost/steps as the first live proof. Real event/tool ordering
+and persisted notice visibility remain unmeasured. Live checklist is in PLAN.md "Verified plugin
+adapter contract".
+Texture: Version tuple: CLI 2.2.5; shared service `/api/info` 2.2.5 (read-only); private server
+2.2.5 (isolated HOME/XDG, no credentials, shut down); managed `@opencode/{plugin,schema,client}`
+2.0.32 + effect 4.0.1 — types one generation behind the host, so host behavior was taken from the
+binary's source and the private server, not the package types. Plugin edits went live through the
+symlink; `plugin.list` shows both plugins active afterwards; shared service never restarted.
 
 ## Discoveries & risks
 

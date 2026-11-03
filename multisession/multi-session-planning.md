@@ -58,6 +58,29 @@ pressures want, but never smaller than the irreducible conceptual unit.**
 | 4. Correctness-criticality of the application  | smaller as it rises| more frequent green gates and more review surface per unit of change                                  |
 | 5. Inner-loop bandwidth (test-suite quality)   | smaller as it rises| trustworthy fast tests make small commits *safe*; weak tests force larger, conservative units          |
 
+#### Comparability as a session-boundary constraint (measurement-shaped work)
+
+The five inputs were derived for code-building sessions, where input 2's floor is "don't fracture a
+conceptual unit." Projects whose sessions *measure* something — benchmark suites, empirical
+harnesses, performance-regression arcs, anything producing observations rather than only artifacts
+— carry a second, distinct floor: **observations that must be compared to one another have to be
+produced in one session**, because the measured environment can drift between sessions in ways the
+plan cannot detect and the inner loop cannot catch.
+
+The drift is usually already in the risk register, named as a halt condition — a dependency version
+bump, a hardware or scheduler change, a remote service revision. That register entry is therefore
+doing double duty: it is a risk *and* a floor-raising input to the tuning law. When a planned split
+would place two mutually-comparable observations in different sessions, it is reintroducing exactly
+the condition the register says must halt the chain.
+
+Practical consequence for `/plan-shard`: a measurement row can be well over the LOC band and still
+be correctly sized, because the unit is the *experiment* — one scenario family, one generated
+report — not the code that runs it. Split the harness that performs the measurement as aggressively
+as inputs 1/3/4/5 want; do not split the measurement itself. The asymmetry is real: harness code is
+verified by a fast deterministic inner loop, so small commits are safe there, while measurement
+output has no inner loop at all and its only integrity guarantee is that everything compared was
+observed under one environment.
+
 Two structural notes. **Inputs 3 and 4 are the cost-of-being-wrong axis** — the same lens that routes
 agent tier (Opus when the cost of being wrong is high). Commit-size tuning is therefore the *same
 decision* as tier-routing, one level down: high cost-of-wrong pulls toward both smaller commits and

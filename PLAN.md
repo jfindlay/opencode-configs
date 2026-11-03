@@ -40,14 +40,108 @@ excluding title/compaction requests. Missing costs remain unavailable rather tha
 
 Child reports require an explicit result ID and verified direct-parent/worker metadata. Missing IDs
 are no longer inferred from a sole-child scan, and background dispatch is not called completion.
-Reports disclose potentially in-flight final events. The exact built-in result-ID field and real
-event/tool ordering still require live verification; synthetic tests are not proof of delivery.
+Reports disclose potentially in-flight final events. The built-in result-ID field is resolved
+below; real event/tool ordering still requires live verification, and synthetic tests are not proof
+of delivery.
 Cross-location events are ignored, and subscription cleanup aborts on unload. Diagnostics are JSON on
 server stderr (confirmed in the private-server output); look for `plugin="session-economics"`.
 
 Managed packages and service configuration are untouched. No paid pilot was run or authorised by
 this migration; persisted advisory delivery, final accounting reconciliation and savings remain
 unverified. The historical V1 implementation/source notes below are not V2 API guidance.
+
+## Verified plugin adapter contract (2026-11-03, runtime 2.2.5)
+
+Conservative accounting and delivery behavior is established by deterministic tests against the
+recorded contract below. No compiler-enforced contract is claimed: the repository's JavaScript gate
+is syntax-only (`node --check`). Synthetic tests are not live delivery evidence. Observe-only
+default, unavailable capacity, and bounded notices are unchanged.
+
+**Version tuple.** CLI `opencode --version` = v2.2.5. Shared background service
+`opencode api get /api/info` = 2.2.5. Private server (`opencode serve`, isolated HOME/XDG dirs,
+different port, no credentials, shut down afterwards) = 2.2.5. Managed packages in
+`node_modules/@opencode/{plugin,schema,client,...}` = 2.0.32 with `effect` 4.0.1 (runtime-managed,
+untouched). The type declarations are therefore one minor generation behind the host; version skew
+alone was not treated as a defect, and each host behavior below was taken from the 2.2.5 binary's
+own embedded source (read-only string search) or observed on the private server, not from the
+package types.
+
+**Hook contract (2.2.5 host source, `Tool.execute`).** `tool.execute.after` receives
+`{tool, sessionID, agent, messageID, id, input, status, result | error}`, where
+`result = {output?, content, metadata?}` (all three exactly as the tool returned them) and an
+assigned `event.result` is what the host persists and shows. Model-visible text is `content`
+(string, or non-empty block array); only when `content` is undefined or empty does the host fall
+back to the text of `output` (string as-is, else `JSON.stringify`). So `output` is the structured
+result and `content` the model-visible text: the adapters read structured IDs from `output` and
+write notices to `content`. Appending a notice to a result with no content must carry that
+fallback text forward (the host's own tool-repair plugin does the same); `appendNotice` now does.
+The built-in `subagent` tool (id `opencode.tool.subagent`; tool name `subagent`) returns
+`output = {sessionID, status: "completed" | "running", output: string}`,
+`content = '<subagent sessionID="…" state="completed">…</subagent>'` (or the running notice), and
+`metadata = {sessionID, status}`. Hence `event.result.output.sessionID` is the primary child ID and
+`event.result.metadata.sessionID` is a valid, consistent fallback (both exist on 2.2.5). Other key
+spellings accepted by `extractChildSessionID` (`sessionId`, `session_id`, `childSessionID`,
+`child_session_id`) are not evidenced for this tool; they are retained as harmless candidate IDs
+because every candidate is verified against the caller's session as parent and the worker role
+before it is used. A backgrounded launch (`input.background === true`) and a foreground call that
+the host moves to the background both return `status: "running"`; neither is a completion.
+`execute.before` may rewrite `input` and tool names; `execute.after` sees the rewritten values.
+
+**Event envelope (private server, 2.2.5).** Public events are `{id, created, type, durable:
+{aggregateID, seq, version}, location?, data}`. Observed: `session.created` carries `location` in
+both the envelope and `data` (plus `parentID` for children and `agent`); `session.agent.selected`
+and `session.deleted` carry **no** location, and `session.deleted.data` is only `{sessionID}`.
+`session.step.ended` is published without an envelope location (host source: `publish(Step.Ended,
+data)` takes no location option; only `session.created` and move pass one) and its data has
+`assistantMessageID`, `cost`, `finish`, `tokens` (the 2.2.5 field `native` replaces `providerState`;
+unused here). `durable.seq` starts at 0. Therefore location is verified at enrolment
+(`session.created`) or through `session.get` (flat `{sessionID}` input; returns `location`,
+`parentID`, `agent`); later events are accepted only for sessions whose location was verified, and
+deletion is accepted for any tracked ID. A foreign location's sessions are never enrolled, and an
+unlocated event for an unknown session is ignored. Sessions that predate attachment count only the
+steps observed after their first verifying tool call.
+Plugin context on 2.2.5: `ctx.location` has `directory`, `project`, no `workspaceID` unless set;
+`ctx.event.subscribe`, `ctx.session.get`, `ctx.tool.hook`, `ctx.shell.hook` exist. Shell hook
+`create.before` receives `{command, cwd, env, shell, timeout}`; the editor plugin ran live
+(`GIT_EDITOR`, `GIT_SEQUENCE_EDITOR`, `VISUAL` = `true`, `PAGER` = `cat`). It preserves a caller's
+or ambient `EDITOR` (the test shell had `EDITOR=vim`), by design. Cleanup ran on plugin reload.
+
+**Defects found and fixed (regression-tested).** (1) Step events were dropped on 2.2.5 because they
+carry no location, so live accounting was inert; (2) deletion events were dropped for the same
+reason, leaking per-session state; (3) a foreground `subagent` call moved to the background was
+reported as a completion; (4) a notice appended to a result with no content hid the output text.
+
+**Known-answer coverage (`tests/*.test.mjs`).** Explicit child attribution — "foreground subagent
+reports verified child totals once", "completed subagent result shape …", "child ID falls back to
+metadata …", "nested subagents report only direct-child totals". No sole-child guessing —
+"background dispatch and missing child IDs do not guess a completion report". Background not
+completion — same test plus "a foreground call moved to the background is not a completion".
+Duplicate/out-of-order — "accounting deduplicates messages and ignores stale durable updates".
+Missing data unavailable — "missing cost stays unavailable …", "malformed identities …", "a fresh
+attachment never imports lifetime cost …". Location exclusion — "other locations and workspaces …",
+"metadata from a different location …", "steps without a location …" (three tests). Bounded
+notices — "cost and step crossings produce bounded separate notices …", "simultaneous triggers …".
+Failure isolation — "errors are untouched …", "bad events and result failures …", "subscription
+failure is contained …". Preservation — "advisory adds one notice and preserves attachments …",
+plugin-result tests. Modes — "off mode registers neither hooks nor …", "observe accounts and logs,
+but preserves the exact result object", advisory tests. Cleanup — "cleanup aborts the subscription
+…", "session deletion …", "deletion without a location …". No unmet gap in the offline set.
+Not measurable offline: real event/tool ordering, whether a persisted message shows the appended
+notice, and the real `session.step.ended` envelope (inferred from host source, not observed).
+
+**Live acceptance checklist (needs the owner's fresh authorization and a bounded spend).**
+1. Before: `plugin.list` shows both plugins `active`; record CLI and `/api/info` versions.
+2. Run with `OPENCODE_SESSION_ECONOMICS=observe` first: confirm `initialized`, then that a worker
+   child's completed steps are recorded (a `task-boundary` log line with non-null cost and steps)
+   — this proves unlocated `session.step.ended` events reach the store.
+3. Foreground `subagent` call: persisted result unchanged in observe; one report only in advisory,
+   child ID equal to the persisted `state.metadata.sessionID`, parent equal to the caller.
+4. Background `subagent` call: no report at launch; no report for a foreground-moved-to-background.
+5. Compare the summed recorded step cost with the child session's finalized `cost` (expect only the
+   already-known small gaps) and note steps before attachment are excluded.
+6. Threshold notice (cost $5 / 100 steps) only if naturally reached; no padding or threshold change.
+7. Confirm a deleted session leaves no notices and that other-location sessions produce none.
+8. Report modes, session IDs, versions, coverage gaps and failures; never print secrets.
 
 ## Purpose and scope
 
@@ -388,8 +482,8 @@ the loader/metadata tests are in the V2 port, and both plugins load. What remain
 `plugins/session-economics.js`, `plugins/no-interactive-editor.js`, their `lib/` helpers and
 `tests/`; report any necessary layout change before expanding the fileset. Do not change tiers,
 permissions, compaction, or managed packages.
-- Offline first (no authorization needed): re-verify both adapters against the installed runtime's
-  plugin contract and fix only demonstrated compatibility defects, with a regression test each.
+- Offline first (done 2026-11-03; see "Verified plugin adapter contract"): both adapters were
+  re-verified against the 2.2.5 host and four demonstrated defects fixed with regression tests.
   Gate: `node --experimental-default-type=module --test tests/*.test.mjs` stays green.
 - Live, only after the owner grants a fresh authorization and a bounded spend arrangement (none is
   granted now): demonstrate real event accounting, child attribution, persisted task-report output,

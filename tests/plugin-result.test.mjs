@@ -23,8 +23,38 @@ test("notices preserve every original text and file content block", () => {
   assert.equal(updated.content[1], content[1]);
 });
 
-test("notices support results with no content", () => {
-  assert.deepEqual(appendNotice({ output: { ok: true } }, "notice"), {
-    output: { ok: true }, content: [{ type: "text", text: "notice" }],
+test("notices support results with neither content nor output", () => {
+  assert.deepEqual(appendNotice({ metadata: { a: 1 } }, "notice"), {
+    metadata: { a: 1 }, content: [{ type: "text", text: "notice" }],
   });
+  assert.deepEqual(appendNotice({ content: [] }, "notice"), {
+    content: [{ type: "text", text: "notice" }],
+  });
+});
+
+test("output the host would show in place of missing content is kept ahead of the notice", () => {
+  // The host renders JSON/string `output` only while `content` is undefined or empty; adding a
+  // bare notice block would otherwise hide it from the model.
+  for (const content of [undefined, []]) {
+    const structured = appendNotice({ content, output: { ok: true } }, "notice");
+    assert.deepEqual(structured.content, [
+      { type: "text", text: '{"ok":true}' }, { type: "text", text: "notice" },
+    ]);
+    assert.deepEqual(structured.output, { ok: true });
+    assert.deepEqual(appendNotice({ content, output: "plain" }, "notice").content, [
+      { type: "text", text: "plain" }, { type: "text", text: "notice" },
+    ]);
+  }
+});
+
+test("output text is not duplicated when content is present, even if empty text", () => {
+  assert.equal(appendNotice({ content: "", output: { ok: true } }, "n").content, "\n\nn");
+  const withBlocks = appendNotice({ content: [{ type: "text", text: "shown" }], output: 1 }, "n");
+  assert.deepEqual(withBlocks.content.map(({ text }) => text), ["shown", "n"]);
+});
+
+test("unserializable output degrades to its string form", () => {
+  const cyclic = {};
+  cyclic.self = cyclic;
+  assert.match(appendNotice({ output: cyclic }, "n").content[0].text, /object/);
 });

@@ -28,6 +28,20 @@ function ended(sessionID, id, cost, seq = 1, scope = location) {
   }, seq, scope);
 }
 
+// The host publishes only session.created with an envelope location; step, agent-selection and
+// deletion events arrive without one.
+function bare(fixture) {
+  const { location: _omitted, ...rest } = fixture;
+  return rest;
+}
+
+function deleted(sessionID, seq = 1) {
+  return {
+    type: "session.deleted", id: `evt_${seq}`, created: seq,
+    durable: { aggregateID: sessionID, seq, version: 2 }, data: { sessionID },
+  };
+}
+
 function session(id, parentID = "root", agent = "build", scope = location) {
   return { id, parentID, agent, location: scope };
 }
@@ -279,6 +293,102 @@ test("foreground subagent reports verified child totals once", async t => {
   assert.equal((await tool(mock, call)).result.content, "summary");
   await mock.emit(ended("child", "m", 0.75));
   assert.equal((await tool(mock, call)).result.content, "summary");
+});
+
+test("completed subagent result shape reports once and preserves output and metadata", async t => {
+  const mock = await setup(t);
+  await enrol(mock, "child", "parent");
+  await mock.emit(bare(ended("child", "m", 0.5)));
+  const result = {
+    output: { sessionID: "child", status: "completed", output: "summary" },
+    content: '<subagent sessionID="child" state="completed">\nsummary\n</subagent>',
+    metadata: { sessionID: "child", status: "completed" },
+  };
+  const call = await tool(mock, {
+    tool: "subagent", sessionID: "parent", agent: "architect", result,
+  });
+  assert.match(call.result.content, /^<subagent sessionID="child" state="completed">/);
+  assert.match(call.result.content, /Child tool returned.*\$0\.50/);
+  assert.equal(call.result.output, result.output);
+  assert.equal(call.result.metadata, result.metadata);
+});
+
+test("child ID falls back to metadata when structured output carries none", async t => {
+  const mock = await setup(t);
+  await enrol(mock, "child", "parent");
+  await mock.emit(ended("child", "m", 2));
+  const call = await tool(mock, {
+    tool: "subagent", sessionID: "parent", agent: "architect",
+    result: {
+      content: "text", output: "no id here", metadata: { sessionID: "child", status: "completed" },
+    },
+  });
+  assert.match(call.result.content, /\$2\.00/);
+});
+
+test("a foreground call moved to the background is not a completion", async t => {
+  const mock = await setup(t);
+  await enrol(mock, "child", "parent");
+  await mock.emit(ended("child", "m", 1));
+  for (const result of [
+    { content: "working", output: { sessionID: "child", status: "running", output: "wait" } },
+    { content: "working", metadata: { sessionID: "child", status: "running" } },
+  ]) {
+    const call = await tool(mock, { tool: "subagent", sessionID: "parent", result });
+    assert.equal(call.result, result);
+  }
+  // The same child still reports once its real foreground result arrives.
+  const done = await tool(mock, {
+    tool: "subagent", sessionID: "parent",
+    result: { content: "ok", output: { sessionID: "child", status: "completed" } },
+  });
+  assert.match(done.result.content, /Child tool returned/);
+});
+
+test("steps without an envelope location are accounted for enrolled sessions", async t => {
+  const mock = await setup(t);
+  await enrol(mock);
+  await mock.emit(event("session.agent.selected", { sessionID: "worker", agent: "build" }, 1));
+  await mock.emit(bare(ended("worker", "m1", 6, 2)));
+  assert.match((await tool(mock)).result.content, /\$6\.00/);
+});
+
+test("steps without a location never enrol a session on their own", async t => {
+  const mock = await setup(t, "advisory", { sessions: { worker: session("worker") } });
+  await mock.emit(bare(ended("worker", "before", 100, 1)));
+  assert.equal((await tool(mock)).result.content, "original");
+  // Verification through session metadata admits only steps observed afterwards.
+  await mock.emit(bare(ended("worker", "after", 6, 2)));
+  const notice = (await tool(mock)).result.content;
+  assert.match(notice, /\$6\.00, 1 completed/);
+});
+
+test("steps without a location stay excluded for a session verified elsewhere", async t => {
+  const foreign = session("worker", "root", "build", { directory: "/other" });
+  const mock = await setup(t, "advisory", { sessions: { worker: foreign } });
+  for (const seq of [1, 2]) {
+    await mock.emit(bare(ended("worker", `m${seq}`, 100, seq)));
+    assert.equal((await tool(mock)).result.content, "original");
+  }
+});
+
+test("deletion without a location clears accounting and notice state", async t => {
+  const mock = await setup(t);
+  await enrol(mock);
+  await mock.emit(ended("worker", "m1", 3, 1));
+  await mock.emit(deleted("worker", 2));
+  await enrol(mock);
+  await mock.emit(ended("worker", "m2", 3, 3));
+  // Surviving state would sum to the $5 threshold.
+  assert.equal((await tool(mock)).result.content, "original");
+});
+
+test("deleting an untracked session is inert", async t => {
+  const mock = await setup(t);
+  await mock.emit(deleted("stranger"));
+  await enrol(mock);
+  await mock.emit(ended("worker", "m", 6));
+  assert.match((await tool(mock)).result.content, /session-economics/);
 });
 
 test("nested subagents report only direct-child totals", async t => {

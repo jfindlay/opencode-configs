@@ -22,20 +22,33 @@ export default Plugin.define({
     const sameLocation = (location) => location?.directory === ctx.location.directory &&
       location?.workspaceID === ctx.location.workspaceID;
 
-    // A server subscription can include other locations. Never enrol those sessions implicitly.
+    function track(sessionID) {
+      const state = ensureState(store, sessionID);
+      state.located = true;
+      return state;
+    }
+
+    // A server subscription spans locations. Only session creation carries a location; later
+    // events (steps, agent changes) are accepted solely for sessions whose location was already
+    // verified, so other locations' sessions are never enrolled implicitly.
     function observe(event) {
       const data = event?.data;
-      if (!data?.sessionID || !sameLocation(event.location ?? data.location)) return;
+      if (!data?.sessionID) return;
+      // Deletion carries no location; dropping an untracked ID is a no-op.
       if (event.type === "session.deleted") {
         store.delete(data.sessionID);
-      } else if (event.type === "session.created") {
-        const state = ensureState(store, data.sessionID);
+        return;
+      }
+      const scope = event.location ?? data.location;
+      if (scope === undefined ? !store.get(data.sessionID)?.located : !sameLocation(scope)) return;
+      if (event.type === "session.created") {
+        const state = track(data.sessionID);
         state.parentID = data.parentID ?? null;
         state.agent = data.agent;
       } else if (event.type === "session.agent.selected" || event.type === "session.step.started") {
-        ensureState(store, data.sessionID).agent = data.agent;
+        track(data.sessionID).agent = data.agent;
       } else if (event.type === "session.step.ended") {
-        const state = ensureState(store, data.sessionID);
+        const state = track(data.sessionID);
         if (state.reported) return;
         recordStepFinish(store, {
           id: data.assistantMessageID, sessionID: data.sessionID,
@@ -50,6 +63,7 @@ export default Plugin.define({
         try {
           const info = await ctx.session.get({ sessionID });
           if (controller.signal.aborted || !sameLocation(info.location)) return;
+          state.located = true;
           state.parentID = info.parentID ?? null;
           state.agent ??= info.agent;
         } catch {
@@ -64,7 +78,10 @@ export default Plugin.define({
       try {
         ensureState(store, event.sessionID).agent = event.agent;
         // Background dispatch returns before the worker finishes; it is not a completion boundary.
-        if (event.tool === "subagent" && event.input?.background !== true) {
+        // A foreground call moved to the background also reports status "running".
+        const launched = event.input?.background === true ||
+          event.result.output?.status === "running" || event.result.metadata?.status === "running";
+        if (event.tool === "subagent" && !launched) {
           const childID = extractChildSessionID(event.result.output) ??
             extractChildSessionID(event.result.metadata);
           if (childID) {

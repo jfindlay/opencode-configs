@@ -239,9 +239,28 @@ delivery evidence. Observe-only mode, unavailable capacity, and bounded metadata
 
 ### Live authorization — prose-enforced, not yet authorized
 
-Defined by the owner before S4; consumed only by S4. Budget: **UNSET**. Protocol: **UNAPPROVED**.
-Approval must name scope and bounded dispatch limits; no inferred authorization from a plan resume.
-An unresolved gate leaves S4 pending and the final outcome offline-complete, not fully verified.
+Defined by the owner before S4; consumed only by S4. Approval must name scope and bounded spend;
+no inferred authorization from a plan resume. An unresolved gate leaves S4 pending and the final
+outcome offline-complete, not fully verified.
+
+**Recorded 2026-11-04 by the owner (generic parameters, deliberately minimal):**
+- Budget: **$2.00 total** across parent, child, auxiliary, retry and status-check usage. Total only;
+  no per-tier sub-ceilings.
+- Model/provider: `anthropic/claude-haiku-5-5` for every model call (parent and child).
+- Scope: the five checks in S4 against a private server with an isolated copy of the config in a
+  disposable HOME/XDG tree and sandbox directory; no real project work; nothing shared is touched.
+- Dispatch, step, token and timeout limits: not separately numbered by the owner. They are bounded
+  by the scenarios (tiny fixed prompts; one foreground worker, one background control) and by the
+  stop rule below; the executor must keep each prompt minimal and set a short per-call timeout.
+- Stop rule: stop all paid work as soon as independently measured spend (finalized API session
+  costs, not the monitor under test) reaches **$1.50** (reserve for unobserved in-flight usage), and
+  never exceed $2.00. No automatic retries: a failed check stops paid work and routes through
+  discovery handling. Disclose any unobservable usage.
+- Credentials: copied into the disposable HOME only, never committed or printed; the disposable
+  tree is deleted afterwards. The advisory check may use a lowered threshold in the disposable
+  copy only (record the delta); production thresholds ($5 / 100 steps) stay unchanged.
+- Production thresholds: owner asked for a recommendation; driver recommends keeping $5 / 100 steps
+  until S4 and some real worker runs supply evidence. Not a change authorized by this graph.
 
 ### Live acceptance — evidence/prose-enforced; to be frozen at S4
 
@@ -279,7 +298,8 @@ Bindings and approvals recorded at chain start (2026-11-03), run config: default
   `~/Source/opencode-config/`; they attribute the earlier deny to remnants of a salt-based
   two-step change procedure. That follow-on is NOT part of this graph and was not authorized as a
   patch-scope change; it is recorded under Discoveries & risks as an owner-owned open item.
-- Live budget and protocol: **UNSET / UNAPPROVED**. S4 stays blocked.
+- Live budget and protocol: **approved 2026-11-04** — $2.00 total, Haiku for all calls, generic
+  parameters; full text in the Live authorization contract. (At chain start this was UNSET.)
 
 | # | Session | Status | Commit | Froze |
 |---|---|---|---|---|

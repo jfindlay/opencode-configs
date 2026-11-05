@@ -136,16 +136,6 @@ acceptance"); that file and the closeout plan were retired after this commit.
   read policy, obsolete no-op rules (`lsp`, `list`, `todoread`, `todowrite` produced no load warning
   on 2.2.5; left in place), and sampling settings (`top_p` untested; V2 docs said request sampling
   settings were not sent to the model; not rechecked on 2.2.5).
-- **`AGENTS-HINTS.md` corrections (owner: user; gate: per-item `/note` or `/session-end`
-  approval; this file was not edited).** Conflicting active guidance, so it stays a closeout
-  exception until approved:
-  1. "Auditing prior sessions" (the `part`+`message`+`session` join filtered on `$.role`) describes
-     the V1 layout. Proposed: for sessions after 2026-10-16 read user prompts with
-     `select json_extract(data,'$.text') from session_message where type='user' and session_id=?`
-     (verified: user rows carry `$.text`, no `$.role`); keep the old join labelled V1-only; point to
-     `commands/config-retrospective.md` for the verified recipe.
-  2. Lines 348, 355 and 361 name `/run-plan` and `commands/run-plan.md`; the command is
-     `plan-run` (pre-existing naming drift found during the V2 migration).
 
 ## Large-write requests correlate with long tool spans (corrected 2026-09-28)
 

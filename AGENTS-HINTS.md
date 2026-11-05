@@ -281,9 +281,12 @@ it. Project-scoped session dirs only cover work done in that project root; sessi
 elsewhere live under `global/` with different retention.
 
 The TUI's SQLite DB at `~/.local/share/opencode/opencode.db` retains all sessions accessible via the
-TUI. Pattern for auditing user instructions: join `part` + `message` + `session`, filter
+TUI. V1 layout (sessions before 2026-10-16): join `part` + `message` + `session`, filter
 `json_extract(m.data,'$.role')='user'` and `json_extract(p.data,'$.type')='text'`, and select
-`json_extract(p.data,'$.text')` for the message content.
+`json_extract(p.data,'$.text')` for the message content. For later sessions (V2 layout) user rows
+carry `$.text` and no `$.role`:
+`select json_extract(data,'$.text') from session_message where type='user' and session_id=?`.
+`commands/config-retrospective.md` holds the verified 2.2.5 recipe.
 
 The storage tree is sufficient for confirming **presence** of patterns; it is NOT sufficient for
 confirming **absence**. If the user reports a behaviour and the grep finds nothing, believe the
@@ -345,17 +348,17 @@ the rendered prompt.  This must be preempted by defensively specifying the `agen
 
 ## Engineering as the quantification of error; the fiduciary-latitude contract
 
-2026-06-06: User acceptance of a sharded PLAN — expressed mechanically by invoking `/run-plan
+2026-06-06: User acceptance of a sharded PLAN — expressed mechanically by invoking `/plan-run
 docs/PLAN.md` — is acceptance of the entire implementation path-space the enrolled agents judge best,
 not a line-item contract to be executed literally. Each agent is empowered to make the best possible
 choice among a heterogeneous set of constraints (business demands, technical constraints, resource
 budget); this is the foundational work of engineering itself — to wright legibility, durability, and
 stability out of natural resources: a Chesterton fence here, a gauge on noise there, a map of the
 approximately-linear region within a fantastically contradictory reality. Engineering is
-epistemologically the quantification of error. The operational consequence for `/run-plan`: agents
+epistemologically the quantification of error. The operational consequence for `/plan-run`: agents
 hold fiduciary latitude under fidelity to the PLAN, so deviation (even medium deviation, with
 commensurate evidence) rides through and is reported at the step-3 review; halts are reserved for the
 irreconcilable — something incredibly wrong that the agent cannot reconcile against the PLAN's
 provisions, anticipations, or quantifications. This is the premise that motivates the whole
 discovery-and-adjustment apparatus and the juncture adjudication. See
-`multisession/multi-session-planning.md` and `commands/run-plan.md` for the mechanics.
+`multisession/multi-session-planning.md` and `commands/plan-run.md` for the mechanics.

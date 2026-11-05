@@ -568,3 +568,23 @@ and saved-allow questions.
 
 **Left alone.** Earlier entries, including the two that cite `PLAN.md` sections: their pointer is
 resolved by this entry. Owner-owned items remain in `NOTES.md` "Open items".
+
+## 2026-11-05 — Config-directory edit policy and permission hardening
+
+**Context.** `NOTES.md` carried two owner items: narrow `build`'s write access to the config
+directory (after measuring symlink-deny matching) and an optional hardening list.
+
+**Measured (2.2.5; `opencode-permtest/docs/FINDINGS.md`, new section).** A path rule matches only the
+spelling it names; tools pass project-relative paths inside the project and absolute paths outside it,
+and resolve no symlink. Project-layer rules did not reach `build`. A saved `edit *` allow turns `ask`
+into allow; a config `deny` held. A shell allow matches its redirected form (`git diff > f`). About
+$0.05 of the $1.00 authorized went to Haiku probes; the rest was model-free rule evaluation.
+
+**Changed.** `opencode.json`: `build` asks on both spellings of the config directory; environment-file
+read defaults restored; four no-op actions removed. Agents: read-only shell allowlists for `explore`,
+`verify`, `session-scan`; `general` states its `edit ask` and asks on redirects; `committer` loses a
+no-op rule. Not committed; verified by rule evaluation, not by live tool calls.
+
+**Left alone.** In-project editing of this repository by `build`, redirects for `build`/`architect`/
+`committer`/`git-editor`, the global `git branch *`/`git reflog *` allows, the `request.body` wire
+question: all listed in `NOTES.md` "Open items".

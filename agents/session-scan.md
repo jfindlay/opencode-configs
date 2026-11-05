@@ -3,9 +3,24 @@ description: "[jf] Haiku-pinned high-volume scanner for long session histories a
 mode: subagent
 model: anthropic/claude-haiku-5-5
 permissions:
-  - action: edit
-    resource: "*"
-    effect: deny
+  - { action: edit, resource: "*", effect: deny }
+  # An `edit` deny does not cover shell writes. Deny every command except a read-only allowlist,
+  # then deny what could still write through a listed command: redirects and output flags.
+  - { action: shell, resource: "*", effect: deny }
+  - { action: shell, resource: "git status", effect: allow }
+  - { action: shell, resource: "git status *", effect: allow }
+  - { action: shell, resource: "git log", effect: allow }
+  - { action: shell, resource: "git log *", effect: allow }
+  - { action: shell, resource: "git diff", effect: allow }
+  - { action: shell, resource: "git diff *", effect: allow }
+  - { action: shell, resource: "git show *", effect: allow }
+  - { action: shell, resource: "ls", effect: allow }
+  - { action: shell, resource: "ls *", effect: allow }
+  - { action: shell, resource: "pwd", effect: allow }
+  - { action: shell, resource: "wc *", effect: allow }
+  - { action: shell, resource: "file *", effect: allow }
+  - { action: shell, resource: "*>*", effect: deny }
+  - { action: shell, resource: "git * --output*", effect: deny }
 ---
 
 You are a high-throughput session scanner. Your task is mechanical classification:

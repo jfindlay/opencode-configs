@@ -58,6 +58,11 @@
   "permissions": [
     { "action": "*", "resource": "*", "effect": "ask" },
     { "action": "read", "resource": "*", "effect": "allow" },
+    // The engine's defaults ask before reading environment files, but the blanket allow above
+    // sits after them and wins (last match). Restore the defaults; `.env.example` stays readable.
+    { "action": "read", "resource": "*.env", "effect": "ask" },
+    { "action": "read", "resource": "*.env.*", "effect": "ask" },
+    { "action": "read", "resource": "*.env.example", "effect": "allow" },
     { "action": "shell", "resource": "*", "effect": "ask" },
     { "action": "shell", "resource": "git status *", "effect": "allow" },
     { "action": "shell", "resource": "git status", "effect": "allow" },
@@ -105,13 +110,9 @@
     { "action": "external_directory", "resource": "~/.config/opencode/**", "effect": "allow" },
     { "action": "glob", "resource": "*", "effect": "allow" },
     { "action": "grep", "resource": "*", "effect": "allow" },
-    { "action": "list", "resource": "*", "effect": "allow" },
-    { "action": "lsp", "resource": "*", "effect": "allow" },
     { "action": "question", "resource": "*", "effect": "allow" },
     { "action": "skill", "resource": "*", "effect": "allow" },
     { "action": "subagent", "resource": "*", "effect": "allow" },
-    { "action": "todoread", "resource": "*", "effect": "allow" },
-    { "action": "todowrite", "resource": "*", "effect": "allow" },
     { "action": "webfetch", "resource": "*", "effect": "allow" }
   ],
   "agents": {
@@ -132,10 +133,18 @@
     "plan": {
       "disabled": true
     },
-    // Build mode: inherits global permissions, but allows edits without prompting.
+    // Build mode: inherits global permissions, but allows edits without prompting, except under
+    // the config directory. A path rule matches only the spelling it names: the engine resolves no
+    // symlink, so ~/.config/opencode and its target ~/Source/opencode-config need one rule each.
+    // Files inside the project directory are matched as project-relative paths (`agents/x.md`),
+    // so these absolute rules do not cover editing this repository while it is the project.
+    // Approval is `ask`, and a saved `edit *` approval turns it back into allow; use `deny` for
+    // a restriction that must survive one.
     "build": {
       "permissions": [
-        { "action": "edit", "resource": "*", "effect": "allow" }
+        { "action": "edit", "resource": "*", "effect": "allow" },
+        { "action": "edit", "resource": "~/.config/opencode/**", "effect": "ask" },
+        { "action": "edit", "resource": "~/Source/opencode-config/**", "effect": "ask" }
       ]
     }
   }

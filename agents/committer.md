@@ -37,7 +37,6 @@ permissions:
   - { action: edit, resource: "*", effect: deny }
   - { action: webfetch, resource: "*", effect: deny }
   - { action: subagent, resource: "*", effect: deny }
-  - { action: todowrite, resource: "*", effect: deny }
 ---
 
 You are the session-close commit subagent. You are invoked by an orchestrating agent (typically

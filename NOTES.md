@@ -93,8 +93,10 @@ acceptance"); that file and the closeout plan were retired after this commit.
   the host-source inference; the in-process envelope was not captured. The adapter verifies location
   at enrolment (`session.created` or `session.get`) and accepts either shape afterwards.
 - **Reload.** A plugin file edit in a watched directory replaced the generation (second
-  `initialized`, no duplicated work). Symlink-path watching is unmeasured: after plugin edits confirm
-  `plugin.list` shows `active` and the new behavior; restart the service only if it does not.
+  `initialized`, no duplicated work). A symlinked config directory is not watched: the server logs
+  `inotify_add_watch ... Not a directory` for it (measured 2026-11-05 on an isolated mimic of the
+  layout). After plugin or config edits confirm `plugin.list` shows `active` and the new behavior;
+  reload or restart the service if it does not.
 - **Live acceptance (one bounded run; $0.0042 of a $2.00 authorization; Haiku only).** Observed:
   both plugins active; observe/advisory initialization; editor hook environment; a foreground worker
   report with verified child ID and non-null cost/steps; no report for the background control;
@@ -106,12 +108,18 @@ acceptance"); that file and the closeout plan were retired after this commit.
 
 ## Open items (owner / gate)
 
-- **Narrower edit policy for `build` (owner: user).** Intent recorded 2026-11-03: general `@build`
-  agents should not have uncontrolled write access to `~/.config/opencode` or
-  `~/Source/opencode-config/`. The applied patch does the opposite. Gate: a separate owner-approved
-  change. Measure first whether an `edit ~/.config/opencode/**` deny matches the canonical repo path
-  through the symlink (never measured; the row was dropped when the patch decision removed the deny)
-  and how a saved allow interacts with a deny (unmeasured).
+- **`build` edit policy for the config directory: applied as `ask`, three limits open (owner:
+  user).** Applied 2026-11-05 in `opencode.json` (`agents.build`): `edit ask` on
+  `~/.config/opencode/**` and `~/Source/opencode-config/**` after `edit * allow`. Measured on 2.2.5
+  (`opencode-permtest/docs/FINDINGS.md`, "Path matching, saved approvals and shell redirects"):
+  a path rule matches only the spelling it names (no symlink resolution), so both spellings are
+  listed. Limits:
+  - Editing this repository while it is the project is not covered: in-project files are matched as
+    project-relative paths, and project-layer rules did not reach `build`.
+  - `ask` is undone by a saved `edit *` allow in a project; a config `deny` is not. Switching the two
+    rules to `deny` makes the restriction durable but blocks `build` there outright.
+  - The running service reads the symlinked config directory through no file watcher (the server
+    logs an inotify failure); reload or restart it for the edit to take effect.
 - **Plugin delivery: smoke-tested once (2026-11-05), residual risks open (owner: `@build`; gate:
   fresh user authorization and spend bound for any further paid run).** Record in "Plugin host
   contract and live acceptance" above. Residual risks:
@@ -131,11 +139,22 @@ acceptance"); that file and the closeout plan were retired after this commit.
     gave `provider.no-route`.
 - **Upstream report for the 2.0.32 `temperature` behavior (owner: user).** Dropped at the study's
   re-scope; file through the `report` skill only if wanted. Not a migration prerequisite.
-- **Optional hardening, deferred (owner: user; no gate until requested).** Shell restrictions for
-  read-only agents (edit deny does not cover shell writes), `general`'s edit policy, environment-file
-  read policy, obsolete no-op rules (`lsp`, `list`, `todoread`, `todowrite` produced no load warning
-  on 2.2.5; left in place), and sampling settings (`top_p` untested; V2 docs said request sampling
-  settings were not sent to the model; not rechecked on 2.2.5).
+- **Optional hardening: applied 2026-11-05, verified by rule evaluation only (owner: user).**
+  Verified per agent with `permission.create` evaluation (no model call), not by live tool calls:
+  - Environment files: `read *.env`, `*.env.*` ask and `*.env.example` allow restored after the
+    global `read * allow` that had overridden the engine defaults.
+  - `explore`, `verify`, `session-scan`: shell is an allowlist of read-only commands (`verify` adds
+    mypy) with redirects (`*>*`) and `git * --output*` denied; `ls 2>&1` is denied too.
+  - `general`: explicit `edit * ask` (what it already resolved to), plus `ask` on redirects.
+  - Removed no-op rules: global `list`, `lsp`, `todoread`, `todowrite`, and `committer`'s
+    `todowrite` deny.
+  - Sampling: `top_p` and `temperature` in an agent file are ignored with a warning; the V2 agent
+    schema has no sampling key. Left unset. `request.body` is accepted; that it reaches the provider
+    is unmeasured.
+  Still open: allowlisted commands can write through a redirect for `build`, `architect`,
+  `committer` (a `*>*` deny would block `Co-authored-by: Name <email>` in commit messages) and
+  `git-editor`; global `git branch *` and `git reflog *` allows cover mutating forms
+  (`git branch -D`); the `grep`/`glob` tools were not given an env-file rule.
 
 ## Large-write requests correlate with long tool spans (corrected 2026-09-28)
 

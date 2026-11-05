@@ -3,9 +3,27 @@ description: "[jf] Sonnet-pinned subagent that verifies a list of claims (typica
 mode: subagent
 model: anthropic/claude-sonnet-5-5
 permissions:
-  - action: edit
-    resource: "*"
-    effect: deny
+  - { action: edit, resource: "*", effect: deny }
+  # An `edit` deny does not cover shell writes. Deny every command except a read-only allowlist,
+  # then deny what could still write through a listed command: redirects and output flags.
+  - { action: shell, resource: "*", effect: deny }
+  - { action: shell, resource: "git status", effect: allow }
+  - { action: shell, resource: "git status *", effect: allow }
+  - { action: shell, resource: "git log", effect: allow }
+  - { action: shell, resource: "git log *", effect: allow }
+  - { action: shell, resource: "git diff", effect: allow }
+  - { action: shell, resource: "git diff *", effect: allow }
+  - { action: shell, resource: "git show *", effect: allow }
+  - { action: shell, resource: "ls", effect: allow }
+  - { action: shell, resource: "ls *", effect: allow }
+  - { action: shell, resource: "pwd", effect: allow }
+  - { action: shell, resource: "wc *", effect: allow }
+  - { action: shell, resource: "file *", effect: allow }
+  # Type checks verify typing claims; they write only their cache directory.
+  - { action: shell, resource: "venv/bin/mypy *", effect: allow }
+  - { action: shell, resource: "./venv/bin/mypy *", effect: allow }
+  - { action: shell, resource: "*>*", effect: deny }
+  - { action: shell, resource: "git * --output*", effect: deny }
 ---
 
 You are a findings verifier. You receive a list of review findings and the relevant source files.

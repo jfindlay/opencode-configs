@@ -28,9 +28,11 @@ export default Plugin.define({
       return state;
     }
 
-    // A server subscription spans locations. Only session creation carries a location; later
-    // events (steps, agent changes) are accepted solely for sessions whose location was already
-    // verified, so other locations' sessions are never enrolled implicitly.
+    // A server subscription spans locations. Location is verified once at enrolment. Later events
+    // may or may not carry one: step events have been observed with it; deletion, agent-selection
+    // and usage events without. A located event must match this location; an unlocated one is
+    // accepted only for an already-verified session, so other locations' sessions are never
+    // enrolled implicitly.
     function observe(event) {
       const data = event?.data;
       if (!data?.sessionID) return;

@@ -1,12 +1,13 @@
 # PLAN — session economics safeguards, without context garbage collection
 
-Status: guidance implemented; both plugins ported to V2 and initial loading verified (fresh
-2.0.32 private server; active in the 2.2.5 background service on 2026-11-03). Real V2 delivery is
-still pending: child attribution, event timing, persisted advisory delivery and final accounting
-reconciliation are unverified, and no paid check is currently authorized. ALIGN execution did not
-establish plugin compatibility or savings; its corrected retrospective remains below.
-Owner: `@build` for reporting and for the offline adapter checks; any paid live check needs a fresh
-owner authorization with a bounded spend arrangement first.
+Status: guidance implemented; both plugins ported to V2 and verified on runtime 2.2.5: loading,
+child attribution, event/tool ordering, persisted advisory delivery and reconciliation against
+finalized API cost passed a bounded live smoke test (see "Live acceptance"). That proves
+compatibility only: no savings, no threshold tuning evidence, no comprehensive sandbox or permission
+claim. Untested properties are listed there. ALIGN execution did not establish plugin compatibility
+or savings; its corrected retrospective remains below.
+Owner: `@build` for reporting; any further paid live check needs a fresh owner authorization with a
+bounded spend arrangement first.
 This file is an interactive build handoff, not a `/plan-run` ledger or authorization to commit.
 
 ## V2 migration verification (2026-10-17, runtime 2.0.32)
@@ -41,14 +42,15 @@ excluding title/compaction requests. Missing costs remain unavailable rather tha
 Child reports require an explicit result ID and verified direct-parent/worker metadata. Missing IDs
 are no longer inferred from a sole-child scan, and background dispatch is not called completion.
 Reports disclose potentially in-flight final events. The built-in result-ID field is resolved
-below; real event/tool ordering still requires live verification, and synthetic tests are not proof
-of delivery.
+below; real event/tool ordering was observed live on 2.2.5 ("Live acceptance"), and synthetic tests
+alone are not proof of delivery.
 Cross-location events are ignored, and subscription cleanup aborts on unload. Diagnostics are JSON on
 server stderr (confirmed in the private-server output); look for `plugin="session-economics"`.
 
 Managed packages and service configuration are untouched. No paid pilot was run or authorised by
-this migration; persisted advisory delivery, final accounting reconciliation and savings remain
-unverified. The historical V1 implementation/source notes below are not V2 API guidance.
+this migration; persisted advisory delivery and reconciliation were later checked in the bounded
+live smoke test below, and savings remain unmeasured. The historical V1 implementation/source
+notes below are not V2 API guidance.
 
 ## Verified plugin adapter contract (2026-11-03, runtime 2.2.5)
 
@@ -91,8 +93,12 @@ the host moves to the background both return `status: "running"`; neither is a c
 {aggregateID, seq, version}, location?, data}`. Observed: `session.created` carries `location` in
 both the envelope and `data` (plus `parentID` for children and `agent`); `session.agent.selected`
 and `session.deleted` carry **no** location, and `session.deleted.data` is only `{sessionID}`.
-`session.step.ended` is published without an envelope location (host source: `publish(Step.Ended,
-data)` takes no location option; only `session.created` and move pass one) and its data has
+`session.step.ended` was inferred from host source to be published without an envelope location
+(`publish(Step.Ended, data)` takes no location option); the live run **observed the opposite on the
+public `/api/event` stream**: every `session.step.ended` frame carried an envelope `location`, while
+`session.execution.*`, `session.usage.updated` and `session.deleted` carried none (see "Live
+acceptance"). The in-process plugin subscription's envelope was not captured separately, and the
+adapter handles both shapes. Step data has
 `assistantMessageID`, `cost`, `finish`, `tokens` (the 2.2.5 field `native` replaces `providerState`;
 unused here). `durable.seq` starts at 0. Therefore location is verified at enrolment
 (`session.created`) or through `session.get` (flat `{sessionID}` input; returns `location`,
@@ -129,7 +135,9 @@ but preserves the exact result object", advisory tests. Cleanup — "cleanup abo
 Not measurable offline: real event/tool ordering, whether a persisted message shows the appended
 notice, and the real `session.step.ended` envelope (inferred from host source, not observed).
 
-**Live acceptance checklist (needs the owner's fresh authorization and a bounded spend).**
+**Live acceptance checklist (needs the owner's fresh authorization and a bounded spend; items 1–5
+and part of 7 were exercised once under the 2026-11-04 authorization, results in "Live
+acceptance").**
 1. Before: `plugin.list` shows both plugins `active`; record CLI and `/api/info` versions.
 2. Run with `OPENCODE_SESSION_ECONOMICS=observe` first: confirm `initialized`, then that a worker
    child's completed steps are recorded (a `task-boundary` log line with non-null cost and steps)
@@ -142,6 +150,103 @@ notice, and the real `session.step.ended` envelope (inferred from host source, n
 6. Threshold notice (cost $5 / 100 steps) only if naturally reached; no padding or threshold change.
 7. Confirm a deleted session leaves no notices and that other-location sessions produce none.
 8. Report modes, session IDs, versions, coverage gaps and failures; never print secrets.
+
+## Live acceptance (2026-11-04/05, runtime 2.2.5)
+
+Bounded smoke test of the adapters against a private server. Labels: **observed** (read from the
+server, its event stream, its persisted records or process logs), **inferred** (not directly read).
+It establishes compatibility on this tuple only; it does not measure savings or enforce anything.
+
+**Authorization (owner, recorded 2026-11-04).** $2.00 total across parent, child, auxiliary, retry
+and status-check usage; `anthropic/claude-haiku-5-5` for every model call; five checks against a
+private server with an isolated config copy in a disposable HOME/XDG tree; stop paid work at $1.50
+of independently measured spend; no automatic retries; credentials only in the disposable tree.
+Production thresholds ($5 / 100 steps) unchanged.
+
+**Version tuple (identical at start and end).** CLI `opencode --version` v2.2.5; shared service
+`/api/info` 2.2.5 (same PID before and after; never used for paid calls or restarted); private
+server (`opencode serve`, loopback, port 49531) 2.2.5; managed `@opencode/plugin` 2.0.32; Node
+v22.22.1. Plugin and library files were copied from this repository unchanged except as listed.
+
+**Isolation.** HOME and all four XDG dirs under a disposable tree; sandbox directory outside this
+repository with two tiny files (`note.txt`, a one-pixel `pixel.png`);
+`OPENCODE_DISABLE_FREE_MODELS=1`; ambient provider keys unset; only the Anthropic API key was copied into the disposable data dir
+(V2 reads it through the credential API, not `auth.json`; it was connected with a request that never
+printed it). Disposable config delta from `opencode.json`: `model` set to Haiku 5.5; `instructions`
+emptied (keeps the worker from reading guidance files); `policies` deny every provider except
+`anthropic`; `agents.title` disabled; `agents.summary` and `agents.compaction` pinned to Haiku 5.5.
+`permissions` and the build/architect/plan blocks were unchanged. Advisory-run delta only
+(`lib/session-economics-core.js`, disposable copy): `costWarnUsd` 5 → 0.000001 and `stepsWarnCount`
+100 → 2. Comment-only edits to the disposable plugin copy triggered the reload probes.
+
+**1. Loading, initialization, hook, reload — observed.** `plugin.list` showed both IDs `active`
+on the shared service (before; repository paths) and on the private server (disposable-tree
+paths). The
+first `plugin.list` for a not-yet-booted location returned an empty list; the second returned the
+full set. `session-economics` logged `initialized` with `mode=observe` and, in the advisory run,
+`mode=advisory`, `capacity=unavailable`. The editor hook was observed through a model-free session
+shell command (server started without these variables): `EDITOR`, `VISUAL`, `GIT_EDITOR`,
+`GIT_SEQUENCE_EDITOR` = `true`, `PAGER` = `cat`, in both modes and after a reload. A comment edit to
+the plugin file replaced the generation (old watchers stopped, a second `initialized` line); the
+later paid runs produced exactly one `advisory`/`task-boundary` line per event and one persisted
+notice per trigger, so no stale generation duplicated work (observed absence of duplicates; the
+cleanup function itself logs nothing). A config-only change (`config.updated`) logged
+`loading plugin` for both plugins but no second `initialized` and no watcher restart; cause not
+established, and not shown to be a defect.
+
+**2. Foreground worker, background control, ordering — observed.** Foreground `subagent` (parent
+`build`, child `general`): the persisted tool metadata `sessionID` equalled the child's ID and the
+child's `parentID` equalled the caller; the child's agent role was `general`. In observe mode the
+persisted parent result held only the `<subagent …>` block (no notice). The first live proof
+required by the checklist passed: the `task-boundary` line carried non-null `cost` and `steps`, so
+step events reach the store. Ordering, from the event stream and timestamped server log: within a
+step, tool results are processed before that step's `step.ended` (milliseconds later), but earlier
+steps' events were already counted (thresholds saw 1 then 2 steps at the second and third tool
+calls). The child's **final** `step.ended` (created 6–7 ms before the parent's `tool.success`)
+was received on the HTTP stream 2–3 ms after the `task-boundary` line and was not in its count, so
+the report covered all but the last step in both runs (observe: 1 of 2 steps; advisory: 3 of 4),
+exactly the "final events may still be in transit" disclosure. Whether the plugin's own
+subscription received that event before or after the hook is inferred from the count.
+Background `subagent` (`background: true`): launch result `status: "running"`, persisted result
+unchanged, **no** `task-boundary` line at launch or when the child later finished (the child ran 3
+steps; the host then injected a synthetic message into the parent). No false completed-child
+report. A foreground call moved to the background was not exercised.
+
+**3. Reconciliation with finalized API records — observed, partial by construction.** Foreground
+observe run, child: recorded 1 step / $0.000160 versus finalized 2 steps / $0.000287 (the
+unrecorded step is the in-flight final one; step IDs and costs on the event stream matched the
+persisted assistant messages exactly, and message costs summed to the session `cost`). Advisory
+run, child: recorded 3 steps / $0.000440 versus finalized 4 steps / $0.000557, same pattern. Parent
+steps were not counted as worker steps. Totals are attachment-time coverage of primary steps,
+not lifetime or billing figures. Title and compaction requests did not occur (title disabled;
+no compaction trigger).
+
+**4. Advisory delivery — observed (persisted), next-step visibility partly inferred.** With the
+low disposable thresholds the child (three sequential `read` calls) got one `cost` notice appended
+to its second result and one `steps` notice appended to its third, which carried an image file
+block; the original text, the `image/png` file block and the tool metadata were preserved and the
+notice was a separate trailing text block (the sub-cent cost renders as `$0.00` — a display
+limit of the two-decimal format). The parent's `subagent` result gained exactly one report after
+the original `<subagent>` block. The session context endpoint listed each notice exactly once
+(no duplicates). That a model request actually contained the notice was not captured at the
+provider (inferred from the persisted context). Notices were never applied to the parent session.
+
+**5. Failures, exclusions, spend.** One failed first attempt: a session sent before the credential
+was connected ended `provider.no-route` with zero model calls and $0 (setup error, not repeated
+as a paid retry). Spend, independently read from the private server's session API and its stats
+endpoint (not the monitor), per session: observe foreground parent $0.001262 and child $0.000287;
+background parent $0.000431 and child $0.000369; advisory parent $0.001266 and child $0.000557;
+total $0.004171 over 16 steps, all `anthropic/claude-haiku-5-5` (stats listed no other model), far
+under the $1.50 stop line. No unobserved usage was identified; title generation was disabled and
+no warming, compaction or retry occurred. Provider invoices were not consulted.
+
+**Not exercised / not established.** Foreground-moved-to-background; threshold crossing at the
+production values; a session in another location producing no notices; deleted-session state
+cleanup beyond observing the location-less `session.deleted` events with no error lines; the
+in-process plugin envelope shape (the public stream showed a location on step events, contradicting
+the earlier host-source inference); capacity/usable-context behavior (unavailable by design);
+worker roles other than `general`; long or nested workloads; whether edits through the symlinked
+config directory reload plugins (the probe edited a real disposable directory); savings.
 
 ## Purpose and scope
 
@@ -319,16 +424,19 @@ separate authorization. Retire this PLAN after accepted completion, not while li
 - [x] Monitor implemented; deterministic tests reported passing at preflight. This did not test
   actual plugin loading and is not evidence that the runtime registered its hooks.
 - [x] Port both plugins to V2 and verify fresh-server loading; add conservative child-ID handling.
-- [ ] Verify real child attribution, event timing and persisted advisory delivery on V2.
-  Owner: `@build`. Gate: offline adapter checks first; the live part needs a fresh owner
-  authorization with a bounded spend arrangement (none is granted now).
-- [ ] Live verification complete. ALIGN execution trees cost $43.99 ($44.67 including a separate
-  status check), exceeding the recorded $10 authorization. Plugin loading and delivery remain
-  unverified; fresh authorization is required before any further paid live checks.
-  Owner: the user (authorization), then `@build`.
+- [x] Verify real child attribution, event timing and persisted advisory delivery on V2: observed
+  once on 2.2.5 in a bounded disposable run (see "Live acceptance"); partial coverage and untested
+  properties are listed there.
+- [x] Live smoke verification complete under the 2026-11-04 owner authorization ($0.0042 of $2.00
+  measured). ALIGN execution trees earlier cost $43.99 ($44.67 including a separate status check),
+  exceeding that pilot's recorded $10 authorization; that run did not establish compatibility. Any
+  further paid live check needs a fresh authorization. Owner: the user (authorization), then
+  `@build`.
 - [x] Retrospective evidence reviewed and corrected; see Pilot results below.
-- [ ] Implementation log updated after verification; PLAN ready to retire. Neither is complete.
-  Owner: `@build`. Gate: accepted live verification (above); retire this file only then.
+- [x] Implementation log updated after live verification (`AGENTS-LOG.md`, 2026-11-05 entry).
+- [ ] PLAN ready to retire. Not yet: the owner reviews the live acceptance record and the separate
+  economics follow-ups below (report tool, research items) are accepted or deferred first.
+  Owner: the user, then `@build`.
 
 ### Version-skew and source-anchor findings (step 2 preflight; V1 runtime, historical)
 
@@ -355,8 +463,8 @@ confirmed the key `sessionId`, which the V1 `extractChildSessionID()` did not ac
 parent-scan fallback may still have attributed a child, so the defect does not establish that every
 report failed. The V2 port replaces that path: reports need an explicit result ID. On 2.2.5 the read
 API shows completed `subagent` calls carrying the child id at `state.metadata.sessionID` (equal to
-the child's `parentID` in 54 of 54 sampled links); the plugin's own event view of that field and
-live delivery remain unverified.
+the child's `parentID` in 54 of 54 sampled links); the live smoke test later observed the same
+child ID in the persisted metadata and in the plugin's `task-boundary` report.
 
 ### Test command (step 3 preflight; Node v18.19.1 at the time, historical)
 
@@ -485,11 +593,12 @@ permissions, compaction, or managed packages.
 - Offline first (done 2026-11-03; see "Verified plugin adapter contract"): both adapters were
   re-verified against the 2.2.5 host and four demonstrated defects fixed with regression tests.
   Gate: `node --experimental-default-type=module --test tests/*.test.mjs` stays green.
-- Live, only after the owner grants a fresh authorization and a bounded spend arrangement (none is
-  granted now): demonstrate real event accounting, child attribution, persisted task-report output,
-  and agreement with finalized usage. Keep worker notice delivery pending unless naturally
-  exercised; do not pad work or silently lower thresholds. Report modes, session IDs, coverage
-  gaps, and failures. Owner of the gate: the user; owner of the work: `@build`.
+- Live (done 2026-11-04/05 under a recorded owner authorization; see "Live acceptance"): event
+  accounting, child attribution, persisted task-report output, persisted advisory notices and
+  agreement with finalized usage were demonstrated once on 2.2.5 with disposable low thresholds. A
+  further paid run needs a fresh authorization and spend bound. Production thresholds are unchanged
+  and no threshold-tuning evidence exists yet; worker notices at the real thresholds remain
+  unexercised.
 
 **2. Separate follow-up: metadata-only economics report (design scope approved 2026-09-28).**
 This is not part of the monitor repair. The user selected the scope and approved recording it, not

@@ -524,3 +524,29 @@ plan; its dropped symlink-matching and upstream-report rows are open items in `N
 **Left alone.** Earlier entries (including "runtime mirror" wording: `~/.config/opencode` is a
 symlink to this repository), `AGENTS-HINTS.md` (proposed corrections are in `NOTES.md` awaiting
 per-item approval), and the owner's intent to narrow `build`'s write access to the config directory.
+
+## 2026-11-05 — Session-economics and editor plugins: bounded live acceptance on 2.2.5
+
+**Context.** The plugins had deterministic tests and a fresh-server loading check, but no observed
+delivery on a real model run. The owner authorized a bounded run: $2.00 total, `claude-haiku-5-5`
+for every call, a private server with an isolated HOME/XDG tree and sandbox, stop at $1.50 of
+independently measured spend.
+
+**Outcome (details and labels in `PLAN.md` → "Live acceptance").** Version tuple CLI 2.2.5, shared
+service 2.2.5 (untouched), private server 2.2.5, managed plugin package 2.0.32, unchanged at the end.
+Both plugin IDs were active; observe and advisory initialization logged; the editor hook set
+`EDITOR`/`VISUAL`/`GIT_EDITOR`/`GIT_SEQUENCE_EDITOR` to `true` and `PAGER` to `cat`; a plugin reload
+left no duplicate work. A foreground `subagent` produced a `task-boundary` report with the verified
+child ID and non-null cost/steps; a background launch produced none. The report counted all but the
+child's final step (that event arrived milliseconds after the hook), as its label discloses. With
+lowered disposable thresholds, persisted notices appended once each, an image attachment survived,
+and the parent got one task report. Independently read spend: $0.0042 over 16 steps, Haiku only.
+
+**Findings that change earlier records.** `session.step.ended` carried an envelope `location` on the
+public event stream, contradicting the host-source inference that it carried none; the adapter
+accepts both shapes, so no code changed. V2 reads provider credentials through its credential API,
+not `auth.json`, so a private server needs a connected credential.
+
+**Not covered.** Foreground-moved-to-background, production-threshold crossings, other-location
+isolation, symlink-reload behavior, any savings or comprehensive permission claim. The disposable
+tree and its credential were deleted; no plugin, library, test, config or package file changed.

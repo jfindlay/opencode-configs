@@ -75,9 +75,21 @@ The command now carries the V2 recipe; this is the evidence and its limits.
   change. Measure first whether an `edit ~/.config/opencode/**` deny matches the canonical repo path
   through the symlink (never measured; the row was dropped when the patch decision removed the deny)
   and how a saved allow interacts with a deny (unmeasured).
-- **Real V2 plugin delivery (owner: `@build`; gate: fresh user authorization and spend bound).**
-  Tracked in `PLAN.md`; also whether edits through the symlinked config directory reload plugins
-  automatically (documented for watched directories, unmeasured through a symlink).
+- **Plugin delivery: smoke-tested once (2026-11-05), residual risks open (owner: `@build`; gate:
+  fresh user authorization and spend bound for any further paid run).** Record and untested list in
+  `PLAN.md` → "Live acceptance". Residual risks that need a home:
+  - The task-boundary report omits the child's final step (its `step.ended` arrives milliseconds
+    after the hook) in both observed runs; the label discloses it, but any consumer comparing the
+    report to a finalized total will see a deficit of about the last step.
+  - After a config-only reload the plugins logged `loading plugin` but no new `initialized` line;
+    whether the economics hooks were re-registered in that generation is unestablished (a file
+    reload did re-initialize).
+  - Notices print sub-cent costs as `$0.00`; low-cost workers will not show meaningful cost in the
+    text.
+  - Edits through the symlinked config directory reloading plugins stayed unmeasured (the probe
+    edited a real disposable directory); the shared service was not restarted.
+  - A V2 private server needs a credential connected through its API; an `auth.json` copy alone
+    gave `provider.no-route`.
 - **Upstream report for the 2.0.32 `temperature` behavior (owner: user).** Dropped at the study's
   re-scope; file through the `report` skill only if wanted. Not a migration prerequisite.
 - **Optional hardening, deferred (owner: user; no gate until requested).** Shell restrictions for

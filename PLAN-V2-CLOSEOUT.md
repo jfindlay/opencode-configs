@@ -410,6 +410,17 @@ Texture: `service.json` reappeared untracked (64 bytes, mode 600, rewritten by t
 service; inferred runtime state) and blocked a clean-tree commit; owner approved a local exclusion
 in `.git/info/exclude`. V2 private servers read provider credentials through the credential API,
 not `auth.json`. Disposable credential tree and sandbox deleted; server down, port refusing.
+Boundary verdict (S4 ◆ final, juncture fork): `still-on-intent`; "Done means" holds. Final-step
+omission and the S3-inference correction are accepted limitations (fixing the omission would change
+core economics semantics → owner review). Medium deviation accepted: the disposable config emptied
+`instructions`, denied non-Anthropic providers and disabled title generation, so acceptance ran on
+a config narrower than production. Fork wording note: PLAN.md "passed" for reconciliation is better
+read as "matched within the disclosed in-flight coverage". Unhomed at exit, owner to decide:
+(1) stale comment at `plugins/session-economics.js` ~L31-33 ("Only session creation carries a
+location") contradicts the observed public stream — comment-only fix, no row yet; (2) the local
+`service.json` exclusion lives only in this clone's `.git/info/exclude`. Retire this plan only
+after the owner reviews the final boundary and accepts homes for the exception list; the config-only
+reload (no second `initialized`) is the residual risk most worth a later model-free check.
 
 ## Discoveries & risks
 

@@ -306,7 +306,7 @@ Bindings and approvals recorded at chain start (2026-11-03), run config: default
 | S1 | Land the reviewed permission-config patch | done | a2f02d3 | Integrated config |
 | S2 | Reconcile V2 migration and integration guidance | done | 36c9864 | Checked integration guidance |
 | S3 | Verify plugin adapters and fix demonstrated compatibility defects | done | e750415 | Verified plugin adapters |
-| S4 | Record bounded live plugin acceptance | pending | — | — |
+| S4 | Record bounded live plugin acceptance | done | d73bf13 | Live acceptance |
 
 ## Action-frame digest
 
@@ -385,6 +385,31 @@ Texture: Version tuple: CLI 2.2.5; shared service `/api/info` 2.2.5 (read-only);
 2.0.32 + effect 4.0.1 — types one generation behind the host, so host behavior was taken from the
 binary's source and the private server, not the package types. Plugin edits went live through the
 symlink; `plugin.list` shows both plugins active afterwards; shared service never restarted.
+
+### S4 — 2026-11-05
+Discovery/flex: Authorization recorded 2026-11-04 ($2.00 total, Haiku for every call, stop at
+$1.50, generic parameters). One bounded live run on a private 2.2.5 server (tuple unchanged start
+to end; shared service untouched) observed: both plugins active; observe/advisory initialization;
+editor hook env; foreground worker report with verified child ID and non-null cost/steps; background
+control produced no report; persisted notices once each with image attachment preserved; spend
+$0.004171 over 16 Haiku steps read from the private server's API (not the monitor). No adapter
+defect found, no code changed. Correction to an S3 inference: on the public `/api/event` stream
+`session.step.ended` frames DID carry an envelope `location` (host-source inference said none);
+adapter accepts both shapes, in-process envelope not captured separately; `session.deleted` and
+`session.execution.*`/`usage.updated` carried none.
+Affected: none (Live acceptance frozen; Verified plugin adapters still hold — the S3 location
+fix is shape-agnostic).
+Deferred: yes — residual risks recorded in NOTES.md/PLAN.md "Live acceptance": the task-boundary
+report omitted the child's final step in both runs (event arrives ms after the hook; label
+discloses); config-only reload logged `loading plugin` without a second `initialized` (cause
+unestablished); sub-cent costs render as `$0.00`; symlink-reload, foreground-moved-to-background,
+production-threshold crossing, other-location isolation, and savings are untested. Owner-owned
+open items unchanged: narrower build edit policy; AGENTS-HINTS.md corrections; upstream
+temperature report; optional hardening.
+Texture: `service.json` reappeared untracked (64 bytes, mode 600, rewritten by the running
+service; inferred runtime state) and blocked a clean-tree commit; owner approved a local exclusion
+in `.git/info/exclude`. V2 private servers read provider credentials through the credential API,
+not `auth.json`. Disposable credential tree and sandbox deleted; server down, port refusing.
 
 ## Discoveries & risks
 

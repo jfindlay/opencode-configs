@@ -6,8 +6,9 @@ Rolling-context findings and framings for this repository. Durable cross-project
 ## V2 permission investigation closed; patch integrated (2026-11-03)
 
 Authoritative sources: `~/Source/opencode-permtest/docs/FINDINGS.md` (evidence classes, patch
-description), the closing ledger in that repository's `docs/PLAN.md`, and this repository's
-`PLAN.md` V2 verification section. Every claim below carries its engine version and label.
+description) and the closing ledger in that repository's `docs/PLAN.md`. That repository is frozen
+(chain complete) but kept as the harness for the unmeasured items below; its history exists only
+there. Every claim below carries its engine version and label.
 
 - **Integrated.** Commit `a2f02d3` removed the nine agent `temperature` fields and the three
   `~/.config/opencode/**` edit denies (global, `architect`, `build`). Those denies no longer exist:
@@ -67,7 +68,43 @@ The command now carries the V2 recipe; this is the evidence and its limits.
   with V2 and legacy messages. Not checked: V1 `aborted` outcomes in V2, archived sessions (none
   exist), whether V2 reproduces historical pilot figures, ordering for `order=asc`.
 
-## Open migration items (owner / gate)
+## Plugin host contract and live acceptance on 2.2.5 (2026-11-03/05)
+
+Tuple: CLI, shared service and private server 2.2.5; managed `@opencode/plugin` 2.0.32, so its
+types lag the host and behavior below comes from the 2.2.5 binary's embedded source or private-server
+observation. Full record: `git show 2f95079:PLAN.md` ("Verified plugin adapter contract", "Live
+acceptance"); that file and the closeout plan were retired after this commit.
+
+- **Design invariants (session economics).** Advisory only: no abort, prompt injection, context
+  rewrite or budget enforcement. Default `observe`; capacity unavailable until the V2 usable-context
+  formula is verified; thresholds ($5 / 100 steps) are provisional and untuned.
+- **Tool hook (host source).** `tool.execute.after` gets `{tool, sessionID, agent, messageID, id,
+  input, status, result | error}` with `result = {output?, content, metadata?}`; an assigned
+  `event.result` is what the host persists. `content` is model-visible; `output` (structured) is the
+  fallback text only while `content` is empty. Adapters read IDs from `output`, write to `content`.
+- **`subagent` result.** `output = {sessionID, status: "completed" | "running", output}`, `metadata =
+  {sessionID, status}`; `output.sessionID` is primary, `metadata.sessionID` a consistent fallback.
+  A background launch and a foreground call moved to the background both return `running`; neither
+  is a completion. Other key spellings in `extractChildSessionID` are unevidenced but harmless.
+- **Event envelopes (observed).** `{id, created, type, durable: {aggregateID, seq, version},
+  location?, data}`. `session.created` carries location; `session.deleted` (`data = {sessionID}`),
+  `session.agent.selected`, `session.execution.*` and `session.usage.updated` do not.
+  `session.step.ended` carried an envelope location on the public `/api/event` stream, contradicting
+  the host-source inference; the in-process envelope was not captured. The adapter verifies location
+  at enrolment (`session.created` or `session.get`) and accepts either shape afterwards.
+- **Reload.** A plugin file edit in a watched directory replaced the generation (second
+  `initialized`, no duplicated work). Symlink-path watching is unmeasured: after plugin edits confirm
+  `plugin.list` shows `active` and the new behavior; restart the service only if it does not.
+- **Live acceptance (one bounded run; $0.0042 of a $2.00 authorization; Haiku only).** Observed:
+  both plugins active; observe/advisory initialization; editor hook environment; a foreground worker
+  report with verified child ID and non-null cost/steps; no report for the background control;
+  notices persisted once each with an image attachment preserved. Reconciliation matched finalized
+  API records within the disclosed in-flight coverage. The run used a config narrower than
+  production (`instructions` emptied, non-Anthropic providers denied, titles off) and disposable low
+  thresholds. Compatibility only: no savings or permission claim. Further paid runs need fresh
+  authorization.
+
+## Open items (owner / gate)
 
 - **Narrower edit policy for `build` (owner: user).** Intent recorded 2026-11-03: general `@build`
   agents should not have uncontrolled write access to `~/.config/opencode` or
@@ -76,8 +113,8 @@ The command now carries the V2 recipe; this is the evidence and its limits.
   through the symlink (never measured; the row was dropped when the patch decision removed the deny)
   and how a saved allow interacts with a deny (unmeasured).
 - **Plugin delivery: smoke-tested once (2026-11-05), residual risks open (owner: `@build`; gate:
-  fresh user authorization and spend bound for any further paid run).** Record and untested list in
-  `PLAN.md` → "Live acceptance". Residual risks that need a home:
+  fresh user authorization and spend bound for any further paid run).** Record in "Plugin host
+  contract and live acceptance" above. Residual risks:
   - The task-boundary report omits the child's final step (its `step.ended` arrives milliseconds
     after the hook) in both observed runs; the label discloses it, but any consumer comparing the
     report to a finalized total will see a deficit of about the last step.
@@ -88,6 +125,8 @@ The command now carries the V2 recipe; this is the evidence and its limits.
     text.
   - Edits through the symlinked config directory reloading plugins stayed unmeasured (the probe
     edited a real disposable directory); the shared service was not restarted.
+  - Not exercised: foreground-moved-to-background, production-threshold crossings, other-location
+    isolation, worker roles other than `general`, long or nested workloads, savings.
   - A V2 private server needs a credential connected through its API; an `auth.json` copy alone
     gave `provider.no-route`.
 - **Upstream report for the 2.0.32 `temperature` behavior (owner: user).** Dropped at the study's
@@ -113,7 +152,8 @@ The command now carries the V2 recipe; this is the evidence and its limits.
 Confirmed in the combined rDLP ALIGN execution/status-check cohort: 71 of 902 completed requests
 had cache writes ≥30,000 tokens and cache reads <5,000. Those requests accounted for $19.72 of
 $44.67 recorded cost; 66 followed an assistant turn containing a tool span of at least five minutes.
-The exact cohort, grouping method, and corrected role totals are in `PLAN.md` → Pilot results.
+Cohort root IDs and baseline totals are in `IDEAS.md` (economics report entry); the grouping method
+and per-role totals are in `git show 2f95079:PLAN.md` → "Pilot results".
 
 Inference: cache expiry plausibly makes large-context sessions sensitive to waits. Neither historical
 TTL settings nor provider eviction decisions were verified. Recorded tool spans mix possible approval

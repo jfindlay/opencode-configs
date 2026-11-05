@@ -550,3 +550,21 @@ not `auth.json`, so a private server needs a connected credential.
 **Not covered.** Foreground-moved-to-background, production-threshold crossings, other-location
 isolation, symlink-reload behavior, any savings or comprehensive permission claim. The disposable
 tree and its credential were deleted; no plugin, library, test, config or package file changed.
+
+## 2026-11-05 — Rolling plans retired; permission harness frozen
+
+**Context.** The V2 closeout chain finished and the session-economics plan had met its acceptance
+criteria (guidance, monitor, V2 port, bounded live acceptance). Both files were rolling context with
+no remaining executable work, and keeping them risked treating their history as current guidance.
+
+**What changed.** `PLAN.md` and `PLAN-V2-CLOSEOUT.md` were deleted; the last commit containing both
+is `2f95079` (`git show 2f95079:PLAN.md`, `git show 2f95079:PLAN-V2-CLOSEOUT.md`). Live content moved
+to `NOTES.md` (2.2.5 plugin host contract, live-acceptance summary, open items) and `IDEAS.md` (the
+approved-but-unbuilt metadata-only economics report with its ALIGN acceptance baseline, plus the cache
+TTL and leading-`cd` research items). Two stale location comments in the economics monitor were
+corrected. `~/Source/opencode-permtest` is frozen, not deleted: its history exists nowhere else
+(its bare remote holds no refs) and it is the natural harness for the still-unmeasured symlink-deny
+and saved-allow questions.
+
+**Left alone.** Earlier entries, including the two that cite `PLAN.md` sections: their pointer is
+resolved by this entry. Owner-owned items remain in `NOTES.md` "Open items".

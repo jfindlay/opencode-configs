@@ -124,7 +124,7 @@ entry is specifically about exposing per-subagent context-fill to `@plan-admin` 
 warm-resumption-vs-commit-and-close mid-session. The lightweight cost/capacity/integrity monitor
 (`plugins/session-economics.js`) is a different, ungated piece of work — it observes and advises,
 it does not drive a resumption decision — and has been promoted out of this idea list; see
-`PLAN.md` / `AGENTS-LOG.md` for its implementation record. Do not conflate the two: a session
+`AGENTS-LOG.md` / `NOTES.md` for its implementation record. Do not conflate the two: a session
 economics warning firing is not evidence this gate has fired.
 
 **Gate**: do NOT start until small-commit discipline (see
@@ -151,3 +151,61 @@ the orchestrating agent?*
 - If YES → spec the hook.
 - If NO → `@plan-admin` must estimate fill from turn count / cumulative tool-output volume
   (coarser); note this fallback in the Thread 3 spec when writing it.
+
+---
+
+## Idea: metadata-only session economics report
+
+**Status**: scope approved 2026-09-28; no implementation. **Gate**: an explicit user go-ahead and an
+agreed fileset. Full original text: `git show 2f95079:PLAN.md` (item 2 of the active handoff).
+
+**Purpose.** Replace repeated cohort selection and arithmetic with one on-demand, deterministic
+operation, conceptually `session_economics_report(roots, view="summary" | "sessions")`. The caller
+supplies exact session IDs; never infer a cohort from titles, dates, directories or recency.
+
+**Data boundary.** Supported session-metadata and direct-children APIs, recursively. On 2.2.5
+`session.list` (with `parentID` for direct children) returns `cost`, `tokens`, `parentID`, `agent`
+and `model.id` without message bodies, pages at `limit` ≤ 200 with opaque cursors, and matched the
+store for 100 sampled sessions. No message endpoints, database reads, arbitrary SQL, shell, model
+calls or arbitrary server/path parameters. Archived-session inclusion is unmeasured on 2.2.5.
+Reconcile on session `cost`, not message sums: top-level sessions can exceed their message sum by a
+small unattributed amount; forked children match exactly.
+
+**Contract essentials.**
+- Deduplicate by session ID; normalize overlapping roots to effective ancestors and report the
+  overlap; effective-root contributions reconcile with the unique-session total.
+- Missing or inaccessible roots are errors, not $0 trees. Child-fetch failures or traversal limits
+  yield an explicitly partial result. Bound traversal; detect malformed or cyclic lineage.
+- Report collection start/end, requested/effective roots, coverage, session count, recorded cost,
+  largest contributors and token categories; the sessions view adds bounded rows, with omissions
+  stated.
+- Collection is non-atomic; "complete" means retained accessible lineage, not billing. Costs are
+  recorded, not invoices. Agent/model fields are labels, not per-request attribution. Cumulative
+  tokens are not context occupancy. No inference of savings, waste or remaining budget.
+
+**Implementation shape.** Separate collector, pure calculation and thin authorization/presentation
+adapter; a runtime-compatible plugin export shape. Permission preflight is an implementation gate:
+prove how the adapter requests scoped metadata access (custom tools do not inherit native-tool
+checks), and that a denial prevents collection.
+
+**Acceptance baseline (recorded costs, V1-era data).** Roots `ses_f4f895b73ffeexSjqcL5VRIIyw`,
+`ses_f4f022c67ffeKtBCwQOgeL8NYx` and `ses_f498698cbffetzkunguCwIr3jG` with their descendants give 45
+execution sessions and $43.99; adding the status-check root `ses_f49e95f5cffey4oqjTEoDqSyN3` gives
+46 and $44.67. Report any discrepancy rather than forcing it. Also needed: synthetic forests (overlap,
+missing fields/roots, partial reads, archived nodes, malformed lineage, mid-collection change), the
+real loaded tool and its denial path, and no prohibited endpoint. A later benefit comparison holds
+task, evidence requirements and approval policy constant.
+
+Excluded from v1: per-step reconciliation, cache/wait diagnostics, enrollment, forecasts, live
+notices, budget enforcement.
+
+### Deferred research (report before implementing; user asks first)
+
+- **Cache TTL.** Establish installed runtime/provider support and actual TTL semantics; estimate net
+  effect with the premium on all affected writes, not the flagged requests' whole costs. No cache
+  setting change or savings claim is authorized.
+- **Leading-`cd` guard.** Research a narrow pre-execution rejection of the raw leading-`cd` pattern
+  with actionable `workdir` guidance, not silent rewriting. The proposed `cd *` permission deny is
+  withdrawn: at the V1 source tag (1.18.31; not rechecked on V2) CWD commands are excluded before
+  permission matching. Verify hook failure behavior and false positives; preserve approval gates.
+  This would enforce a convention, not a shell security boundary.

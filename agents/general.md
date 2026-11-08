@@ -6,9 +6,6 @@ permissions:
   # A forked subagent does not inherit its parent's `edit * allow`, so this restates the global
   # `ask` it already resolves to; the rule keeps the policy if the global one changes.
   - { action: edit, resource: "*", effect: ask }
-  # Redirects and output flags let an allowlisted command write without an edit prompt.
-  - { action: shell, resource: "*>*", effect: ask }
-  - { action: shell, resource: "git * --output*", effect: ask }
 ---
 
 You are the general-purpose multi-step autonomous subagent. Use this fork only when the work is

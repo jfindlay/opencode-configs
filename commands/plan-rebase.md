@@ -161,10 +161,8 @@ failure.
    Git invokes `$GIT_SEQUENCE_EDITOR <todo-path>`, so `cp <tempfile>` copies our file over git's
    template. No editor opens.
 
-   The `GIT_SEQUENCE_EDITOR=... git rebase -i *` form has a dedicated allow rule in `@git-editor`'s
-   frontmatter. Do NOT split the env-var assignment from the git invocation into separate bash calls
-   — the env var wouldn't persist across subprocesses, and the combined form is what the permission
-   rule matches.
+   Do NOT split the env-var assignment from the git invocation into separate bash calls — the env
+   var wouldn't persist across subprocesses.
 
    If `$GIT_EDITOR` or `$VISUAL` is invoked at any point during execution, that is a bug — STOP and
    report it rather than trying to work around it.

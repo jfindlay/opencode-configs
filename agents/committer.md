@@ -3,22 +3,10 @@ description: "[jf] Narrow session-close commit subagent for autonomous chains. R
 mode: subagent
 model: anthropic/claude-haiku-5-5
 permissions:
-  - { action: shell, resource: "*", effect: deny }
-  - { action: shell, resource: "git status", effect: allow }
-  - { action: shell, resource: "git status *", effect: allow }
-  - { action: shell, resource: "git diff", effect: allow }
-  - { action: shell, resource: "git diff *", effect: allow }
-  - { action: shell, resource: "git log", effect: allow }
-  - { action: shell, resource: "git log *", effect: allow }
-  - { action: shell, resource: "git show *", effect: allow }
-  - { action: shell, resource: "git rev-parse *", effect: allow }
-  - { action: shell, resource: "git add *", effect: allow }
-  - { action: shell, resource: "git commit -m *", effect: allow }
-  - { action: shell, resource: "ls", effect: allow }
-  - { action: shell, resource: "ls *", effect: allow }
-  # The secret check scans untracked files with grep. Command-name rules cannot confine grep to
-  # the expected files, so this is a scan tool, not a read sandbox.
-  - { action: shell, resource: "grep *", effect: allow }
+  # Shell follows the global policy except that committing is this role's job, so the global
+  # commit `ask` is lifted. Everything below is a tripwire for history-shaping operations that
+  # belong to @git-editor; the role's real limits are the procedure and refusal taxonomy below.
+  - { action: shell, resource: "git commit *", effect: allow }
   # Explicit denies — these belong to @git-editor, not here.
   - { action: shell, resource: "git commit --amend", effect: deny }
   - { action: shell, resource: "git commit --amend *", effect: deny }

@@ -3,44 +3,9 @@ description: "[jf] General git work — rebases, commits, cherry-picks, amends, 
 mode: primary
 model: anthropic/claude-sonnet-5-5
 permissions:
-  - { action: shell, resource: "*", effect: ask }
-  - { action: shell, resource: "git status *", effect: allow }
-  - { action: shell, resource: "git status", effect: allow }
-  - { action: shell, resource: "git log *", effect: allow }
-  - { action: shell, resource: "git log", effect: allow }
-  - { action: shell, resource: "git diff *", effect: allow }
-  - { action: shell, resource: "git diff", effect: allow }
-  - { action: shell, resource: "git show *", effect: allow }
-  - { action: shell, resource: "git rev-parse *", effect: allow }
-  - { action: shell, resource: "git rev-list *", effect: allow }
-  - { action: shell, resource: "git reflog *", effect: allow }
-  - { action: shell, resource: "git remote", effect: allow }
-  - { action: shell, resource: "git remote -v", effect: allow }
-  - { action: shell, resource: "git branch", effect: allow }
-  - { action: shell, resource: "git branch *", effect: allow }
-  - { action: shell, resource: "git rebase -i *", effect: allow }
-  # The sequence-editor shim is the only practical way to drive `git rebase -i`
-  # non-interactively. Env-var-prefixed commands match against the full string,
-  # so `git rebase -i *` alone would not cover this form.
-  - { action: shell, resource: "GIT_SEQUENCE_EDITOR=* git rebase -i *", effect: allow }
-  - { action: shell, resource: "git rebase --continue", effect: allow }
-  - { action: shell, resource: "git rebase --abort", effect: allow }
-  - { action: shell, resource: "git rebase --skip", effect: allow }
-  - { action: shell, resource: "git rebase --edit-todo", effect: allow }
-  - { action: shell, resource: "git commit --amend *", effect: allow }
-  - { action: shell, resource: "git commit --amend", effect: allow }
-  - { action: shell, resource: "git commit -m *", effect: allow }
-  - { action: shell, resource: "git cherry-pick *", effect: allow }
-  - { action: shell, resource: "git cherry-pick --continue", effect: allow }
-  - { action: shell, resource: "git cherry-pick --abort", effect: allow }
-  - { action: shell, resource: "git cherry-pick --skip", effect: allow }
-  - { action: shell, resource: "git reset --soft *", effect: allow }
-  - { action: shell, resource: "git add *", effect: allow }
-  - { action: shell, resource: "git restore --staged *", effect: allow }
-  - { action: shell, resource: "ls *", effect: allow }
-  - { action: shell, resource: "ls", effect: allow }
-  - { action: shell, resource: "git reset --hard *", effect: ask }
-  - { action: shell, resource: "git clean *", effect: ask }
+  # Shell follows the global policy, with the global commit `ask` lifted: committing and
+  # history rewriting are this role's job. `reset --hard` and `clean` keep the global ask.
+  - { action: shell, resource: "git commit *", effect: allow }
   # Explicit deny — overrides any upstream allow.
   # The user decides when refs leave the local machine.
   - { action: shell, resource: "git push", effect: deny }

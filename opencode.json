@@ -49,8 +49,8 @@
       ".mypy_cache/**"
     ]
   },
-  // Global: read-only bash pre-approved; edits and mutations require approval.
-  // Applies to plan mode and as the base for build mode.
+  // Global: shell allowed with a few checkpoints (push, commit, destructive git); edits ask.
+  // Applies to every agent as the base; agent rules append after it.
   // V2 ordered permissions array. Rules resolve the same way as the old per-action maps
   // did (last matching rule wins); this just flattens each action's map into
   // {action, resource, effect} tuples in the same order, and renames bash->shell,
@@ -63,44 +63,17 @@
     { "action": "read", "resource": "*.env", "effect": "ask" },
     { "action": "read", "resource": "*.env.*", "effect": "ask" },
     { "action": "read", "resource": "*.env.example", "effect": "allow" },
-    { "action": "shell", "resource": "*", "effect": "ask" },
-    { "action": "shell", "resource": "git status *", "effect": "allow" },
-    { "action": "shell", "resource": "git status", "effect": "allow" },
-    { "action": "shell", "resource": "git log *", "effect": "allow" },
-    { "action": "shell", "resource": "git log", "effect": "allow" },
-    { "action": "shell", "resource": "git diff *", "effect": "allow" },
-    { "action": "shell", "resource": "git diff", "effect": "allow" },
-    { "action": "shell", "resource": "git branch *", "effect": "allow" },
-    { "action": "shell", "resource": "git branch", "effect": "allow" },
-    { "action": "shell", "resource": "git remote -v", "effect": "allow" },
-    { "action": "shell", "resource": "git worktree list *", "effect": "allow" },
-    { "action": "shell", "resource": "git worktree list", "effect": "allow" },
-    { "action": "shell", "resource": "git reflog *", "effect": "allow" },
-    { "action": "shell", "resource": "git reflog", "effect": "allow" },
-    { "action": "shell", "resource": "ls *", "effect": "allow" },
-    { "action": "shell", "resource": "ls", "effect": "allow" },
-    { "action": "shell", "resource": "pwd", "effect": "allow" },
-    { "action": "shell", "resource": "which *", "effect": "allow" },
-    { "action": "shell", "resource": "wc *", "effect": "allow" },
-    { "action": "shell", "resource": "file *", "effect": "allow" },
-    // Output filters. Rules match command names, so they cannot confine these to stdin; reading a
-    // file through them is accepted occasional use, not a sandbox. AGENTS.md steers direct file
-    // inspection to Read/Glob/Grep. Restrictive agents set their own shell defaults after this.
-    { "action": "shell", "resource": "grep *", "effect": "allow" },
-    { "action": "shell", "resource": "head *", "effect": "allow" },
-    { "action": "shell", "resource": "tail *", "effect": "allow" },
-    // Still denied: native tools cover these.
-    { "action": "shell", "resource": "rg *", "effect": "deny" },
-    { "action": "shell", "resource": "find *", "effect": "deny" },
-    { "action": "shell", "resource": "cat *", "effect": "deny" },
-    { "action": "shell", "resource": "sed *", "effect": "deny" },
-    { "action": "shell", "resource": "awk *", "effect": "deny" },
-    { "action": "shell", "resource": "sqlite3 -readonly *", "effect": "allow" },
-    // Type-check and compile-verify — read-only, loop frequently.
-    { "action": "shell", "resource": "venv/bin/mypy *", "effect": "allow" },
-    { "action": "shell", "resource": "./venv/bin/mypy *", "effect": "allow" },
-    { "action": "shell", "resource": "venv/bin/python -m py_compile *", "effect": "allow" },
-    { "action": "shell", "resource": "./venv/bin/python -m py_compile *", "effect": "allow" },
+    // Shell is allowed by default. These rules are consent checkpoints, not containment: they
+    // match command text, so they cannot see effects (redirects, interpreters, `env`, `git -C`).
+    // Preferences such as Read/Grep/Glob over cat/grep/find live in AGENTS.md as guidance, not
+    // as denies. Rules are checked per extracted subcommand; one deny or ask decides the line.
+    // Real isolation (sandbox, credentials, network) belongs outside this file.
+    { "action": "shell", "resource": "*", "effect": "allow" },
+    { "action": "shell", "resource": "git push *", "effect": "deny" },
+    { "action": "shell", "resource": "git commit *", "effect": "ask" },
+    { "action": "shell", "resource": "git reset --hard *", "effect": "ask" },
+    { "action": "shell", "resource": "git clean *", "effect": "ask" },
+    { "action": "shell", "resource": "sudo *", "effect": "ask" },
     // `edit` covers edit/write/patch in V2, so the old separate edit+write maps (which were
     // identical) collapse into one action without changing behavior.
     { "action": "edit", "resource": "*", "effect": "ask" },

@@ -135,6 +135,12 @@ Set `workdir` on shell calls rather than prefixing `cd` (AGENTS.md, directory co
    - **Body**: 1–4 sentences explaining the WHY, derived from `SESSION CONTRACT`. Optional bullets
      for distinct change aspects. Strip any "what we did" language —
      diff-stat shows that already.
+   - **Body wrapping.** Hard-wrap body text at 72 characters, greedily: fill each line with as many
+     words as fit, up to and including column 72, and break only at the last space that keeps the
+     line ≤72. Do not break early (ragged lines at ~60 are wrong) and never exceed 72. Wrap each
+     paragraph separately; indent bullet continuation lines two spaces under the bullet text. Never
+     split a single unbreakable token (URL, path); let it overflow on its own line. The title and
+     the `Co-authored-by:` trailer lines are not wrapped.
    - No conventional-commits prefixes (`feat:`, `fix:`, etc.) — use natural language.
    - **Co-author trailer (default ON).** Append one `Co-authored-by:` line per content agent after
      a blank line at the end of the body. The content agent(s) did the intellectual work of the
@@ -149,7 +155,14 @@ Set `workdir` on shell calls rather than prefixing `cd` (AGENTS.md, directory co
 7. **Stage and commit.**
    - For each path in `EXPECTED FILES`: `git add <path>`. Never bare `git add .` or `git add -A`.
    - Run `git diff --cached --stat` to confirm staging matches expectations. If not, REFUSE.
-   - `git commit -m "<title>" -m "<body>"`.
+   - **Width pre-flight.** Counting by eye is unreliable, so check the drafted body with a command
+     before committing: pass the exact body text (without the trailer) to
+     `awk 'length($0) > 72 { print NR": "length($0) }'` via `printf '%s\n' '<body>' | awk ...`. Any
+     output names an over-long line; re-wrap those lines and re-run until the output is empty. The
+     only tolerated hit is a line holding a single unbreakable token. Then check for under-filled
+     lines: if a line plus the first word of the next line would still fit in 72 characters, re-wrap.
+   - `git commit -m "<title>" -m "<body>"`. Use one `-m` per paragraph; newlines inside a quoted
+     body are preserved, so the hard wraps survive.
 
 8. **Verify.** Run `git log -1 --stat` and `git status` to confirm:
    - HEAD now points to the new commit.

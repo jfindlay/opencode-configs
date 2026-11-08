@@ -80,9 +80,12 @@ the judgment register for. T0/T1 agents follow the trigger directly.
 
 These rules exist because violating them costs turns and clutters sessions.
 
-- **Never use bash for file operations.** Use `Read` (not cat/head/tail/less), `Grep` (not grep/rg),
-  `Glob` (not find/ls-for-patterns), `Edit` (not sed/awk), `Write` (not `cat <<EOF` or `echo >`).
-  `ls` is fine for quick directory inspection only.
+- **Native tools for files, shell filters for command output.** Inspect and change files with `Read`,
+  `Grep`, `Glob`, `Edit`, `Write` — not cat/sed/awk/find/rg, `cat <<EOF`, or `echo >`. `grep`,
+  `head`, `tail` are permitted in a shell pipeline to filter a command's output (`pytest | tail`),
+  not to read files. `ls` is fine for quick directory inspection. An agent's own shell
+  restrictions win over this rule. A permission denial never authorizes reaching the same effect
+  through another interpreter or tool (`python3`, `node`); report the block.
 - **Never `cd X && cmd`.** Use the tool's `workdir` parameter. Cding into a subprocess shell means
   the next command has no memory of it.
 - **Never `echo` to communicate.** Output directly in chat.

@@ -19,6 +19,9 @@ permissions:
   - { action: shell, resource: "pwd", effect: allow }
   - { action: shell, resource: "wc *", effect: allow }
   - { action: shell, resource: "file *", effect: allow }
+  # Read-only session history for config audits; no other API operation is allowed.
+  - { action: shell, resource: "opencode api session.list *", effect: allow }
+  - { action: shell, resource: "opencode api session.message.list *", effect: allow }
   - { action: shell, resource: "*>*", effect: deny }
   - { action: shell, resource: "git * --output*", effect: deny }
 ---
@@ -42,6 +45,10 @@ and response scale (collapse clusters, pivotal facts only) shape the quality of 
 - Cite locations. Every finding must include a `file:line` reference so the caller can navigate
   directly.
 - Prefer tools over bash. Use `Read`, `Grep`, `Glob` instead of cat/grep/find.
+- Session history is readable through exactly two shell operations: `opencode api session.list` and
+  `opencode api session.message.list` (parameters as `--param key=value`). Use small pages. You have
+  no redirect, `jq`, `sqlite3`, or other API operation; when output is large, `Read` the file the
+  shell tool retains. Report what you could not reach instead of working around the limit.
 
 ## Critical tool discipline
 

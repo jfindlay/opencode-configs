@@ -83,18 +83,18 @@
     { "action": "shell", "resource": "which *", "effect": "allow" },
     { "action": "shell", "resource": "wc *", "effect": "allow" },
     { "action": "shell", "resource": "file *", "effect": "allow" },
-    // AGENTS.md forbids these in favor of Read/Glob/Grep/Edit/Write.
-    { "action": "shell", "resource": "grep *", "effect": "deny" },
+    // Output filters. Rules match command names, so they cannot confine these to stdin; reading a
+    // file through them is accepted occasional use, not a sandbox. AGENTS.md steers direct file
+    // inspection to Read/Glob/Grep. Restrictive agents set their own shell defaults after this.
+    { "action": "shell", "resource": "grep *", "effect": "allow" },
+    { "action": "shell", "resource": "head *", "effect": "allow" },
+    { "action": "shell", "resource": "tail *", "effect": "allow" },
+    // Still denied: native tools cover these.
     { "action": "shell", "resource": "rg *", "effect": "deny" },
     { "action": "shell", "resource": "find *", "effect": "deny" },
     { "action": "shell", "resource": "cat *", "effect": "deny" },
     { "action": "shell", "resource": "sed *", "effect": "deny" },
     { "action": "shell", "resource": "awk *", "effect": "deny" },
-    // Pipe-tail patterns. OpenCode's matcher is glob-prefix-anchored, so the
-    // leading `*` may or may not span a pipe — keep the patterns conservative
-    // and rely on the leading-token denies above to catch the common cases.
-    { "action": "shell", "resource": "* | head*", "effect": "deny" },
-    { "action": "shell", "resource": "* | tail*", "effect": "deny" },
     { "action": "shell", "resource": "sqlite3 -readonly *", "effect": "allow" },
     // Type-check and compile-verify — read-only, loop frequently.
     { "action": "shell", "resource": "venv/bin/mypy *", "effect": "allow" },
@@ -125,6 +125,21 @@
         { "action": "edit", "resource": "**/docs/PLAN.md", "effect": "allow" },
         { "action": "edit", "resource": "**/docs/NOTES.md", "effect": "allow" },
         { "action": "edit", "resource": "**/docs/ROADMAP.md", "effect": "allow" }
+      ]
+    },
+    // /plan-run agents write the default PLAN. In-project paths reach the engine project-relative,
+    // so the rule names `docs/PLAN.md`; an absolute rule or `**/docs/PLAN.md` is not a substitute.
+    // A non-default PLAN path needs explicit user authorization. File rules cannot enforce which
+    // section either agent may write: the driver writes ledger and digest, the juncture fork
+    // writes contracts for inflection design only (agents/plan-admin.md, agents/plan-juncture.md).
+    "plan-admin": {
+      "permissions": [
+        { "action": "edit", "resource": "docs/PLAN.md", "effect": "allow" }
+      ]
+    },
+    "plan-juncture": {
+      "permissions": [
+        { "action": "edit", "resource": "docs/PLAN.md", "effect": "allow" }
       ]
     },
     // Disable the built-in plan agent — replaced by @architect (Opus 5.5).

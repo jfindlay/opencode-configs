@@ -1,5 +1,5 @@
 ---
-description: "[jf] Autonomously execute a session-sharded plan file as a 1:1 session:commit chain. @plan-admin orchestrates the mechanical loop; dispatches @build/@general/@explore per session entry, @committer for commits, and pages a forked @plan-juncture (Opus) only at inflection points, contract-invalidating discoveries, and sub-track boundaries. A row marked (F/C) by /plan-shard runs as a feature-stage then completion-stage pair sharing one intent capsule and one commit; ordinary rows are unaffected. State lives in the committed plan ledger. Args: [plan-path] [may-reshard|halt-at-boundaries]. Plan path defaults to docs/PLAN.md."
+description: "[jf] Autonomously execute a session-sharded plan file as a 1:1 session:commit chain. @plan-admin orchestrates the mechanical loop; dispatches @build/@explore per session entry, @committer for commits, and pages a forked @plan-juncture (Opus) only at inflection points, contract-invalidating discoveries, and sub-track boundaries. A row marked (F/C) by /plan-shard runs as a feature-stage then completion-stage pair sharing one intent capsule and one commit; ordinary rows are unaffected. State lives in the committed plan ledger. Args: [plan-path] [may-reshard|halt-at-boundaries]. Plan path defaults to docs/PLAN.md."
 agent: plan-admin
 subagent: false
 ---
@@ -14,7 +14,7 @@ files, and consumed contracts) per `multisession/multi-session-planning.md`.  Th
 This command runs from `@plan-admin` (T1). The mechanical loop — select, dispatch, gate, commit,
 ledger — is entirely the driver's work. T1 judgment (discovery adjudication, inflection-point
 interface design, sub-track boundary coordinate-transform) is paged in by forking `@plan-juncture` at the
-three junctures only. Implementation is dispatched down-tier to `@build`/`@general`; research to
+three junctures only. Implementation is dispatched down-tier to `@build`; research to
 `@explore`. If invoked from a non-`plan-admin` session, stop and tell the user to switch.
 
 User input: $ARGUMENTS
@@ -48,8 +48,8 @@ feature/completion branch (see `/plan-shard`'s Conditional feature/completion br
 such a row:
 
 - **F-stage / C-stage** — two execution contexts dispatched in sequence for the same row, sharing
-  one intent and producing one commit. Both are dispatched at T1 to `@build` (or `@general`, per the
-  same judgment as any other code-change dispatch in step 3) — no new agent type, no tier escalation.
+  one intent and producing one commit. Both are dispatched at T1 to `@build`, as any other code-change
+  dispatch in step 3 is — no new agent type, no tier escalation.
 - **`handoff-ready`** — F's return state. It means the row is NOT done and NOT green; it is a
   mid-unit checkpoint. A `handoff-ready` return never marks the ledger row `done`.
 - **Intent capsule** — the six-field record the driver writes into PLAN's `## Completion handoffs`
@@ -171,8 +171,7 @@ Read the session entry's category:
   consumes; instructs the subagent NOT to read the Roadmap appendix or any other session. Subagent
   leaves the tree dirty with green tests; does NOT commit.
 - **Code-change, Category A (substrate)** not flagged `@architect`: the driver dispatches `@build`
-  directly (cheap cases where the interface is already written into contracts), or dispatches
-  `@general` for heterogeneous setup work (e.g. S0 skeleton). Use judgment.
+  directly, including setup work such as an S0 skeleton; task size does not select another agent.
 
 One session-list row = one dispatch = one commit — except a row marked `(F/C)`, which is two
 dispatches (F-stage then C-stage) sharing that row's single eventual commit (see step 3b). Never
@@ -180,7 +179,7 @@ batch two different rows into one dispatch, and never split an unmarked row into
 
 For a row marked `(F/C)`, dispatch the F-stage using the **F-stage dispatch template** (see
 Feature/completion dispatch templates below) in place of the standard Dispatch template; route to
-`@build`/`@general` by the same category judgment above. Do not run the step-4 verify gate against
+`@build`. Do not run the step-4 verify gate against
 F's return — step 3b governs what happens next.
 
 Dispatch prompts stay scoped: deliver the session entry and the contract subsections it consumes as
@@ -427,8 +426,7 @@ DONE WHEN
 ## Feature/completion dispatch templates (paired units only)
 
 Used only for a row marked `(F/C)` by `/plan-shard` (see Terminology above). Both stages are
-dispatched to `@build` (or `@general` for heterogeneous setup work, per the same category judgment as
-step 3) — pinned T1, the same tier as every other implementation dispatch in this loop. No new agent
+dispatched to `@build` — pinned T1, the same tier as every other implementation dispatch in this loop. No new agent
 type and no tier escalation exist for this pattern.
 
 ### F-stage (feature) dispatch

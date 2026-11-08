@@ -38,8 +38,11 @@ rely on prose guidance alone — encode tier in each subagent's `model:` frontma
 - `@architect` — T0/Opus 5.5. Deep planning, architectural tradeoffs, cross-cutting audits, phase
   planning, rebase plans. Rolling-context writes allowed; all other writes require user approval.
   References `AGENTS-REASONING.md` in full including the T-1/T0-only section.
-- `@build` — T1/Sonnet 5.5. Default implementation: coding, refactors, test fixes, review-address
-  cycles. References `AGENTS-REASONING.md` up to the T-1/T0-only marker.
+- `@build` — T1/Sonnet 5.5, `mode: all`: the one implementation worker, as a primary agent or as a
+  forked subagent (including `/plan-run` F/C stages). Coding, setup, multi-file changes, refactors,
+  test/fix loops, review-address cycles; reports results or blockers to its caller and does not plan,
+  orchestrate chains, rewrite history, or commit on its own. References `AGENTS-REASONING.md` up to
+  the T-1/T0-only marker.
 - `@plan-admin` — T1/Sonnet 5.5. Autonomous-chain driver for `/plan-run`. Runs the mechanical
   loop (select, dispatch, gate, commit, ledger); pages a forked `@plan-juncture` only at the three
   junctures (inflection design, discovery adjudication, sub-track boundary). Never implements;
@@ -60,8 +63,9 @@ rely on prose guidance alone — encode tier in each subagent's `model:` frontma
 - `@verify` — T1/Sonnet 5.5. Verifies a list of claims (typically review findings) against the
   actual code. Returns accurate/inaccurate/needs-discussion labels per claim. Used by
   `/address-review` when ≥5 findings require code verification.
-- `@general` — T1/Sonnet 5.5. Multi-step autonomous work with heterogeneous tools where no
-  specialised subagent (`@explore`, `@verify`, `@git-editor`) fits. May edit/write. Overrides built-in
+- `@general` — T1/Sonnet 5.5. Miscellaneous multi-step work where no specialised subagent
+  (`@explore`, `@verify`, `@build`, `@git-editor`) fits; not a fallback coding worker — implementation,
+  including setup and multi-file changes, goes to `@build`. May edit/write (asks). Overrides built-in
   `@general` to pin the tier — without the pin, forks from a T0 or T-1 primary would silently run
   on Opus or GPT-6 Astra.
 - `@session-scan` — T2/Haiku 5.5. High-volume session-history scan for retrospectives. Used by
@@ -103,7 +107,7 @@ rely on prose guidance alone — encode tier in each subagent's `model:` frontma
 - `/config-retrospective` — single-session `@architect` audit of the OpenCode user-level infrastructure
   against the session store, scored against a relentless-simplicity lens. Forks `@explore` for
   permission-flow + usage-pattern data; the cohesion review is the orchestrator's own spine;
-  approved changes are actioned by forked `@build`/`@general` and committed via `@committer`
+  approved changes are actioned by a forked `@build` and committed via `@committer`
   with user-approved message. On-demand only.
 - `/explore` — fork a parameterized `@explore` subagent with a structured investigation prompt.
 - `/format-loop` — iterative format + fix loop until clean or convergence fails; pass a scope in
@@ -114,7 +118,7 @@ rely on prose guidance alone — encode tier in each subagent's `model:` frontma
   Also carries the execution playbook that `@git-editor` follows when the user pastes an approved
   plan into a fresh session.
 - `/plan-run` — autonomously execute a session-sharded `docs/PLAN.md` as a 1:1 session:commit
-  chain. `@plan-admin` orchestrates the mechanical loop; dispatches `@build`/`@general`/`@explore`
+  chain. `@plan-admin` orchestrates the mechanical loop; dispatches `@build`/`@explore`
   per session entry, `@committer` for commits, and pages `@plan-juncture` (Opus) only at inflection
   points, contract-invalidating discoveries, and sub-track boundaries. State lives in the PLAN.md
   ledger. Args: `[plan-path] [may-reshard|halt-at-boundaries|fully-autonomous]`.

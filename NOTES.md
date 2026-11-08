@@ -42,7 +42,9 @@ current tables are `session_v2`/`session_message`, and its permission and overri
 The command now carries the V2 recipe; this is the evidence and its limits.
 
 - **Method.** `opencode api session.list|session.message.list` (stdout redirected to a file; piping
-  a large response truncated it), compared with `sqlite3 -readonly` queries on the live store. No
+  a large response truncated it; small pages piped fine, and a full response the shell tool retained
+  itself parsed — the 2026-11-07 recipe in the command avoids redirects), compared with `sqlite3
+  -readonly` queries on the live store. No
   backup was made: the store is about 19 GB, `/tmp` is a 7.7 GB tmpfs and the root disk is 92% full.
   Only bounded, read-only queries ran; nothing was written, repaired or copied. SQLite `.backup`
   was not exercised. Scratch output (transcript content) was deleted afterwards.

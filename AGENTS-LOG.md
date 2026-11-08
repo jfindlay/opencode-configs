@@ -588,3 +588,40 @@ no-op rule. Not committed; verified by rule evaluation, not by live tool calls.
 **Left alone.** In-project editing of this repository by `build`, redirects for `build`/`architect`/
 `committer`/`git-editor`, the global `git branch *`/`git reflog *` allows, the `request.body` wire
 question: all listed in `NOTES.md` "Open items".
+
+## 2026-11-07 — Permission friction: one implementation worker, output filters, scoped exceptions
+
+**Context.** A driver run (rDLP) showed task/permission contradictions, not intermittent
+enforcement: four shell denials for forbidden `cat`/`grep`, `Agent build cannot run as a subagent`
+(so every implementation child ran as `general`), committers attempting forbidden diff/grep scans,
+and `@plan-admin` PLAN writes depending on prompts. The denials were correct under the rules; the
+rules and the tasks disagreed.
+
+**Changed.** `build` is `mode: all` with one bounded mandate (implement, own the test/fix loop,
+report to the caller; no planning, chain orchestration, history rewriting, or self-commit), and
+`general` is demoted to miscellaneous work, not a fallback coder; roster, `/plan-run`, `plan-admin`,
+`config-retrospective` and the planning manual route implementation to `build` only. Global shell:
+`grep`, `head`, `tail` allowed, the stale `* | head*`/`* | tail*` denies removed; the tool-discipline
+rule is now "native tools for files, filters for command output" with the no-other-interpreter
+clause. `committer` gains `grep *` and a recipe with separate tracked (`git diff HEAD -G`) and
+untracked (`grep -lE`) scans and explicit exit-status handling. `explore` gains exactly
+`opencode api session.list *` and `session.message.list *`; the retrospective crib drops the
+redirect advice, fixes the `parentID` linkage sentence and the pagination contract, and keeps SQLite
+as the orchestrator's backed-up fallback. `plan-admin`/`plan-juncture` get `edit docs/PLAN.md`.
+
+**Accepted tradeoffs.** Command-name rules cannot confine `grep`/`head`/`tail` to stdin, so
+occasional file reads through them are tolerated; none of this is a filesystem sandbox. The
+explorer can read sensitive session history; it cannot mutate. The PLAN allow is file-level:
+section limits stay procedural.
+
+**Verified (2.2.5).** Private-server rule evaluation (no model call): 86 cases across the six
+roles matched expectations, except one case that tested the evaluator rather than the config
+(a whole `ls | head` string; it takes resources as given and does not split pipes) (negative cases for other API operations, redirects, forbidden edits and
+Git operations included). Shared service reloaded once (`location.reload`, user-approved): loaded
+`build` is `all`/pinned, new rules present. Fixture scans: dirty/clean/missing/bad-regex/bad-rev
+statuses behaved as the recipe states. In the live shell, a quoted `|` was not split and a real pipe
+into `cat` was denied. **Not verified:** a live `committer`/`explore` call (needs a paid run), and
+the evaluation API does not run the shell scanner, so the exact recipe under `committer`'s rules is
+inferred from the scanner behavior above. A saved-allow against a configured deny stays unmeasured.
+Existing saved approvals (rDLP: `edit *`, `grep *`, `head *`, `tail *`, `python3 *`, `cat *`,
+`echo *`) were reported, not revoked.

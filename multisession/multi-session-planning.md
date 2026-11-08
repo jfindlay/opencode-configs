@@ -12,7 +12,7 @@ internalise.
 
 ## The atom: the commit-shaped session
 
-The atomic execution unit is **one `@build` or `@general` session producing one commit-shaped
+The atomic execution unit is **one `@build` session producing one commit-shaped
 deliverable**. The defining property is *not* a LOC count — it is **one conceptual unit, ending
 green**:
 

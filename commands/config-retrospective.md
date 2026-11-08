@@ -26,10 +26,15 @@ agent, parent, model, cost, timestamps and per-status tool counts for 100 recent
 store layout changed between the V1 and V2 runtimes; re-check after an engine upgrade.
 
 **Prefer the read API.** `opencode api <operationId> --param key=value` talks to the background
-service. Redirect stdout to a file: on 2.2.5 a large response piped to another process arrived
-truncated, as invalid JSON. Pages are bounded (`limit` ≤ 200); follow `cursor.next` until a page
-returns fewer than `limit` items. Location-scoped operations take `location[directory]=<path>` in a
-raw `GET` path.
+service. Keep pages small and do not pipe a large response into another process: on 2.2.5 such a
+response (piped into `jq`) arrived truncated, as invalid JSON, while small pages parsed and a full
+response the shell tool retained itself (it saves large output to a file) was also parseable. A
+message `limit` bounds the item count, not the response bytes: tool output sits inline in the
+messages. Read retained output with `Read` (`offset`/`limit`); no export file or redirect is needed.
+Pagination: `cursor.next` is an opaque value; pass it back as `--param cursor=<value>` (not with
+`order`; repeat the `type` filter for messages). Stop on an empty page: a page shorter than `limit`
+can still carry a non-null `cursor.next` (a 14-item result at `limit=200` did). Location-scoped
+operations take `location[directory]=<path>` in a raw `GET` path.
 - `session.list` (`limit`, `order`, `parentID`, `directory`, `project`, `search`, `archived`): per
   session `id`, `parentID` (absent for top-level), `agent`, `model.id`, `cost`, `tokens`
   (`input`, `output`, `reasoning`, `cache.read`, `cache.write`), `outcome` (finished sessions only),
@@ -41,18 +46,20 @@ raw `GET` path.
   `type: "tool"`, `name`, `state.status` (`streaming`, `running`, `completed`, `error`),
   `state.error` (`type`, `message`) and `time` (`created`, `ran`, `completed`).
 - Fork linkage: a completed `subagent` tool call carries the child's id at
-  `state.metadata.sessionID`; it equals the child's `parentID`.
+  `state.metadata.sessionID`. The child's `parentID` is the calling session's id, not its own.
 
 **Cost.** `session.cost` is the session's own spend, never rolled up from children. For forked
 children it equals the sum of its assistant messages' `cost`. A top-level session's `cost` exceeds
 that sum by a small amount ($0.00002–$0.002 in the sample) not attributable to any listed message;
 the cause is unverified. These are OpenCode-recorded costs, not invoices.
 
-**Direct store queries (fallback for bulk aggregates).** `~/.local/share/opencode/opencode.db` is a
-live WAL database (about 19 GB on this machine). Query it only as `sqlite3 -readonly <db> '<query>'`
-with predicates on indexed columns (`session_id`, `parent_id`); never write it, and never copy
-`.db`, `-wal` and `-shm` as separate files. For a stable copy use SQLite's `.backup` into a
-directory with enough free space (`/tmp` may be too small).
+**Direct store queries (explicit bulk-aggregate fallback; the orchestrator's, not `@explore`'s).**
+`~/.local/share/opencode/opencode.db` is a live WAL database (about 19 GB on this machine). The
+OpenCode skill requires a backup before inspecting persistent data with external tools: take one
+with SQLite's `.backup` into a directory with enough free space (`/tmp` may be too small; never copy
+`.db`, `-wal` and `-shm` as separate files). If no space exists, say so and get the user's decision
+before querying the live file. Query only as `sqlite3 -readonly <db> '<query>'` with predicates on
+indexed columns (`session_id`, `parent_id`); never write it.
 - `session_v2` (current sessions): `id`, `parent_id`, `agent`, `model` (JSON; `json_extract(model,
   '$.id')`), `cost`, `tokens_input/output/reasoning/cache_read/cache_write`, `idle_outcome`,
   `time_created/updated/idle/busy` (millisecond-epoch), `title`, `slug`, `directory`.
@@ -97,13 +104,17 @@ carried `permissions`, so a fork's session-level override cannot be discovered o
 1. Confirm T0/`@architect`. If not, tell the user and stop.
 2. Fork `@explore` for Threads 1+2 with the schema crib + thread questions (template per
    `AGENTS-SUBAGENT-STRATEGY.md`). Validate crib first; surface any drift immediately.
-   Read-only: the read API first, else `sqlite3 -readonly`; never write `.db`/`.db-wal`/`.db-shm`.
-   Edit through the `opencode-config/` path; the symlinked config directory is the same files.
+   `@explore` is read-only and has exactly two shell operations for history, `opencode api
+   session.list` and `opencode api session.message.list`: small pages, no redirect, `jq`, or
+   SQLite. Have it report any access gap (the response too large to read, an operation it lacks)
+   rather than work around it; bulk SQLite queries are yours, under the store rules above. This
+   grants reads of sensitive session history, not API mutations. Never write
+   `.db`/`.db-wal`/`.db-shm`. Edit through the `opencode-config/` path; the symlinked config
+   directory is the same files.
 3. Run Thread 3 yourself. Produce a ranked candidate list (deletes, merges, cuts, permission edits)
    ranked by (simplicity impact) × (ease/safety).
 4. Gate via Question tool (accept / defer / reject). Do not action before this step.
-5. Dispatch `@build` (mechanical) or `@general` (multi-file) to action accepted changes. Subagents
-   leave the tree dirty; do NOT commit.
+5. Dispatch `@build` to action accepted changes. It leaves the tree dirty; do NOT commit.
 6. Commit: draft message, gate on user approval, delegate to `@committer`. One commit per coherent
    change. Never push.
 7. Append a dated entry to `AGENTS-LOG.md`: what changed, why, alternatives weighed.

@@ -9,7 +9,8 @@ session:commit chain by running the mechanical loop defined in `/plan-run`. You 
 **dispatcher**, not an implementer and not an adjudicator. The three roles are strictly separate:
 
 - **You (T1):** select, dispatch, gate mechanically, commit, update ledger, maintain digest.
-- **`@build` / `@general` / `@explore` (T1):** implement sessions and produce commits.
+- **`@build` / `@explore` (T1):** `@build` implements sessions (setup and multi-file work
+  included; `@general` is not a fallback coder); `@explore` does research. Neither commits.
 - **`@committer` (T1):** stage and commit on your instruction.
 - **`@plan-juncture` (T0/Opus):** adjudicate discoveries, design inflection-point interfaces, run
   sub-track boundary coordinate-transforms. Paged only at the three junctures — never for mechanical
@@ -44,7 +45,7 @@ any step's wording or verdict vocabulary.
    `@plan-juncture` with the inflection entry and digest; it returns one-shot either
    `design-confident <summary>` or `design-uncertain-HALT <what cannot be reconciled>`, exactly as
    `/plan-run` step 2 specifies — that command is canonical for this verdict, not this file. On
-   `design-confident`, you **self-continue**: dispatch `@build`/`@general` to implement, no human
+   `design-confident`, you **self-continue**: dispatch `@build` to implement, no human
    halt. On `design-uncertain-HALT`, you **halt for human sign-off**, surfacing the fork's named
    irreconcilability. Do not default to always halting here — that was this file's own earlier
    description and it conflicted with the command; the command's self-continue-unless-irreconcilable

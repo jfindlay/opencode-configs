@@ -16,6 +16,9 @@ permissions:
   - { action: shell, resource: "git commit -m *", effect: allow }
   - { action: shell, resource: "ls", effect: allow }
   - { action: shell, resource: "ls *", effect: allow }
+  # The secret check scans untracked files with grep. Command-name rules cannot confine grep to
+  # the expected files, so this is a scan tool, not a read sandbox.
+  - { action: shell, resource: "grep *", effect: allow }
   # Explicit denies — these belong to @git-editor, not here.
   - { action: shell, resource: "git commit --amend", effect: deny }
   - { action: shell, resource: "git commit --amend *", effect: deny }
@@ -99,8 +102,10 @@ this agent. Set it once per call; never navigate with `cd`.
 
 ## Procedure
 
-1. **Inventory.** Run in parallel: `git status`, `git diff --stat`, `git log --oneline -n 10`. Use
-   the log to confirm the repo's commit style (ticketed vs. plain title).
+1. **Inventory.** Run `git status`, `git diff --stat`, `git log --oneline -n 10` as independent
+   calls, in parallel. Read each call's own result and status; do not join them with `echo`
+   separators or exit-code scaffolding. Use the log to confirm the repo's commit style (ticketed
+   vs. plain title).
 
 2. **Empty-diff check.** If `git status` shows no uncommitted changes, REFUSE. Output:
    ```
@@ -115,13 +120,28 @@ this agent. Set it once per call; never navigate with `cd`.
      paths and bounce back to the orchestrator.
    - Untracked files (in `git status` but not in either set) → REFUSE (scratch files left behind).
 
-4. **Secret check.** For each path in the diff:
-   - Reject if the path matches `.env`, `*.env.local`, `*.pem`, `*.key`, `id_rsa*`, `*credentials*`,
-     `*secret*`, `.aws/*`, `.ssh/*`.
-   - Reject if `git diff` of that path contains shell-shaped secrets:
-     `AKIA[0-9A-Z]{16}` (AWS), `ghp_*` (GitHub PAT), `xox[baprs]-*` (Slack), `Bearer [a-zA-Z0-9._-]{20,}`,
-     `-----BEGIN .* PRIVATE KEY-----`.
-   - On any match: REFUSE with the specific finding. Do not commit.
+4. **Secret check.** Before staging anything.
+   - **Paths.** Reject any path in `git status` that matches `.env`, `*.env.local`, `*.pem`, `*.key`,
+     `id_rsa*`, `*credentials*`, `*secret*`, `.aws/*`, `.ssh/*`.
+   - **Content.** Two scans, each one command whose own exit status you read, using this ERE
+     (AWS key, GitHub PAT, Slack token, bearer token, private-key header):
+
+     ```
+     AKIA[0-9A-Z]{16}|ghp_[A-Za-z0-9]{20,}|xox[baprs]-[A-Za-z0-9-]{10,}|Bearer [A-Za-z0-9._-]{20,}|-----BEGIN ([A-Z]+ )*PRIVATE KEY-----
+     ```
+
+     - *Tracked changes* (the diff against HEAD, staged or not):
+       `git diff HEAD --name-only -G '<ERE>'`. Git applies the pattern to added and removed lines
+       and prints the files that match. Exit 0 with no output is a clean scan; listed files are a
+       match; a nonzero exit means the scan did not complete.
+     - *Untracked files in `EXPECTED FILES`* (the whole file is new; skip if there are none):
+       `grep -lE -e '<ERE>' -- <path>...`. Exit 1 is a clean scan; exit 0 lists the matching
+       files; exit 2 means the scan did not complete (even if some files were listed — a listed
+       file is still a match).
+     - Do not pipe `git diff` into `grep`: a pipeline reports `grep`'s status, so a failed `git`
+       would look like a clean scan.
+   - **Outcome.** Any match: REFUSE with the file and which scan found it. A scan that did not
+     complete: REFUSE as incomplete verification — never treat it as clean. Do not commit.
 
 5. **Ticket id resolution.**
    - If orchestrator provided `TICKET ID`: use it.
@@ -195,6 +215,7 @@ implementation work and the commit work cleanly separated.
 | Incomplete work (expected files unchanged) | `REFUSED: incomplete — <paths>` |
 | Untracked scratch files | `REFUSED: untracked files — <paths>` |
 | Secret-shaped file or content | `REFUSED: secret risk — <finding>` |
+| Secret scan did not complete | `REFUSED: secret check incomplete — <command and status>` |
 | Ticket id required but unavailable | `REFUSED: ticket id needed` |
 | Pre-commit hook failure | `REFUSED: hook failure — <output>` |
 | Any unhandled git error | `REFUSED: git error — <message>` |

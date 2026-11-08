@@ -104,9 +104,9 @@ carried `permissions`, so a fork's session-level override cannot be discovered o
 1. Confirm T0/`@architect`. If not, tell the user and stop.
 2. Fork `@explore` for Threads 1+2 with the schema crib + thread questions (template per
    `AGENTS-SUBAGENT-STRATEGY.md`). Validate crib first; surface any drift immediately.
-   `@explore` is read-only and has exactly two shell operations for history, `opencode api
-   session.list` and `opencode api session.message.list`: small pages, no redirect, `jq`, or
-   SQLite. Have it report any access gap (the response too large to read, an operation it lacks)
+   `@explore` is read-only by contract (its prompt, not its shell rules) and reads history through
+   `opencode api session.list` and `opencode api session.message.list`: small pages, no mutating
+   API operation. Have it report any access gap (the response too large to read, a denied command)
    rather than work around it; bulk SQLite queries are yours, under the store rules above. This
    grants reads of sensitive session history, not API mutations. Never write
    `.db`/`.db-wal`/`.db-shm`. Edit through the `opencode-config/` path; the symlinked config

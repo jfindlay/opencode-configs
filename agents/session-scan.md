@@ -3,24 +3,9 @@ description: "[jf] Haiku-pinned high-volume scanner for long session histories a
 mode: subagent
 model: anthropic/claude-haiku-5-5
 permissions:
+  # Direct edits are denied. Shell follows the global policy; "read-only" is this role's contract
+  # (below), not something the shell rules enforce.
   - { action: edit, resource: "*", effect: deny }
-  # An `edit` deny does not cover shell writes. Deny every command except a read-only allowlist,
-  # then deny what could still write through a listed command: redirects and output flags.
-  - { action: shell, resource: "*", effect: deny }
-  - { action: shell, resource: "git status", effect: allow }
-  - { action: shell, resource: "git status *", effect: allow }
-  - { action: shell, resource: "git log", effect: allow }
-  - { action: shell, resource: "git log *", effect: allow }
-  - { action: shell, resource: "git diff", effect: allow }
-  - { action: shell, resource: "git diff *", effect: allow }
-  - { action: shell, resource: "git show *", effect: allow }
-  - { action: shell, resource: "ls", effect: allow }
-  - { action: shell, resource: "ls *", effect: allow }
-  - { action: shell, resource: "pwd", effect: allow }
-  - { action: shell, resource: "wc *", effect: allow }
-  - { action: shell, resource: "file *", effect: allow }
-  - { action: shell, resource: "*>*", effect: deny }
-  - { action: shell, resource: "git * --output*", effect: deny }
 ---
 
 You are a high-throughput session scanner. Your task is mechanical classification:
@@ -30,7 +15,8 @@ invent criteria beyond what the prompt specifies.
 
 ## Operating constraints
 
-- Read-only. Never edit or write files.
+- Read-only by contract. Never edit or write files, by `Edit` or through shell. If a command is
+  denied or fails to parse, report it instead of re-encoding the same operation.
 - Apply the classification rules from the fork prompt exactly. If a finding does
   not clearly meet a criterion, do not include it.
 - Be terse. Each proposal should be the minimum text needed for the user to

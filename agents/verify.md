@@ -3,27 +3,9 @@ description: "[jf] Sonnet-pinned subagent that verifies a list of claims (typica
 mode: subagent
 model: anthropic/claude-sonnet-5-5
 permissions:
+  # Direct edits are denied. Shell follows the global policy; "read-only" is this role's contract
+  # (below), not something the shell rules enforce.
   - { action: edit, resource: "*", effect: deny }
-  # An `edit` deny does not cover shell writes. Deny every command except a read-only allowlist,
-  # then deny what could still write through a listed command: redirects and output flags.
-  - { action: shell, resource: "*", effect: deny }
-  - { action: shell, resource: "git status", effect: allow }
-  - { action: shell, resource: "git status *", effect: allow }
-  - { action: shell, resource: "git log", effect: allow }
-  - { action: shell, resource: "git log *", effect: allow }
-  - { action: shell, resource: "git diff", effect: allow }
-  - { action: shell, resource: "git diff *", effect: allow }
-  - { action: shell, resource: "git show *", effect: allow }
-  - { action: shell, resource: "ls", effect: allow }
-  - { action: shell, resource: "ls *", effect: allow }
-  - { action: shell, resource: "pwd", effect: allow }
-  - { action: shell, resource: "wc *", effect: allow }
-  - { action: shell, resource: "file *", effect: allow }
-  # Type checks verify typing claims; they write only their cache directory.
-  - { action: shell, resource: "venv/bin/mypy *", effect: allow }
-  - { action: shell, resource: "./venv/bin/mypy *", effect: allow }
-  - { action: shell, resource: "*>*", effect: deny }
-  - { action: shell, resource: "git * --output*", effect: deny }
 ---
 
 You are a findings verifier. You receive a list of review findings and the relevant source files.
@@ -38,7 +20,9 @@ mismatch — do not attempt to reframe the finding yourself.
 
 ## Operating constraints
 
-- Read-only. Never edit or write files.
+- Read-only by contract. Never edit or write files, by `Edit` or through shell. Running a type
+  checker to test a typing claim is fine.
+- If a command is denied or fails to parse, report it instead of re-encoding the same operation.
 - For each finding, read the file(s) and line(s) cited. If no location is given, search for the
   relevant symbol or pattern.
 - Return exactly one of three verdicts per finding:

@@ -12,7 +12,7 @@ files, and consumed contracts) per `multisession/multi-session-planning.md`.  Th
 — that is a `@architect` interactive task. It EXECUTES an already-sharded one.
 
 This command runs from `@plan-admin` (T1). The mechanical loop — select, dispatch, gate, commit,
-ledger — is entirely the driver's work. T1 judgment (discovery adjudication, inflection-point
+ledger — is entirely the driver's work. Opus-tier judgment (discovery adjudication, inflection-point
 interface design, sub-track boundary coordinate-transform) is paged in by forking `@plan-juncture` at the
 three junctures only. Implementation is dispatched down-tier to `@build`; research to
 `@explore`. If invoked from a non-`plan-admin` session, stop and tell the user to switch.
@@ -178,8 +178,8 @@ Read the session entry's category:
   Output is a written artifact appended to the plan or a NOTES file.
 - **Code-change, Category B/C** (algorithm/optimization on a frozen substrate): fork `@build`.
   Scoped prompt (see Dispatch template) — names ONLY this session's entry plus the contracts it
-  consumes; instructs the subagent NOT to read the Roadmap appendix or any other session. Subagent
-  leaves the tree dirty with green tests; does NOT commit.
+  consumes; instructs the subagent NOT to read the rest of the plan, the roadmap, or any other
+  session. Subagent leaves the tree dirty with green tests; does NOT commit.
 - **Code-change, Category A (substrate)** not flagged `@architect`: the driver dispatches `@build`
   directly, including setup work such as an S0 skeleton; task size does not select another agent.
 
@@ -354,8 +354,9 @@ resume reads only committed state and never has to reconcile an uncommitted ledg
 If the just-completed session is the last in a sub-track (marked ◆ in the plan):
 
 - **Anneal gate (run before forking).** Grep the sub-track's durable files (source, tests, human
-  docs — excluding PLAN/ROADMAP and git metadata) against the anneal denylist from PLAN's
-  `## Notes for executors` (seed default below). This is mechanical — no juncture fork needed.
+  docs — excluding PLAN, ROADMAP, NOTES, the project's `AGENTS.md`, and git metadata) against the
+  anneal denylist from PLAN's `## Notes for executors` (seed default below). This is mechanical —
+  no juncture fork needed.
   - **Hits → dispatch one `@build` anneal-fix subagent** to translate plan coordinates into
     standalone statements. Counts against the Fix-loop budget (cap 2). Re-grep. Still hitting →
     halt (`BLOCKED: anneal failed to converge`).
@@ -423,8 +424,9 @@ Thoroughness: medium
 Read-only: NO (this is an implementation session).
 
 You are executing ONE session from <PLAN>: session <N> — "<title>".  Read ONLY: the <N> entry in
-<PLAN>, and the "## Cross-session contracts" subsections it Consumes. Do NOT read the Roadmap
-appendix. Do NOT start any other session. Do NOT commit — leave the tree dirty with green tests.
+<PLAN>, and the "## Cross-session contracts" subsections it Consumes. Do NOT read the rest of the
+plan or the roadmap. Do NOT start any other session. Do NOT commit — leave the tree dirty with
+green tests.
 
 DELIVERABLE
 <the entry's bullet list, verbatim>
@@ -463,8 +465,8 @@ Read-only: NO (this is an implementation session).
 
 You are executing the FEATURE STAGE of a paired feature/completion unit from <PLAN>: session <N> —
 "<title>". Read ONLY: the <N> entry in <PLAN>, its Completion appendix, and the "## Cross-session
-contracts" subsections it Consumes. Do NOT read the Roadmap appendix. Do NOT start any other
-session. Do NOT commit — leave the tree dirty.
+contracts" subsections it Consumes. Do NOT read the rest of the plan or the roadmap. Do NOT
+start any other session. Do NOT commit — leave the tree dirty.
 
 DELIVERABLE
 <the entry's bullet list, verbatim>
@@ -509,7 +511,7 @@ You are executing the COMPLETION STAGE of a paired feature/completion unit from 
 — "<title>". The feature stage already implemented behavior and substantive tests, uncommitted, in
 the current working tree — do not discard or re-derive it. Read ONLY: the intent capsule for unit
 <N> in PLAN's "## Completion handoffs", the <N> entry in <PLAN> and its Completion appendix, and the
-"## Cross-session contracts" subsections it Consumes. Do NOT read the Roadmap appendix or any other
+"## Cross-session contracts" subsections it Consumes. Do NOT read the roadmap or any other
 unit's entry — the capsule is the complete intent; trust it. Do NOT start any other unit. Do NOT
 commit — leave the tree dirty with green tests.
 

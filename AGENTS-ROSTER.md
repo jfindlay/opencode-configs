@@ -121,7 +121,7 @@ rely on prose guidance alone — encode tier in each subagent's `model:` frontma
   chain. `@plan-admin` orchestrates the mechanical loop; dispatches `@build`/`@explore`
   per session entry, `@committer` for commits, and pages `@plan-juncture` (Opus) only at inflection
   points, contract-invalidating discoveries, and sub-track boundaries. State lives in the PLAN.md
-  ledger. Args: `[plan-path] [may-reshard|halt-at-boundaries|fully-autonomous]`.
+  ledger. Args: `[plan-path] [may-reshard|halt-at-boundaries]`.
 - `/plan-anneal` — `@build`-owned mechanical sweep that trims leaked plan coordinates (session ids,
   category letters, ◆, "frozen contract", sub-track names, PLAN/ROADMAP references) out of a
   project's durable files (source, tests, human docs) and translates each into the standalone

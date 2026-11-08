@@ -69,9 +69,11 @@ walk-state invariant `W = a·G + b·Q`"), not by nothing ("KAT for S4" → delet
 3. **Scan.** Grep each denylist pattern over the in-scope **durable** files only:
    - **Include:** source, tests, human docs (`docs/**` narrative prose, `PEDAGOGY.md`, inline
      docstrings and comments).
-   - **Exclude:** the rolling/static docs and git metadata — `docs/PLAN.md`, `docs/ROADMAP.md`,
-     `docs/NOTES.md`, `.git/**`, and any file whose whole job is to hold coordinates. Plan
-     coordinates are *supposed* to live there; annealing them there is wrong.
+   - **Exclude:** the rolling/static docs, the project's `AGENTS.md`, and git metadata —
+     `docs/PLAN.md`, `docs/ROADMAP.md`, `docs/NOTES.md`, `AGENTS.md`, `.git/**`, and any file whose
+     whole job is to hold coordinates. Plan coordinates are *supposed* to live in the rolling docs,
+     and the register rule `/plan-shard` seeds into `AGENTS.md` names the very vocabulary it
+     prohibits; annealing either is wrong. This list is the same one `/plan-run` step 7 uses.
 
    Collect every hit with its file, line, and the matched coordinate.
 
@@ -118,10 +120,10 @@ walk-state invariant `W = a·G + b·Q`"), not by nothing ("KAT for S4" → delet
 
 ## Constraints
 
-- **Never edit the rolling/static docs.** `docs/PLAN.md`, `docs/ROADMAP.md`, `docs/NOTES.md`, and
-  commit messages legitimately hold plan coordinates — that is the whole point of the two-vocabulary
-  split. This command reads PLAN (to recover referents) but writes only durable source/test/doc
-  files.
+- **Never edit the rolling/static docs or `AGENTS.md`.** `docs/PLAN.md`, `docs/ROADMAP.md`,
+  `docs/NOTES.md`, and commit messages legitimately hold plan coordinates — that is the whole point
+  of the two-vocabulary split — and `AGENTS.md` carries the seeded register rule that names them.
+  This command reads PLAN (to recover referents) but writes only durable source/test/doc files.
 - **Translate, never merely delete.** A trimmed coordinate is replaced by its referent. Deleting a
   coordinate and leaving a hole loses the content the coordinate was standing in for.
 - **Domain vocabulary is off-limits.** If a denylist pattern matches real domain content, the

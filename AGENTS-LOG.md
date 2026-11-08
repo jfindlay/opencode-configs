@@ -692,3 +692,26 @@ denies and may recur as prompt-layer drift).
 evaluation per agent, live behavior, or the scanner's handling of `$(...)`, subshells, heredocs.
 The running service reads the symlinked config directory without a watcher; reload it for the change
 to take effect.
+
+## 2026-11-08 — Multisession consistency pass: seeded AGENTS.md rule, anneal scope, drift
+
+**Context.** `/plan-shard` seeded the project's `AGENTS.md` with a pointer into PLAN's
+`## Notes for executors`: a durable file pointing at a rolling doc that is archived after the arc,
+the dangling-pointer shape the anneal mechanism exists to remove. The anneal scope lists also
+disagreed (`/plan-anneal` excluded `NOTES.md`; `/plan-run` step 7 did not) and neither mentioned
+`AGENTS.md`.
+
+**Changed.** The seed is now a verbatim, self-contained `## Register in durable files` block with a
+heading-based idempotency check, no PLAN/ROADMAP pointer, no denylist copy. `AGENTS.md` is excluded
+from anneal scope in `/plan-anneal` and `/plan-run` step 7 (as is `NOTES.md` in step 7), and from
+the default cleanup row's expected files. `architect.md` gains a fourth write trigger for the seed
+and states that non-docs writes are prompted (`edit * ask`), not disabled. The planning manual
+records the seed under register discipline. Drift fixes: "Roadmap appendix" (a section the sharded
+PLAN no longer has) removed from the `/plan-run` dispatch templates; `fully-autonomous` dropped from
+the roster's `/plan-run` args (never defined); `/plan-run` header "T1 judgment" corrected to
+Opus-tier.
+
+**Left alone.** Projects already seeded with the old pointer keep it until edited by hand.
+
+**Checked.** Documentation only; grep for the removed phrases and for lines over 100 characters in
+the touched files. No live-agent run.

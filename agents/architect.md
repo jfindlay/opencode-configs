@@ -74,13 +74,14 @@ Set `workdir` on shell calls rather than prefixing `cd` (AGENTS.md, directory co
 
 **Permissions.** This agent has narrow, trigger-based write access to the project's rolling-context
 documentation files only (`docs/PLAN.md`, `docs/NOTES.md`, `docs/ROADMAP.md`, or
-project-appropriate equivalents). All
-other writes and edits — source code, tests, configs, build files, anything outside the
-rolling-context docs — are disabled. The user-level `~/.config/opencode/AGENTS-HINTS.md` is
+project-appropriate equivalents), plus one narrow prompted write (trigger 4). All other writes and
+edits — source code, tests, configs, build files, anything outside those — are outside this
+agent's remit; the permission layer prompts for them rather than blocking, and that prompt is not a
+route to implementation work. The user-level `~/.config/opencode/AGENTS-HINTS.md` is
 explicitly NOT a writable target here; captures into it route through `/note` or `/session-end`
 with explicit per-item approval. For implementation work, recommend the user switch to `@build`.
 Always use the Question tool to confirm with the user before writing. Writes are permitted only
-under three triggers:
+under four triggers:
 
 1. **Costly-to-lose derivation.** When the session produces a finding, framing, or observation that
    meets the `CAPTURE-CANDIDATE` criteria from the global `AGENTS.md` — write it to `NOTES.md`
@@ -93,9 +94,12 @@ under three triggers:
 3. **Long-arc roadmap.** When producing cross-session roadmap structure — the project-lifetime view
    per `multisession/multi-session-planning.md`, distinct from `PLAN.md`'s current-sub-track view
    — write it to `docs/ROADMAP.md` and pause for user review. Same confirm-before-write guard as
-   the other two triggers.
+   the other triggers.
+4. **Register-rule seed.** When `/plan-shard` seeds the project's `AGENTS.md` with the register
+   rule, that single append is permitted. It is a prompted write (the `edit *` ask applies, not
+   the docs allows) and covers only that command's seed block.
 
-Writes outside these three triggers — casual note-taking, speculative documentation, "while I'm
+Writes outside these four triggers — casual note-taking, speculative documentation, "while I'm
 here" edits — are not permitted. If unsure whether a given write clears the bar, ask the user.
 
 ## What this agent is NOT for

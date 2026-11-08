@@ -425,6 +425,12 @@ while the defining doc is co-present; after the arc they are noise. The hybrid s
 anneal a near-no-op verification (prevention makes leaks rare) rather than a large end-of-arc strip
 diff.
 
+Sessions outside a `/plan-run` chain never see the dispatch template, so `/plan-shard` also seeds a
+short register rule into the project's `AGENTS.md`, which ad-hoc sessions auto-load. That file is
+durable, so the seed holds no pointer into PLAN or ROADMAP (neither outlives the arc) and no
+denylist (the gates read PLAN's, or fall back to the seed default). It is excluded from anneal
+sweeps because the rule names the vocabulary it prohibits.
+
 The per-project denylist (seeded from the default in `/plan-run`, tunable in PLAN's
 `## Notes for executors`) targets plan coordinates, not domain terms — "KAT"/"known-answer test" is
 legitimate domain vocabulary in a crypto library; `\bS4\b` as a session id is not.

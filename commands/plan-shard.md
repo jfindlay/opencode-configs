@@ -157,10 +157,10 @@ Produce `docs/PLAN.md` with exactly these sections. `/plan-run` preconditions on
    **Default final row — anneal cleanup.** End every session list with one extra row, `Anneal
    cleanup (skippable)`, Cat I, no tier override, Consumes: none (it runs last by row order).
    Expected files: durable files the arc touched (source, tests, human docs), never the rolling
-   docs. Its deliverable is `/plan-anneal` over the whole project: leaked plan coordinates
-   translated, plus the line-length pass that absorbs overruns earlier sessions deferred (see
-   `multisession/multi-session-planning.md`, "Line length is deferred to the anneal sweep"). The
-   `(skippable)` tag authorizes the `/plan-run` driver to skip the row when it judges the sweep
+   docs or the project's `AGENTS.md`. Its deliverable is `/plan-anneal` over the whole project:
+   leaked plan coordinates translated, plus the line-length pass that absorbs overruns earlier
+   sessions deferred (see `multisession/multi-session-planning.md`, "Line length is deferred to the
+   anneal sweep"). The `(skippable)` tag authorizes the `/plan-run` driver to skip the row when it judges the sweep
    unnecessary. Include the row by default; omit it only when the user declines it at the shard
    confirm gate, or when the PLAN is a single-session plan.
 - `## Session detail` — per-row deliverable, ≥1 KAT (a row whose deliverable can't be a KAT has an
@@ -225,13 +225,25 @@ In greenfield mode, the whole session is a dialogue: elicit intent → propose s
    confirm-before-write gate as the PLAN write.
 3. Write `docs/ROADMAP.md` (if reconciled) then `docs/PLAN.md`. Pause for review. Do NOT run
    `/plan-run`.
-4. **Seed the project's `AGENTS.md`** (same confirm-before-write gate): append the register rule to
-   the target project's `AGENTS.md`, creating the file with just this block if none exists. The
-   block: the REGISTER rule (state the property/reason/invariant; never the plan coordinate; plan
-   vocabulary lives in PLAN/ROADMAP/ledger/commit messages only) plus a pointer to the anneal
-   denylist in PLAN's `## Notes for executors`. Idempotent: skip if the block is already present.
-   This covers agents outside `/plan-run` chains — ad-hoc sessions auto-load the repo's `AGENTS.md`
-   and never see the dispatch template.
+4. **Seed the project's `AGENTS.md`** (same confirm-before-write gate; this is a prompted write
+   outside `@architect`'s auto-allowed docs): append the register rule to the target project's
+   `AGENTS.md`, creating the file with just this block if none exists. The block, verbatim:
+
+   ```
+   ## Register in durable files
+
+   In code, tests, and human docs, state the actual property, reason, or invariant — never the
+   plan coordinate (session ids, category letters, sub-track names, "frozen contract", references
+   to plan or roadmap files). Plan vocabulary lives in the rolling plan docs, the ledger, and
+   commit messages only.
+   ```
+
+   Idempotent: skip if a `## Register in durable files` heading is already present. Keep the block
+   self-contained — no pointer into PLAN or ROADMAP (the file is durable; they are not) and no
+   denylist copy (the anneal gates read PLAN's, or fall back to the seed default). The block names
+   the vocabulary it prohibits, so `AGENTS.md` is excluded from anneal sweeps. This covers agents
+   outside `/plan-run` chains — ad-hoc sessions auto-load the repo's `AGENTS.md` and never see the
+   dispatch template.
 5. If the design statement (greenfield) or a discovery during sharding is a durable roadmap-level
    fact *not already folded in by the reconciliation step*, surface it as a `CAPTURE-CANDIDATE` for
    `docs/ROADMAP.md` or NOTES.

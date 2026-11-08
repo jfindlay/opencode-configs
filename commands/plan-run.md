@@ -1,5 +1,5 @@
 ---
-description: "[jf] Autonomously execute a session-sharded plan file as a 1:1 session:commit chain. @plan-admin orchestrates the mechanical loop; dispatches @build/@explore per session entry, @committer for commits, and pages a forked @plan-juncture (Opus) only at inflection points, contract-invalidating discoveries, and sub-track boundaries. A row marked (F/C) by /plan-shard runs as a feature-stage then completion-stage pair sharing one intent capsule and one commit; ordinary rows are unaffected. State lives in the committed plan ledger. Args: [plan-path] [may-reshard|halt-at-boundaries]. Plan path defaults to docs/PLAN.md."
+description: "[jf] Autonomously execute a session-sharded plan file as a 1:1 session:commit chain. @plan-admin orchestrates the mechanical loop; dispatches @build/@explore per session entry, @committer for commits, and pages a forked @plan-juncture (T0) only at inflection points, contract-invalidating discoveries, and sub-track boundaries. A row marked (F/C) by /plan-shard runs as a feature-stage then completion-stage pair sharing one intent capsule and one commit; ordinary rows are unaffected. State lives in the committed plan ledger. Args: [plan-path] [may-reshard|halt-at-boundaries]. Plan path defaults to docs/PLAN.md."
 agent: plan-admin
 subagent: false
 ---
@@ -12,7 +12,7 @@ files, and consumed contracts) per `multisession/multi-session-planning.md`.  Th
 — that is a `@architect` interactive task. It EXECUTES an already-sharded one.
 
 This command runs from `@plan-admin` (T1). The mechanical loop — select, dispatch, gate, commit,
-ledger — is entirely the driver's work. Opus-tier judgment (discovery adjudication, inflection-point
+ledger — is entirely the driver's work. T0 judgment (discovery adjudication, inflection-point
 interface design, sub-track boundary coordinate-transform) is paged in by forking `@plan-juncture` at the
 three junctures only. Implementation is dispatched down-tier to `@build`; research to
 `@explore`. If invoked from a non-`plan-admin` session, stop and tell the user to switch.
@@ -523,7 +523,7 @@ Run the full project gate. Complete missing branch cases and necessary regressio
 lint/format, and documentation/shape/layering conformance. Small behavior-preserving corrections are
 permitted within the unit's expected files. Do NOT weaken assertions, lower coverage, add
 convenience exclusions, change public behavior, or redesign the feature to obtain green. Do not
-spend turns rewrapping a few over-100-character lines the gate does not enforce — report them in
+spend turns rewrapping a few over-width lines the gate does not enforce — report them in
 your return; the general anneal sweep takes them.
 
 IF YOU FIND A DEFECT
@@ -624,7 +624,7 @@ CONSTRAINTS:
 When dispatching a `@build` fix subagent (step 4f, the F-fix defect-check dispatch, or the
 anneal-fix in step 7), include one line in the prompt: "REGISTER rule applies — see dispatch
 template." Fix forks edit durable files and the same plan-coordinate prohibition applies. Line-length
-overruns are not a fix trigger: a session whose only blemish is lines over 100 characters is green;
+overruns are not a fix trigger: a session whose only blemish is over-width lines is green;
 note them in the ledger for the general anneal sweep (`/plan-anneal` line-length pass) and do not
 open a Fix-loop iteration over them. Exception: a project gate that hard-fails on line length —
 fix those with the project formatter. A bounded
@@ -634,7 +634,7 @@ defect — it is scoped to that defect, not a re-opening of the whole feature st
 ## Constraints
 
 - Runs from `@plan-admin` only. Implementation is always dispatched down-tier.
-- `@plan-juncture` (Opus) is paged as a subagent only at the three junctures (inflection design,
+- `@plan-juncture` (T0) is paged as a subagent only at the three junctures (inflection design,
   discovery adjudication, sub-track boundary). It is never resident for the loop.
 - One session-list row → one session commit + one ledger commit. No batching — except a row marked
   `(F/C)`, whose F-stage and C-stage are two dispatches sharing that one session commit (step 3b),

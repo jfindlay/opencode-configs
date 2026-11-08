@@ -131,9 +131,9 @@ Set `workdir` on shell calls rather than prefixing `cd` (AGENTS.md, directory co
 
 6. **Draft the commit message.**
    - **Title**: `<ticket-id> <concise sentence-case description>` if ticketed, else `<concise
-     description>`. No trailing period. Wrap at the natural sentence end; aim for ≤72 chars.
+     description>`. No trailing period. Title and body widths per `AGENTS.md` git conventions.
    - **Body**: 1–4 sentences explaining the WHY, derived from `SESSION CONTRACT`. Optional bullets
-     for distinct change aspects. Wrap body lines at 72. Strip any "what we did" language —
+     for distinct change aspects. Strip any "what we did" language —
      diff-stat shows that already.
    - No conventional-commits prefixes (`feat:`, `fix:`, etc.) — use natural language.
    - **Co-author trailer (default ON).** Append one `Co-authored-by:` line per content agent after
@@ -141,8 +141,8 @@ Set `workdir` on shell calls rather than prefixing `cd` (AGENTS.md, directory co
      diff; omitting attribution is credit-laundering. Resolution order:
      1. If the orchestrator provided `CO_AUTHOR: none` — omit the trailer entirely.
      2. If the orchestrator provided one or more `CO_AUTHOR` lines — use them verbatim.
-     3. If `CO_AUTHOR` was omitted — use the current session's model as the default:
-        `Co-authored-by: Claude Sonnet 5.5 <noreply+claude-sonnet@anthropic.com>`.
+     3. If `CO_AUTHOR` was omitted — default to the T1 identity string from `AGENTS-ROSTER.md`
+        "Identity string format" (the default content agent is `@build`, not this T2 committer).
    - This agent (`@committer`) does NOT get a co-author trailer — it is the mechanical commit
      runner, not the content author.
 

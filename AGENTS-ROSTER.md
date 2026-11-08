@@ -5,13 +5,19 @@ field; when in an autonomous chain and orchestrating a committer dispatch.
 
 ## Model tier hierarchy (full detail)
 
+**Single authority.** This section is the only prose place that names models, versions, cost
+ratios, and usage shares. The `model:` frontmatter fields and `opencode.json` carry the concrete
+pins; everything else uses tier notation. A model bump edits this section, those pins, and the
+co-author identity examples below — nothing else. (`AGENTS-LOG.md` and `NOTES.md` are historical
+records and keep the names that were true when written.)
+
 - **T-1 — GPT-6 Astra**: interactive dialectic at the generative extremity — genesis of framings
   that don't yet exist, abduction, pivotal anomalies that resist all canonical options. Use only
   when the problem requires T-1-scale reasoning reserve and the interactive dialectic shape.
-  ~2.5× Opus 5.5 / ~5× Sonnet. Session count per week: very small.
+  ~2.5× T0 / ~5× T1. Session count per week: very small.
 - **T0 — Claude Opus 5.5**: deep planning, architectural tradeoff analysis, boundary design,
   cross-cutting audits. Use when the cost of being wrong is high and the work is analytical rather
-  than generative.
+  than generative. Session count per week: small.
 - **T0-alt — GPT-5.5 / Gemini 3.1 Pro** (as available): cross-check T0 conclusions at phase
   boundaries. Different families catch different failure modes.
 - **T1 — Claude Sonnet 5.5**: default for implementation, refactors, tests, docstring work,
@@ -31,46 +37,46 @@ rely on prose guidance alone — encode tier in each subagent's `model:` frontma
 ## Agent roster
 
 **Primary agents** (invoked by `@name` or set as startup agent):
-- `@dialectic` — T-1/GPT-6 Astra. Interactive dialectic at the generative extremity: genesis, abduction,
+- `@dialectic` — T-1. Interactive dialectic at the generative extremity: genesis, abduction,
   pivotal anomalies. Temperature 0.6. Rolling-context writes allowed; all other writes require user
   approval. References `AGENTS-REASONING.md` in full; loads `AGENTS-REASONING-HINTS.md`
   proactively. NOT for audits, reviews, or routine deep work — use `@architect` for those.
-- `@architect` — T0/Opus 5.5. Deep planning, architectural tradeoffs, cross-cutting audits, phase
+- `@architect` — T0. Deep planning, architectural tradeoffs, cross-cutting audits, phase
   planning, rebase plans. Rolling-context writes allowed; all other writes require user approval.
   References `AGENTS-REASONING.md` in full including the T-1/T0-only section.
-- `@build` — T1/Sonnet 5.5, `mode: all`: the one implementation worker, as a primary agent or as a
+- `@build` — T1, `mode: all`: the one implementation worker, as a primary agent or as a
   forked subagent (including `/plan-run` F/C stages). Coding, setup, multi-file changes, refactors,
   test/fix loops, review-address cycles; reports results or blockers to its caller and does not plan,
   orchestrate chains, rewrite history, or commit on its own. References `AGENTS-REASONING.md` up to
   the T-1/T0-only marker.
-- `@plan-admin` — T1/Sonnet 5.5. Autonomous-chain driver for `/plan-run`. Runs the mechanical
+- `@plan-admin` — T1. Autonomous-chain driver for `/plan-run`. Runs the mechanical
   loop (select, dispatch, gate, commit, ledger); pages a forked `@plan-juncture` only at the three
   junctures (inflection design, discovery adjudication, sub-track boundary). Never implements;
   never adjudicates discoveries itself.
-- `@git-editor` — T1/Sonnet 5.5. General git work: rebases, commits, cherry-picks, amends,
+- `@git-editor` — T1. General git work: rebases, commits, cherry-picks, amends,
   branch/tag cleanup. Elevated git permissions; rewrites local history only and never pushes. For
   narrative-arc rebase work, paired with `/plan-rebase` which carries both the planning steps and
   the execution playbook.
 
 **Subagents** (forked via the Task tool):
-- `@plan-juncture` — T0/Opus 5.5. Juncture adjudicator for `/plan-run` chains. Paged by `@plan-admin`
+- `@plan-juncture` — T0. Juncture adjudicator for `/plan-run` chains. Paged by `@plan-admin`
   at inflection-point interface design, discovery adjudication (does this finding invalidate a frozen
   downstream contract?), and sub-track boundary coordinate-transform. One-shot return; does not
   implement; writes only to PLAN's `## Cross-session contracts` on inflection design.
-- `@explore` — T1/Sonnet 5.5. Code-structure surveys, needle-finding in large trees, open-ended
+- `@explore` — T1. Code-structure surveys, needle-finding in large trees, open-ended
   codebase questions. Default fork choice for read-only exploration. Overrides built-in `@explore`
-  to prevent silent Opus or T-1 inheritance when forked from `@architect` or `@dialectic`.
-- `@verify` — T1/Sonnet 5.5. Verifies a list of claims (typically review findings) against the
+  to prevent silent T0 or T-1 inheritance when forked from `@architect` or `@dialectic`.
+- `@verify` — T1. Verifies a list of claims (typically review findings) against the
   actual code. Returns accurate/inaccurate/needs-discussion labels per claim. Used by
-  `/address-review` when ≥5 findings require code verification.
-- `@general` — T1/Sonnet 5.5. Miscellaneous multi-step work where no specialised subagent
+  `/address-review` when the findings volume warrants a fork (threshold lives there).
+- `@general` — T1. Miscellaneous multi-step work where no specialised subagent
   (`@explore`, `@verify`, `@build`, `@git-editor`) fits; not a fallback coding worker — implementation,
   including setup and multi-file changes, goes to `@build`. May edit/write (asks). Overrides built-in
   `@general` to pin the tier — without the pin, forks from a T0 or T-1 primary would silently run
-  on Opus or GPT-6 Astra.
-- `@session-scan` — T2/Haiku 5.5. High-volume session-history scan for retrospectives. Used by
+  on T0 or T-1.
+- `@session-scan` — T2. High-volume session-history scan for retrospectives. Used by
   `/session-end`. Does NOT reference `AGENTS-REASONING.md`.
-- `@committer` — T2/Haiku 5.5. The ecosystem's single forward-commit primitive: turns a known
+- `@committer` — T2. The ecosystem's single forward-commit primitive: turns a known
   fileset into one new commit. Reads a session-contract summary + expected-files list, stages
   exactly those files (whole-path, never hunks), uses a supplied verbatim message or drafts one in
   repo convention, commits. `STAGING MODE` tunes drift tolerance: `strict` (default, for autonomous
@@ -93,7 +99,7 @@ rely on prose guidance alone — encode tier in each subagent's `model:` frontma
 ## Command roster
 
 - `/address-review` — process pasted review output; classify findings, plan fixes, apply with
-  checkpoints. Forks `@verify` when ≥5 findings require code verification.
+  checkpoints. Forks `@verify` when enough findings require code verification.
 - `/style-audit` — audit a target (file, dir, or package) for code, doc, and test style violations.
   Resolves language; forks one read-only `@explore` per applicable surface; merges findings by file;
   emits proposals only. Reference: `STYLE-DOC.md` `## Audit checklist` (doc surface),
@@ -119,7 +125,7 @@ rely on prose guidance alone — encode tier in each subagent's `model:` frontma
   plan into a fresh session.
 - `/plan-run` — autonomously execute a session-sharded `docs/PLAN.md` as a 1:1 session:commit
   chain. `@plan-admin` orchestrates the mechanical loop; dispatches `@build`/`@explore`
-  per session entry, `@committer` for commits, and pages `@plan-juncture` (Opus) only at inflection
+  per session entry, `@committer` for commits, and pages `@plan-juncture` (T0) only at inflection
   points, contract-invalidating discoveries, and sub-track boundaries. State lives in the PLAN.md
   ledger. Args: `[plan-path] [may-reshard|halt-at-boundaries]`.
 - `/plan-anneal` — `@build`-owned mechanical sweep that trims leaked plan coordinates (session ids,
@@ -181,9 +187,11 @@ Co-authored-by: Claude Sonnet 5.5 <noreply+claude-sonnet@anthropic.com>
 Co-authored-by: Claude Opus 5.5 <noreply+claude-opus@anthropic.com>
 ```
 
-Convention: version-pinned human-readable name (so the history is honest about what ran);
-role-only email (durable across version bumps, clearly non-human). Use `anthropic.com` as the
-domain — it is unambiguous and won't be mistaken for a real person's address.
+The first line is the T1 identity (the default content agent), the second is T0; other tiers
+follow the same shape. Convention: version-pinned human-readable name (so the history is honest
+about what ran); role-only email (durable across version bumps, clearly non-human). Use
+`anthropic.com` as the domain — it is unambiguous and won't be mistaken for a real person's
+address.
 
 ### Suppression
 

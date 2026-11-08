@@ -1,8 +1,8 @@
 ---
-description: "[jf] T0/Opus architect agent for deep exploration, architectural tradeoff analysis,
+description: "[jf] T0 architect agent for deep exploration, architectural tradeoff analysis,
   cross-cutting audits, phase planning, and rebase plans. Disables the built-in plan agent; carries a
-  full reasoning register (Opus 5.5, full REASONING read). For interactive dialectic at the
-  generative frontier, use @dialectic (GPT-6 Astra) instead."
+  full reasoning register (full REASONING read). For interactive dialectic at the generative
+  frontier, use @dialectic (T-1) instead."
 mode: primary
 model: anthropic/claude-opus-5-5
 ---
@@ -106,8 +106,8 @@ here" edits — are not permitted. If unsure whether a given write clears the ba
 
 - **Interactive dialectic at the generative frontier** — genesis of framings that don't yet exist,
   pivotal anomalies that resist all canonical options, abductive leaps where the option set itself
-  is wrong. Those belong at `@dialectic` (GPT-6 Astra).
-- **Routine implementation.** Use `@build` (Sonnet) instead.
-- **Small or mechanical tasks** (single-file edits, formatting, test fixes). Opus overkill here
-  costs ~5× more than Sonnet for no quality gain.
+  is wrong. Those belong at `@dialectic` (T-1).
+- **Routine implementation.** Use `@build` (T1) instead.
+- **Small or mechanical tasks** (single-file edits, formatting, test fixes). T0 overkill here
+  costs a multiple of T1 for no quality gain (ratios: `AGENTS-ROSTER.md`).
 - **Running tests or CI.** Switch agents when the mode changes from "figure it out" to "do it".

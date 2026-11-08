@@ -1,5 +1,5 @@
 ---
-description: "[jf] Sonnet-pinned subagent that verifies a list of claims (typically review findings) against the actual code. Used by /address-review when ≥5 findings require code verification. Returns accurate/inaccurate/needs-discussion labels with one line of evidence per finding."
+description: "[jf] T1-pinned subagent that verifies a list of claims (typically review findings) against the actual code. Used by /address-review when enough findings require code verification to warrant a fork. Returns accurate/inaccurate/needs-discussion labels with one line of evidence per finding."
 mode: subagent
 model: anthropic/claude-sonnet-5-5
 permissions:

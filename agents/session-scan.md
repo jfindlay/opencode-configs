@@ -1,5 +1,5 @@
 ---
-description: "[jf] Haiku-pinned high-volume scanner for long session histories and mechanical classification. Used by /session-end. Low judgment load: rules are explicit in the fork prompt; no creative synthesis required."
+description: "[jf] T2-pinned high-volume scanner for long session histories and mechanical classification. Used by /session-end. Low judgment load: rules are explicit in the fork prompt; no creative synthesis required."
 mode: subagent
 model: anthropic/claude-haiku-5-5
 permissions:

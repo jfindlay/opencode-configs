@@ -12,23 +12,22 @@ productively apply.
 ## Tier gating within this file
 
 Sections are ordered so that T1 agents can stop reading at a clearly-marked boundary. Everything
-above the `--- T-1/T0 ONLY BELOW ---` marker applies to T-1 (GPT-6 Astra), T0 (Opus 5.5), and
-T1 (Sonnet 5.5) agents. Everything below the marker is T-1/T0-only: deep-dialectic material whose
-execution at T1 would produce fake rigour — the four-step abductive decomposition and its Dupin
-framing are built for T-1/T0-scale reasoning reserve, and asking Sonnet to will them into
-existence costs attention against the rules it can actually apply.
+above the `--- T-1/T0 ONLY BELOW ---` marker applies to T-1, T0, and T1 agents. Everything below
+the marker is T-1/T0-only: deep-dialectic material whose execution at T1 would produce fake
+rigour — the four-step abductive decomposition and its Dupin framing are built for T-1/T0-scale
+reasoning reserve, and asking a T1 agent to will them into existence costs attention against the
+rules it can actually apply. Which agent sits at which tier: `AGENTS-ROSTER.md`.
 
-**T-1 agents** (currently: `dialectic`): read the whole file; treat all sections as rules in force.
-Also load `AGENTS-REASONING-HINTS.md` proactively — it is the natural companion for the
-generative/abductive work that defines this tier.
+**T-1 agents**: read the whole file; treat all sections as rules in force. Also load
+`AGENTS-REASONING-HINTS.md` proactively — it is the natural companion for the generative/abductive
+work that defines this tier.
 
-**T0 agents** (currently: `architect`): read the whole file; treat all sections as rules in force.
+**T0 agents**: read the whole file; treat all sections as rules in force.
 
-**T1 agents** (currently: `build`, `git-editor`, `explore`, `verify`, `general`): read through the
-marker and stop. If you encounter a fact pattern where eliminative and generalizing modes both fail
-against a pivotal anomaly, the correct move is to surface the anomaly and recommend escalation to
-`@architect`, or to `@dialectic` if the anomaly is at the generative frontier, not to attempt the
-abductive decomposition yourself.
+**T1 agents**: read through the marker and stop. If you encounter a fact pattern where eliminative
+and generalizing modes both fail against a pivotal anomaly, the correct move is to surface the
+anomaly and recommend escalation to `@architect`, or to `@dialectic` if the anomaly is at the
+generative frontier, not to attempt the abductive decomposition yourself.
 
 ## Capability allocation (governing principle)
 

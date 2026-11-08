@@ -9,9 +9,9 @@ incidental, not a dependency of this guide.
 
 ## Mechanical rules
 
-- `rustfmt` owns layout. The one non-default setting is `max_width = 100` (mirrors the Python
-  100-char wrap); everything else is rustfmt canonical and kept implicit per Rust convention. Never
-  hand-format against rustfmt.
+- `rustfmt` owns layout. The one non-default setting is `max_width`, set to the `AGENTS.md`
+  line width (the tool setting must carry the number; keep it in sync); everything else is rustfmt
+  canonical and kept implicit per Rust convention. Never hand-format against rustfmt.
 - `clippy` is the lint gate, wired in `Cargo.toml` `[lints.clippy]`: `all` denied, `pedantic`
   warned. CI runs `cargo clippy --all-targets -- -D warnings`. Do not `#[allow(...)]` without a
   short `// why` comment justifying the exception.
@@ -52,7 +52,7 @@ TODO.
 
 Apply the same level/concern-separation, plurality, side-effect-isolation, and size heuristics as
 `STYLE-CODE-PYTHON.md` §"Function structuring principles". Rust's expression orientation and `?`
-operator tend to shorten functions; the ~60–90-line guidance still applies at 100-char width.
+operator tend to shorten functions; the ~60–90-line guidance still applies at the standard width.
 
 ### Module / crate structuring principles
 

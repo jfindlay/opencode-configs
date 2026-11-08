@@ -27,23 +27,24 @@ fuller unpacking.
 
 Routing model reframes "what's the best model" as "what's the cost of this being wrong". The rule:
 
-- **Generative frontier, interactive dialectic → T-1 (GPT-6 Astra).** Genesis of framings that
-  don't yet exist, abduction, pivotal anomalies that resist all canonical options. The bar is not
-  "intellectually interesting" — it is "the T-1-scale reserve changes the answer." ~2.5× Opus 5.5,
-  ~5× Sonnet. Session count per week: very small.
-- **Cost-of-wrong high, analytical → T0 (Opus 5.5).** Architectural tradeoffs, boundary design,
-  cross-cutting audits, phase planning, commit-shape decisions. Session count per week: small.
-- **Cost-of-wrong moderate → T1 (Sonnet 5.5).** Implementation, refactors, test writing,
-  review-address cycles. ~95% of sessions.
-- **Cost-of-wrong low, judgment required → T2 (Haiku or equivalent).** Classify these files, group
-  these patterns, summarize this output.
-- **Cost-of-wrong low, judgment mechanical → T3 (Kimi K2.5).** Count these items, extract this
-  section, regex-and-report.
+- **Generative frontier, interactive dialectic → T-1.** Genesis of framings that don't yet exist,
+  abduction, pivotal anomalies that resist all canonical options. The bar is not "intellectually
+  interesting" — it is "the T-1-scale reserve changes the answer." Rare.
+- **Cost-of-wrong high, analytical → T0.** Architectural tradeoffs, boundary design, cross-cutting
+  audits, phase planning, commit-shape decisions. Occasional.
+- **Cost-of-wrong moderate → T1.** Implementation, refactors, test writing, review-address cycles.
+  The default.
+- **Cost-of-wrong low, judgment required → T2.** Classify these files, group these patterns,
+  summarize this output.
+- **Cost-of-wrong low, judgment mechanical → T3.** Count these items, extract this section,
+  regex-and-report.
+
+Models, cost ratios, and usage shares per tier live in `AGENTS-ROSTER.md`.
 
 Upgrade or downgrade is not about task size. Large mechanical tasks stay at T3. Small architectural
 decisions stay at T0. The signal is "if this is wrong, how much work is downstream?"
 
-Cross-check T0 conclusions at phase boundaries with T0-alt (GPT-5 / Gemini 2.5 Pro): ask the alt
+Cross-check T0 conclusions at phase boundaries with T0-alt (a different model family): ask the alt
 to steelman objections to the T0 plan. Different families catch different failure modes.
 
 ## Subagent prompt anatomy
@@ -86,8 +87,8 @@ three-axis rule produces correct answers on all four cases above without losing 
 cases where they agreed.
 
 **Tier is not chosen at fork time.** Subagents inherit the caller's model unless their own
-frontmatter `model:` field overrides it. Forking an `@explore` subagent from an Opus primary runs
-the subagent on Opus unless `explore.md` pins Sonnet. This makes prose tier guidance ("T1-subagent
+frontmatter `model:` field overrides it. Forking an `@explore` subagent from a T0 primary runs
+the subagent at T0 unless `explore.md` pins T1. This makes prose tier guidance ("T1-subagent
 for explores") unenforceable unless encoded in each subagent's definition.
 
 ## Commands can't scope permissions — only agents can
@@ -318,7 +319,7 @@ In long-arc projects, the discoveries log (a section in the roadmap for action-f
 affect the static frame) is the operational mechanism that prevents both defocus and rigidity.
 Discoveries internal to a sub-track (e.g., "we need a different algorithm variant") can wait until
 the sub-track boundary for evaluation. Discoveries that affect cross-track contracts (e.g., "the
-substrate session got the interface wrong") deserve immediate static-frame review via a small Opus
+substrate session got the interface wrong") deserve immediate static-frame review via a small T0
 session. The discipline: the project's narrative document (PEDAGOGY.md or equivalent) is where the
 two frames meet — re-reading it at sub-track boundaries is the practice that catches both defocus
 and rigidity. "The plan was wrong about X" is a successful outcome of a session, not a failure.

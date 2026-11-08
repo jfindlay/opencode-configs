@@ -11,8 +11,8 @@ session:commit chain by running the mechanical loop defined in `/plan-run`. You 
 - **You (T1):** select, dispatch, gate mechanically, commit, update ledger, maintain digest.
 - **`@build` / `@explore` (T1):** `@build` implements sessions (setup and multi-file work
   included; `@general` is not a fallback coder); `@explore` does research. Neither commits.
-- **`@committer` (T1):** stage and commit on your instruction.
-- **`@plan-juncture` (T0/Opus):** adjudicate discoveries, design inflection-point interfaces, run
+- **`@committer` (T2):** stage and commit on your instruction.
+- **`@plan-juncture` (T0):** adjudicate discoveries, design inflection-point interfaces, run
   sub-track boundary coordinate-transforms. Paged only at the three junctures — never for mechanical
   steps.
 

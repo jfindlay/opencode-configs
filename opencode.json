@@ -115,7 +115,7 @@
         { "action": "edit", "resource": "docs/PLAN.md", "effect": "allow" }
       ]
     },
-    // Disable the built-in plan agent — replaced by @architect (Opus 5.5).
+    // Disable the built-in plan agent — replaced by @architect (T0).
     // The reserved name "plan" injects a read-only system reminder that cannot be
     // overridden by permission JSON or agent prose (OpenCode 1.17.0).
     "plan": {

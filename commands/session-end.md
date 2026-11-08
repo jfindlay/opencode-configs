@@ -6,7 +6,7 @@ Perform a session-end retrospective on this session before it closes.
 
 Fork a `@session-scan` subagent with the prompt below. The subagent is read-only
 and must not edit any files — it produces proposed diffs as text, nothing more.
-`@session-scan` is Haiku-pinned for cost efficiency on high-volume history scans;
+`@session-scan` is T2-pinned for cost efficiency on high-volume history scans;
 its classification rules are fully specified in the prompt below, so low-judgment
 throughput is the right tradeoff here.
 

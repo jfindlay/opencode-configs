@@ -11,10 +11,9 @@ Turn a long-arc design into the executable form `/plan-run` consumes. The output
 This command produces the shards and pauses for review; it never runs `/plan-run` itself (executing
 is a separate, `@plan-admin` action).
 
-Runs from `@architect` (Opus 5.5): sharding is the same high-judgment interface-and-contract design the
-inflection juncture does — session boundaries, contract freezes, and tier selection.
-If invoked from a different agent, note that the judgment register expects Opus and proceed only if
-the user confirms.
+Runs from `@architect` (T0): sharding is the same high-judgment interface-and-contract design the
+inflection juncture does — session boundaries, contract freezes, and tier selection. If invoked from
+a different agent, note that the judgment register expects T0 and proceed only if the user confirms.
 
 Source (optional): $ARGUMENTS
 
@@ -148,7 +147,7 @@ Produce `docs/PLAN.md` with exactly these sections. `/plan-run` preconditions on
 - `## Verify gate` — the bound VERIFY_TEST / VERIFY_TYPES commands (discover them; do not assume
   `make`). `/plan-run` re-discovers these but stating them here documents the gate.
 - **`## Session list`** ★ — one commit-shaped session per row. Columns: `#` | `Session` (commit-title
-  shaped) | `Cat` (A substrate / B algorithm / C optimization / I integrative) | `Tier` (Opus only
+  shaped) | `Cat` (A substrate / B algorithm / C optimization / I integrative) | `Tier` (T0 only
   where cost-of-wrong demands) | `Consumes` (contract names) | `Expected files`. Mark sub-track-final
    rows `◆` and inflection points `@architect`. Mark a row selected for the conditional
    feature/completion branch above with a trailing `(F/C)` on the Session title; absent by default,

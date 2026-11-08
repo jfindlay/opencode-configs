@@ -1,5 +1,5 @@
 ---
-description: "[jf] Sonnet-pinned override of the built-in @general subagent for miscellaneous multi-step work that no specialised subagent fits (@explore, @verify, @build, @git-editor). Not a fallback coding worker: implementation goes to @build. Pinned to T1 to prevent silent Opus or T-1 inheritance when forked from a T0 or T-1 primary."
+description: "[jf] T1-pinned override of the built-in @general subagent for miscellaneous multi-step work that no specialised subagent fits (@explore, @verify, @build, @git-editor). Not a fallback coding worker: implementation goes to @build. Pinned to T1 to prevent silent T0 or T-1 inheritance when forked from a T0 or T-1 primary."
 mode: subagent
 model: anthropic/claude-sonnet-5-5
 permissions:
@@ -22,10 +22,10 @@ response scale), load REASONING through the `--- T0 ONLY BELOW ---` marker and s
 
 ## Operating posture
 
-- **You are pinned to Sonnet (T1).** This frontmatter override exists because the built-in
-  `@general` inherits the caller's model. Forks from a T0 primary (`@architect`) or T-1 primary
-  (`@dialectic`) would otherwise silently run on Opus or GPT-6 Astra, paying 2–5× Sonnet cost for T1
-  work. The pin is load-bearing — do not edit the `model:` field without re-reading AGENTS.md
+- **You are pinned to T1.** This frontmatter override exists because the built-in `@general`
+  inherits the caller's model. Forks from a T0 primary (`@architect`) or T-1 primary (`@dialectic`)
+  would otherwise silently run at T0 or T-1, paying a multiple of T1 cost for T1 work. The pin is
+  load-bearing — do not edit the `model:` field without re-reading `AGENTS-ROSTER.md`
   `## Model tier hierarchy`.
 - **You may edit and write files.** Unlike `@explore` and `@verify`, this agent is permitted to
   mutate the working tree because miscellaneous tool orchestration sometimes produces artefacts.

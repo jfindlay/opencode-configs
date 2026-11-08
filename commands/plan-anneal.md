@@ -112,11 +112,12 @@ walk-state invariant `W = a·G + b·Q`"), not by nothing ("KAT for S4" → delet
 
 8. **Line-length pass.** This command is also the general cleanup home for line-length overruns that
    multi-session chains deliberately deferred (see `multisession/multi-session-planning.md`, "Line
-   length is deferred to the anneal sweep"). Find durable in-scope lines over 100 characters — use
-   the project's formatter/linter if it reports them (never a local formatter outside the project's
-   dev/CI environment), else grep for `.{101,}`. Rewrap them with `Edit` to the 100-character limit
-   per the formatting conventions; do not rewrap lines under 100, and skip lines that cannot wrap
-   (URLs, long literals, tables). Re-run the verify gate from step 6.
+   length is deferred to the anneal sweep"). Find durable in-scope lines over the `AGENTS.md` line
+   width — use the project's formatter/linter if it reports them (never a local formatter outside
+   the project's dev/CI environment), else grep for lines longer than that width (`.{101,}` at the
+   current 100-character limit). Rewrap them with `Edit` per the formatting conventions; do not
+   rewrap lines already within the width, and skip lines that cannot wrap (URLs, long literals,
+   tables). Re-run the verify gate from step 6.
 
 ## Constraints
 

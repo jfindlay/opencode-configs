@@ -6,12 +6,11 @@ source quotations that animate those rules. The relationship mirrors HINTS↔AGE
 referential, not in-force — consult them when the operational rules in REASONING don't fire
 reflexively, or when you need to reconstruct *why* a rule has the shape it does.
 
-**Tier gating.** This file is for T-1 and T0 agents only (currently `@dialectic` and `@architect`). T1
-agents should not load it. Its content is calibrated for T-1/T0-scale reasoning reserve, and
-partial execution at Sonnet tier produces fake rigour — the same failure mode that motivated the
-within-REASONING T-1/T0 gate. Asking Sonnet to will the four-step abductive decomposition into
-existence costs attention against the rules it can actually apply while producing the appearance of
-compliance without the substance.
+**Tier gating.** This file is for T-1 and T0 agents only. T1 agents should not load it. Its content
+is calibrated for T-1/T0-scale reasoning reserve, and partial execution at T1 produces fake
+rigour — the same failure mode that motivated the within-REASONING T-1/T0 gate. Asking a T1 agent
+to will the four-step abductive decomposition into existence costs attention against the rules it
+can actually apply while producing the appearance of compliance without the substance.
 
 **When to load this file.** Four triggers:
 

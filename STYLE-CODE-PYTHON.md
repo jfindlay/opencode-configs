@@ -10,7 +10,7 @@ ambiguous, the template repo is normative.
 
 ## Mechanical rules
 
-- PEP 8 except line wrap at 100 characters.
+- PEP 8 except line width, which follows `AGENTS.md` Formatting conventions (the single authority).
 - Full mypy strict typing.
 - Docstrings on all named scopes: packages, modules, classes, functions, in rST format — **no types
   in docstrings**, because the code is fully typed. Use `:param name:`, `:returns:`, `:raises:`,
@@ -63,10 +63,10 @@ When considering function scope, focus, and complexity (intricacy, fragility, im
 3. **[side effects]** IO to/from storage/network, other threads/processes, etc. should probably not
    be mixed with local logic.
 4. **[function size]** If a function cannot naturally be split and it exceeds ~60–90 lines at
-   100-character line length excluding inline documentation and comments, then it is intricate. If
+   the standard line width excluding inline documentation and comments, then it is intricate. If
    the codebase concern is lower-level, higher-performance, etc. **[codebase intensity]** then the
    reasonable size range could be higher and/or wider than ~60–90 lines. **[size range]** Given a
-   typical project intensity, functions over 60 lines at 100 characters should be split unless
+   typical project intensity, functions over 60 lines at the standard width should be split unless
    doing so violates one of the above rules; some may go as long as 90 lines, after which the above
    rules apply more strictly.
 

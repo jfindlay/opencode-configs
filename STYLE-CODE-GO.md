@@ -8,8 +8,8 @@ assumed).
 ## Mechanical rules
 
 - **`gofmt -s` owns all layout and is non-negotiable.** Go deliberately has no line-length setting;
-  do NOT impose the Python/Rust 100-char wrap on Go source. (Markdown and comment prose may still
-  wrap at 100.) This is the one deliberate divergence from the sibling guides — see
+  do NOT impose the `AGENTS.md` line width on Go source. (Markdown and comment prose still
+  follow it.) This is the one deliberate divergence from the sibling guides — see
   `STYLE-DOC.md`'s Go note.
 - **`go vet` + `staticcheck`** are the lint gate. `staticcheck` is the standard external linter;
   treat its findings as errors in CI.

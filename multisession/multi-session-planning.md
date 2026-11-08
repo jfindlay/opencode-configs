@@ -25,17 +25,17 @@ green**:
 
 **Default size: ~150-400 LOC, touching 2-4 files** — smaller than the original rho-crate
 calibration (~400-1000 LOC, 4-7 files), and deliberately so. The original range sat near the top of
-what Sonnet's coherent-context window can hold without compaction; the smaller default keeps each
-session well inside the window, makes the green-commit checkpoint denser, and makes reverts finer
-grained. **This is a default, not a fixed range** — the commit-size tuning law below adjusts it up
-or down per project. The LOC figure is a consequence of "one conceptual unit at the smallest size
-that keeps the unit whole and the triple-contract sharp," never a target in its own right.
+what a T1 agent's coherent-context window can hold without compaction; the smaller default keeps
+each session well inside the window, makes the green-commit checkpoint denser, and makes reverts
+finer grained. **This is a default, not a fixed range** — the commit-size tuning law below adjusts
+it up or down per project. The LOC figure is a consequence of "one conceptual unit at the smallest
+size that keeps the unit whole and the triple-contract sharp," never a target in its own right.
 
 Smaller is wasted session overhead (the warm-up cost of context-loading isn't amortised). Larger
-overflows Sonnet's coherent-context window and forces compaction, which loses precisely the design
-context the session most needs to preserve. The cost curve in session size is therefore **U-shaped**
-— too small fails to amortise fixed warm-up, too large pays quadratic cache-read accumulation plus a
-compaction event plus lost design context. Trimming the always-injected base context (the system
+overflows a T1 agent's coherent-context window and forces compaction, which loses precisely the
+design context the session most needs to preserve. The cost curve in session size is therefore
+**U-shaped** — too small fails to amortise fixed warm-up, too large pays quadratic cache-read
+accumulation plus a compaction event plus lost design context. Trimming the always-injected base context (the system
 prompt, the auto-loaded conventions file) lowers the warm-up term and **shifts the U's optimum
 toward smaller sessions** — context-trim and commit-shrink compound rather than trade off.
 
@@ -82,7 +82,7 @@ output has no inner loop at all and its only integrity guarantee is that everyth
 observed under one environment.
 
 Two structural notes. **Inputs 3 and 4 are the cost-of-being-wrong axis** — the same lens that routes
-agent tier (Opus when the cost of being wrong is high). Commit-size tuning is therefore the *same
+agent tier (T0 when the cost of being wrong is high). Commit-size tuning is therefore the *same
 decision* as tier-routing, one level down: high cost-of-wrong pulls toward both smaller commits and
 higher-tier review, for the same reason. **Input 5 is the one the original calibration omitted** and
 it is load-bearing: how aggressively you can shrink commits is gated by how fast and trustworthy the
@@ -116,9 +116,9 @@ controller outpaces the divergence. The inner test-loop is fast enough to earn a
 *outer* loop is not. So adaptation that the inner loop cannot catch — anything that invalidates a
 frozen cross-session contract — must still halt and surface to the human, never be ridden through.
 
-### Adjudicator tier: Opus at junctures
+### Adjudicator tier: T0 at junctures
 
-The juncture adjudicator (`@plan-juncture`) runs at Opus, fixed. Juncture work is the
+The juncture adjudicator (`@plan-juncture`) runs at T0, fixed. Juncture work is the
 highest-judgment work in the chain — substrate interface design, contract-invalidation adjudication,
 static↔action frame transforms — performed cold from a written digest, which is exactly the
 condition where the stronger model extracts the most signal from lossy context. Junctures are rare
@@ -315,7 +315,7 @@ factoring; the ECDLP baseline solver; a polynomial-selection algorithm.
   implemented in either order or genuinely in parallel.
 - Internally self-contained — tests pass or they don't; no cross-session contracts beyond the
   substrate interface.
-- Sonnet-tier almost always. The judgment surface is constrained by the substrate.
+- T1 almost always. The judgment surface is constrained by the substrate.
 
 ### Category C — optimization layer
 
@@ -458,10 +458,11 @@ check and cannot certify that this sweep passed.
 
 ### Line length is deferred to the anneal sweep
 
-Every agent already knows to hold the 100-character wrap, and mostly does. The residue is a few lines
-a handful of characters over. **A line-length overrun is never a reason to extend a session, open a
-Fix-loop iteration, or dispatch a fix.** Re-engaging a spent session to rewrap a few lines re-reads
-and re-bills the whole session history for a cosmetic change worth almost nothing.
+Every agent already knows to hold the line-width limit (`AGENTS.md` Formatting conventions), and
+mostly does. The residue is a few lines a handful of characters over. **A line-length overrun is
+never a reason to extend a session, open a Fix-loop iteration, or dispatch a fix.** Re-engaging a
+spent session to rewrap a few lines re-reads and re-bills the whole session history for a cosmetic
+change worth almost nothing.
 
 Overruns are factored out instead: the executing agent notes them in the ledger (file and rough
 count, no more) and moves on; the general anneal cleanup — `/plan-anneal`'s line-length pass, run at

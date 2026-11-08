@@ -22,11 +22,15 @@ be committed to the repo — they exist only at the symlink target and are cover
 
 ## Model tiers
 
-T-1 = GPT-6 Astra (interactive dialectic at the generative extremity — genesis, abduction, pivotal
-anomalies). T0 = Opus 5.5 (deep planning, architectural tradeoffs, cross-cutting audits). T1 =
-Sonnet (default — implementation, refactors, reviews). T2 = Haiku (mechanical subagents). Default
-to T1. Encode tier in each subagent's `model:` frontmatter field — never rely on prose guidance
-alone. Full tier detail and agent roster: `AGENTS-ROSTER.md`.
+T-1 = interactive dialectic at the generative extremity (genesis, abduction, pivotal anomalies).
+T0 = deep planning, architectural tradeoffs, cross-cutting audits. T1 = default (implementation,
+refactors, reviews). T2 = mechanical subagents. Default to T1. Encode tier in each subagent's
+`model:` frontmatter field — never rely on prose guidance alone.
+
+**Tier notation only.** Everywhere outside `AGENTS-ROSTER.md` (the single authority for the
+tier→model mapping, cost ratios, and usage shares), the `model:` frontmatter fields, and
+`opencode.json`, refer to models by tier (T-1, T0, T1, T2) — never by model name or version, which
+churn. Full tier detail and agent roster: `AGENTS-ROSTER.md`.
 
 ## Document loading rules
 
@@ -133,14 +137,16 @@ When writing or modifying code, load the matching per-language guide via the `ST
 ### Python
 
 When writing or modifying Python code, **load STYLE-CODE-PYTHON.md** before edits. It carries the
-mechanical rules (PEP 8 with 100-char wrap, mypy strict, rST docstrings, dataclass carve-out) and
-the structuring principles (when to split functions, classes, modules; decorator/dataclass/Pydantic
-guidance; test philosophy).
+mechanical rules (PEP 8 with the standard line width, mypy strict, rST docstrings, dataclass
+carve-out) and the structuring principles (when to split functions, classes, modules;
+decorator/dataclass/Pydantic guidance; test philosophy).
 
 ## Formatting conventions
 
-- Flow lines upto 100 characters and then wrap, including comments and docstrings and non-code
-  files. Do not prematurely wrap lines less than 100 characters.
+- **Line width (single authority).** Flow free-flowing text — prose, comments, docstrings, Markdown,
+  non-code files — as full as possible without exceeding 100 characters; do not wrap prematurely.
+  Every other file defers here instead of restating the number. Exceptions: Go source (`gofmt` owns
+  layout; see `STYLE-CODE-GO.md`) and commit messages (see Git conventions).
 - Always use the project's dev/CI environments rather than local formatters.
 
 ## Git conventions
@@ -152,6 +158,8 @@ guidance; test philosophy).
 - Commit body: one to a few sentences or points. Keep strictly focused on the *why* only — the
   purpose of the commit. Keep details out of the commit message. They should be evident from the
   commit body.
+- Commit message width (single authority): title aims for ≤72 characters, no trailing period; body
+  wraps at 72 characters. `/commit` and `@committer` defer here.
 - **Agent attribution**: commits where an agent produced the diff carry a `Co-authored-by:` trailer
   crediting the content agent(s). Attribution is default ON. Full convention (who gets credited,
   identity string format, suppression conditions) lives in `AGENTS-ROSTER.md` under "Agent

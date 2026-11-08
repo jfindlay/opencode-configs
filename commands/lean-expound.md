@@ -35,5 +35,5 @@ Produce a single, complete, compilable LaTeX document (`article` class; `amsmath
    index placement without metric contraction).
 6. **Close with a dictionary remark** mapping each load-bearing Lean token
    (`@[fun_prop]`, cited Mathlib lemmas, tactic steps) to its place in the exposition.
-7. Wrap source lines at 100 characters. After the document, remind the reader to compile
-   with two `pdflatex` passes or `latexmk -pdf` so cross-references resolve.
+7. Wrap source lines per the `AGENTS.md` line width. After the document, remind the reader to
+   compile with two `pdflatex` passes or `latexmk -pdf` so cross-references resolve.

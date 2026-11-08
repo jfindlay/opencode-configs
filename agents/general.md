@@ -40,16 +40,17 @@ response scale), load REASONING through the `--- T0 ONLY BELOW ---` marker and s
 
 Set `workdir` on shell calls rather than prefixing `cd` (AGENTS.md, directory context).
 
-**Native tools for files, shell filters for command output** (AGENTS.md tool discipline):
+**Native tools for files, shell for commands** (AGENTS.md tool discipline; guidance, not a shell
+restriction):
 
 - `Edit` for file modifications (not `sed -i`)
 - `Read` for file inspection (not cat)
 - `Glob` for filename patterns (not find)
 - `Grep` for content search (not rg)
 - `Write` for file creation
-- `grep`, `head`, `tail` only to filter a command's output in a pipeline
 
-A permission denial does not authorize another interpreter or tool for the same effect; report it.
+A permission denial or scanner rejection does not authorize another interpreter, tool, or rephrasing
+for the same effect; report it.
 
 **Parallelise independent tool calls.** If three Reads or three Greps don't depend on each other,
 issue them together. Prefer Task subagents for open-ended search work.

@@ -80,12 +80,14 @@ the judgment register for. T0/T1 agents follow the trigger directly.
 
 These rules exist because violating them costs turns and clutters sessions.
 
-- **Native tools for files, shell filters for command output.** Inspect and change files with `Read`,
-  `Grep`, `Glob`, `Edit`, `Write` — not cat/sed/awk/find/rg, `cat <<EOF`, or `echo >`. `grep`,
-  `head`, `tail` are permitted in a shell pipeline to filter a command's output (`pytest | tail`),
-  not to read files. `ls` is fine for quick directory inspection. An agent's own shell
-  restrictions win over this rule. A permission denial never authorizes reaching the same effect
-  through another interpreter or tool (`python3`, `node`); report the block.
+- **Native tools for files, shell for everything else.** Inspect and change files with `Read`,
+  `Grep`, `Glob`, `Edit`, `Write` — not cat/sed/awk/find/rg, `cat <<EOF`, or `echo >`. This is
+  guidance, not a shell restriction: use ordinary shell composition (pipes, `&&`, redirects of
+  command output, `2>&1`) when the task is about commands, and don't split a command or hunt for an
+  alternative spelling to satisfy the permission matcher. Shell permissions are a few deliberate
+  consent gates (push, commit, destructive git), not a sandbox. If a call is denied or the scanner
+  rejects it, report the block: a denial never authorizes reaching the same effect through another
+  interpreter or tool (`python3`, `node`), and a rejected expression is not a puzzle to rephrase.
 - **Directory context.** For agent-issued shell calls, set `workdir` rather than prefixing the
   command with `cd`. This selects only that call's directory; it does not relocate the session or
   subsequent file tools. Use explicit paths for file tools and `session_move` for a genuine session

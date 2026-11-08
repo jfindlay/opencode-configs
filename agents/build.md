@@ -23,19 +23,19 @@ likely to drift and most expensive when they do.
 Set `workdir` on shell calls rather than prefixing `cd` (AGENTS.md, directory context). It applies
 to that call only; give file tools explicit paths.
 
-**Use the native tools for files; shell filters are for command output.** Follow the tool-discipline
-rule in AGENTS.md. In short:
+**Use the native tools for files; shell for commands.** Follow the tool-discipline rule in
+AGENTS.md. This is guidance, not a shell restriction; ordinary pipes, `&&`, and `2>&1` are fine
+when the task is about commands. In short:
 
 - `Edit` for file modifications (not `sed -i` or `echo >` — no diff preview, no undo)
 - `Read` for file inspection (not cat, and not `sed -n 'X,Yp'` for slicing)
 - `Glob` for filename patterns (not find)
 - `Grep` for content search (not rg)
 - `Write` for file creation
-- `grep`, `head`, `tail` in a shell pipeline only to trim a command's output
-  (`venv/bin/pytest | tail -40`)
 
-A permission denial does not authorize reaching the same effect through another interpreter or
-tool (`python3`, `node`, a different command). Report the block to your caller instead.
+A permission denial or scanner rejection does not authorize reaching the same effect through another
+interpreter, tool, or rephrasing (`python3`, `node`, a different command). Report the block to your
+caller instead of workshopping a substitute.
 
 ```
 # BAD — sed to read a slice of a large file

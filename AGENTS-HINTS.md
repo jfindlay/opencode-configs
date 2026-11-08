@@ -198,29 +198,27 @@ Preventive rule: never use `--ours`/`--theirs` blindly during an autosquash. Ins
 if the correct resolution isn't obvious, stop and ask. The `@build` prompt for fixup-heavy work
 should include this constraint explicitly.
 
-## OpenCode permission patterns match the entire command string
+## Shell permission rules are tripwires, not containment
 
-OpenCode's `bash` permission patterns are matched against the **full command string** the model
-emits, not against the leading executable or any sub-command. Two consequences worth internalising:
+OpenCode (V2, measured on 2.2.5) extracts each subcommand of a compound line (`&&`, `;`, pipes) and
+checks every part against the rules; one `deny` denies the line, otherwise one `ask` asks. Redirect
+targets and flags stay part of the matched text, and syntax the scanner cannot analyze is rejected
+before any rule runs. Consequences worth internalising:
 
-1. **Env-var-prefixed commands need their own pattern.** A call like `GIT_SEQUENCE_EDITOR="cp
-   /tmp/x" git rebase -i <base>` does NOT match an allow rule of `"git rebase -i *"` — the string
-   doesn't start with `git`. It needs an explicit `"GIT_SEQUENCE_EDITOR=* git rebase -i *"` rule.
-   Same applies to any command that prefixes an env assignment, and to `env VAR=val cmd` forms.
+1. **A rule sees command text, not effects.** `git push *` does not match `git -C d push`,
+   `env VAR=1 git push`, or a push inside a script; an allow for `git diff *` also matches
+   `git diff > f`. Rules therefore work as consent gates for recognizable forms, never as proof an
+   agent cannot do something. Isolation belongs in a sandbox, credentials, and network policy.
+2. **A restrictive allowlist makes every unlisted part a deny (or ask).** Allowlists of "read-only"
+   commands grew without bound and made ordinary pipelines, `2>&1`, and `cd dir && cmd` fail. The
+   config therefore allows shell by default with a few gates (push, commit, destructive git) and
+   states role limits such as "read-only" in the agent's prompt instead.
+3. **Scanner errors are a separate class** from configured denials; widening rules does not fix
+   them. Report the failing expression rather than rephrasing it repeatedly.
 
-2. **Compound commands match as one string.** `git log --oneline && echo "---" && git branch
-   --show-current` does NOT match `"git log *"` — the pattern engine sees the whole chained string.
-   This behaves like a feature, not a bug: it prevents an allow rule from being tunneled through an
-   `&&`. But it means the model must emit each command as its own bash call. AGENTS.md's
-   "Parallelize independent calls" rule already covers the preferred fix — issue separate tool calls
-   — but diagnostically it's useful to know that compound-string mismatches are the mechanism behind
-   what looks like "my allow rule isn't working."
-
-**How the session surfaced this**: user reported that "rebase agent still prompts for permissions
-granted in frontmatter." Bisect on a throwaway repo showed: simple agent-unique allowlisted commands
-ran cleanly without prompting (so the merge semantics were fine); the prompts were triggered by (a)
-a chained `git log ... && echo ... && git branch ...` call that no allow pattern covered, and (b)
-the env-var-prefix form of `git rebase -i`. Both are pattern-match gaps, not permission-engine bugs.
+Earlier V1-era guidance here said compound commands match as one whole string and must be split
+into separate calls; that is not how V2 evaluates them, and splitting is no longer advised for
+permission reasons.
 
 ## Agent prompt body as activation-time rule enforcement
 

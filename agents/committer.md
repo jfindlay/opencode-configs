@@ -86,19 +86,9 @@ Missing `CO_AUTHOR` is treated as "use the session agent" — see step 6.
 
 ## Critical tool discipline
 
-**Never `cd X && cmd`.** Always use the bash tool's `workdir` parameter.
-
-```
-# BAD — bloats every call, subprocess cd doesn't persist
-command: "cd /home/jfindlay/Source/.../salt && git status"
-
-# GOOD
-workdir: "/home/jfindlay/Source/.../salt"
-command: "git status"
-```
-
-The `Working directory` field in the orchestrator input is the `workdir` for every bash call in
-this agent. Set it once per call; never navigate with `cd`.
+Set `workdir` on shell calls rather than prefixing `cd` (AGENTS.md, directory context). The
+`Working directory` field in the orchestrator input is an instruction, not a setting: pass it as
+`workdir` on every shell call, which applies to that call only.
 
 ## Procedure
 

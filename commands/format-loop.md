@@ -15,7 +15,7 @@ Target filter (optional): $ARGUMENTS
    - `Makefile` with a `format` target → `make format`.
    - Else ask.
 
-   Use `workdir` set to the project root — never `cd <root> && <cmd>`.
+   Use `workdir` set to the project root rather than `cd <root> && <cmd>`.
 
 2. **Apply $ARGUMENTS** as a narrowing selector if provided (e.g. a path, a target name, or a `-k`
    expression). Pass through to the runner. Empty → run the full format target.

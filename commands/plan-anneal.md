@@ -43,7 +43,7 @@ walk-state invariant `W = a·G + b·Q`"), not by nothing ("KAT for S4" → delet
 
 1. **Resolve scope.** `$ARGUMENTS`, if present, is a path or glob narrowing the sweep (a directory,
    a crate, a `src/**` glob). Empty → the whole project tree. Use `workdir` set to the project root
-   — never `cd <root> && <cmd>`.
+   rather than `cd <root> && <cmd>`.
 
 2. **Resolve the denylist.** Check for a per-project denylist in `docs/PLAN.md`'s
    `## Notes for executors` (the tunable list `/plan-shard` seeds and the ◆ gate greps). If present,

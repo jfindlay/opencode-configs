@@ -355,9 +355,24 @@ If the just-completed session is the last in a sub-track (marked ◆ in the plan
     `\bS[0-9]+\b` (plan session ids), `sub-track`, `frozen contract`, `PLAN\.md`, `ROADMAP\.md`,
     `action-frame`, `◆`, `\bCat [ABC]\b`, `plan-(run|shard|juncture)`.
 
+- **Stale-claim candidates (gathered before forking; the anneal gate cannot stand in for this).**
+  List the claims this sub-track corrected, invalidated, or flexed, from the digest and ledger. For
+  each, search the durable surfaces it touches (human docs, comments, tests) for surviving
+  formulations, including unchanged sections — the claim's own terms and obvious paraphrases, not a
+  whole-repository audit. Record each hit as `file:line` with the claim it may contradict. No
+  claims, or no hits, is a stated result in the fork prompt, not an omission. Gathering is
+  mechanical; deciding whether a hit contradicts anything is the fork's.
 - Fork `@plan-juncture` (subagent) with juncture type `boundary-transform`. Include the `## Purpose (design
-  intent)`, the frozen-contract list, and the full current `## Action-frame digest`.
-- The fork returns: `still-on-intent <notes>` or `drift-HALT <what changed and why>`.
+  intent)`, the frozen-contract list, the full current `## Action-frame digest`, and the superseded
+  claims with their search candidates (see the Juncture fork template).
+- The fork returns: `still-on-intent <notes>` or `drift-HALT <what changed and why>`. Its notes
+  classify each candidate as a contradiction, a harmless historical quotation, or a keyword match,
+  against the corrected contract and its evidence; a clean search is not proof of correctness.
+- **Contradictions found.** One `@build` correction dispatch (REGISTER rule applies) fixes them in
+  the durable files; it counts against the Fix-loop budget (cap 2). Re-check the named candidates.
+  A contradiction still standing after that is not a clean review: report it in the ledger's
+  boundary note and in your summary, and halt as non-convergence naming it. A contradiction that
+  would invalidate a frozen contract or the design intent is `drift-HALT`, not a fix dispatch.
 - If `still-on-intent`: the fork judged work is trending toward design intent, tolerating medium
   deviation that trends toward intent. Reconcile the ledger's frozen contracts against the plan's
   stated contracts, note drift in the ledger, and continue per Boundary policy.
@@ -575,6 +590,13 @@ JUNCTURE QUESTION:
   Boundary: Re-read ## Purpose (design intent) and the frozen-contract list. Are we still tracking
   the design intent? Return: still-on-intent <notes> OR drift-HALT <what changed and why it needs
   sign-off>.
+  SUPERSEDED CLAIMS: <claims this sub-track corrected/invalidated, from the digest and ledger, or
+  "none">.
+  SEARCH CANDIDATES: <file:line hits for those claims in durable docs, comments, tests, or "none
+  found">. For each, say in your notes whether it is a contradiction of the corrected contract and
+  its evidence, a harmless historical quotation, or a keyword match; name every contradiction. A
+  clean search is not proof the claims are gone — check the surviving prose you can see, not only
+  the hits.
 
 CONSTRAINTS:
 - Return one-shot. Do not ask the user anything — anything needing human sign-off comes back as a

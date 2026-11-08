@@ -625,3 +625,35 @@ the evaluation API does not run the shell scanner, so the exact recipe under `co
 inferred from the scanner behavior above. A saved-allow against a configured deny stays unmeasured.
 Existing saved approvals (rDLP: `edit *`, `grep *`, `head *`, `tail *`, `python3 *`, `cat *`,
 `echo *`) were reported, not revoked.
+
+## 2026-11-07 — Follow-up: stale-claim sweep, edit-error diagnosis, directory guidance
+
+**Stale claims at boundaries.** In an rDLP run a claim about a norm map survived in unchanged prose
+after a claims-correction sub-track, though the new tests refuted it; the anneal denylist cannot see
+obsolete assertions in ordinary domain language. The planning manual gains "Claim verification is
+not annealing". `/plan-run` step 7 has the driver gather the sub-track's superseded claims (digest
+and ledger) and `file:line` search candidates before the existing boundary fork; the fork classifies
+each as contradiction, historical quotation, or keyword match; contradictions get one `@build`
+correction under the existing Fix-loop budget, an unresolved one halts as non-convergence, and one
+that would breach a contract or intent is the existing `drift-HALT`. No new verdict, phase, or loop;
+`plan-admin` and `plan-juncture` reconciled. Cost accepted: semantic review of affected claims only.
+
+**Edit-error diagnosis (no mitigation).** Two failed edits in a build session recorded the keys
+`path`, `oldString`, `new String`; the retries used `newString`. The validation error did not show
+the unrecognized key, so the failure looked like a missing argument. It was a misspelled field, not
+a permission rejection. Provider-side schema constraints and argument generation were not
+inspected: no provider or runtime bug is claimed, and no reminder, alias, auto-repair or config
+change was added. A clearer unknown-key diagnostic is a possible upstream report, not filed.
+
+**Directory guidance.** The shared rule claimed a `cd`'d subprocess "has no memory"; `cd dir &&
+cmd` does work inside its call, and neither it nor `workdir` relocates a session. `AGENTS.md` now
+states the V2 behavior (checked against the tools and commands pages): `workdir` is per call, file
+tools take explicit paths, `session_move` relocates, a prompt's "Working directory:" is an
+instruction, and slash-command `!` blocks run outside agent permissions. Six agent files drop their
+duplicated BAD/GOOD `cd` examples for a one-line pointer; `format-loop`/`plan-anneal` soften
+"never". The stale `filePath` Read example in `build` is now `path` (real drift, unrelated to the
+edit failures). `AGENTS-HINTS.md` and earlier log entries still carry the old wording; not edited.
+
+**Checked.** Wording against the V2 tools/commands pages and the loaded schemas; repository search
+for surviving "never `cd`", "subprocess cd", and `filePath`: only `AGENTS-HINTS.md`, this log, and
+`PLAN.md` remain. Documentation only: no live-agent run, no permission change.

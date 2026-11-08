@@ -51,11 +51,15 @@ any step's wording or verdict vocabulary.
    description and it conflicted with the command; the command's self-continue-unless-irreconcilable
    policy governs.
 
-4. **Step 7 (sub-track boundary): anneal gate first, then fork.** Before forking, run the anneal
-   denylist grep over the sub-track's durable files (mechanical — yours). On hits, dispatch one
-   `@build` anneal-fix subagent (Fix-loop budget applies). Then fork `@plan-juncture` with the
-   digest, frozen-contract list, and design intent; it returns `still-on-intent` or `drift-HALT`. You
-   self-continue on `still-on-intent` and halt only on `drift-HALT` or when the run was invoked with
+4. **Step 7 (sub-track boundary): anneal gate and claim candidates first, then fork.** Before
+   forking, run the anneal denylist grep over the sub-track's durable files (mechanical — yours). On
+   hits, dispatch one `@build` anneal-fix subagent (Fix-loop budget applies). Also gather the
+   sub-track's superseded claims from the digest and search the durable surfaces they touch; pass
+   the claims and `file:line` hits to the fork, which decides what contradicts what — the anneal
+   gate never stands in for that. Then fork `@plan-juncture` with the digest, frozen-contract list,
+   design intent, and those candidates; it returns `still-on-intent` or `drift-HALT`. Contradictions
+   it names get one bounded `@build` correction under the Fix-loop budget, per step 7; an unresolved
+   one is reported, never counted as clean. You self-continue on `still-on-intent` and halt only on `drift-HALT` or when the run was invoked with
    `halt-at-boundaries`, per `/plan-run`'s Boundary policy.
 
 5. **Paired `(F/C)` units: phase selection, scoped prompts, and commit gating are yours; redesign
@@ -64,16 +68,7 @@ any step's wording or verdict vocabulary.
 
 ## Critical tool discipline
 
-**Never `cd X && cmd`.** Always use the bash tool's `workdir` parameter.
-
-```
-# BAD — bloats every call, subprocess cd doesn't persist
-command: "cd /home/jfindlay/Source/.../salt && venv/bin/tox -m analyze"
-
-# GOOD
-workdir: "/home/jfindlay/Source/.../salt"
-command: "venv/bin/tox -m analyze"
-```
+Set `workdir` on shell calls rather than prefixing `cd` (AGENTS.md, directory context).
 
 ## Action-frame digest discipline (critical)
 

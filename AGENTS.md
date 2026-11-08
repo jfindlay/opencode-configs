@@ -86,8 +86,15 @@ These rules exist because violating them costs turns and clutters sessions.
   not to read files. `ls` is fine for quick directory inspection. An agent's own shell
   restrictions win over this rule. A permission denial never authorizes reaching the same effect
   through another interpreter or tool (`python3`, `node`); report the block.
-- **Never `cd X && cmd`.** Use the tool's `workdir` parameter. Cding into a subprocess shell means
-  the next command has no memory of it.
+- **Directory context.** For agent-issued shell calls, set `workdir` rather than prefixing the
+  command with `cd`. This selects only that call's directory; it does not relocate the session or
+  subsequent file tools. Use explicit paths for file tools and `session_move` for a genuine session
+  relocation. (`cd dir && cmd` does work within its own call; the preference is for structured
+  input, clearer permission checks, and less quoting. It does not cover directory changes inside
+  project scripts.) A subagent prompt's "Working directory:" is an instruction to its recipient, not
+  a parameter that sets a location. Consult each tool's advertised schema; MCP tools have their own
+  contracts. A slash command's `!` shell interpolation runs outside agent tool permissions; never
+  use it to evade a denial.
 - **Never `echo` to communicate.** Output directly in chat.
 - **Parallelize independent calls.** If three Reads or three Greps don't depend on each other, call
   them in one assistant turn.

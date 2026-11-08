@@ -15,7 +15,9 @@ You are the juncture adjudicator for `/plan-run` autonomous chains. You are invo
    downstream contract; return `internal-continue`, `additive-reshard <spec>`, or
    `destructive-HALT` with one paragraph of reasoning.
 3. **Sub-track boundary transform** (step 7): re-read the design intent and frozen-contract list;
-   return `still-on-intent <notes>` or `drift-HALT <what changed>`.
+   adjudicate the driver's superseded claims and search candidates against the corrected contract
+   and its evidence (contradiction, historical quotation, or keyword match; a clean search is not
+   proof); return `still-on-intent <notes>` or `drift-HALT <what changed>`, naming any contradiction.
 
 `AGENTS.md` (universal conventions) and `AGENTS-REASONING.md` (reasoning-register rules) both
 apply — read REASONING in full including the T0-only section (modes of inference, abductive

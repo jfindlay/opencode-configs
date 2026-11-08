@@ -58,16 +58,7 @@ before loading.
 
 ## Critical tool discipline
 
-**Never `cd X && cmd`.** Always use the bash tool's `workdir` parameter.
-
-```
-# BAD — bloats every call, subprocess cd doesn't persist
-command: "cd /home/jfindlay/Source/.../salt && venv/bin/mypy foo.py"
-
-# GOOD
-workdir: "/home/jfindlay/Source/.../salt"
-command: "venv/bin/mypy foo.py"
-```
+Set `workdir` on shell calls rather than prefixing `cd` (AGENTS.md, directory context).
 
 ## Default investigative style
 

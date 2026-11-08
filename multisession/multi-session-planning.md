@@ -429,6 +429,27 @@ The per-project denylist (seeded from the default in `/plan-run`, tunable in PLA
 `## Notes for executors`) targets plan coordinates, not domain terms — "KAT"/"known-answer test" is
 legitimate domain vocabulary in a crypto library; `\bS4\b` as a session id is not.
 
+### Claim verification is not annealing
+
+Annealing is not claim verification. A coordinate denylist catches leaked planning vocabulary, not
+obsolete assertions expressed in ordinary domain language. At each boundary, use the sub-track's
+corrections and discoveries to identify superseded claims, then search relevant durable
+documentation and comments, including unchanged sections, for surviving formulations. Check
+candidates against the corrected contract and its evidence; a clean keyword search is not proof of
+correctness.
+
+The motivating case: a claim about a norm map survived in unchanged prose after a claims-correction
+sub-track, although the new tests refuted it. Nothing the anneal grep looks for would have caught
+it, and no changed line contained it.
+
+In `/plan-run` the driver gathers the sub-track's superseded claims from the digest and ledger and
+searches the durable surfaces they touch (not the whole repository); the boundary-transform fork
+adjudicates each candidate against the contracts and evidence, separating a real contradiction from
+a harmless historical quotation or a mere keyword match. The cost is semantic review, so it is
+limited to claims this sub-track affected, and it adds no verdict, phase, or loop: contradictions go
+through the existing correction and escalation paths. The anneal gate stays a separate mechanical
+check and cannot certify that this sweep passed.
+
 ---
 
 ## The two reference frames

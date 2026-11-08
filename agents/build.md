@@ -20,16 +20,8 @@ likely to drift and most expensive when they do.
 
 ## Critical tool discipline
 
-**Never `cd X && cmd`.** Always use the bash tool's `workdir` parameter.
-
-```
-# BAD — bloats every call, subprocess cd doesn't persist
-command: "cd /home/jfindlay/Source/.../salt && venv/bin/mypy foo.py"
-
-# GOOD
-workdir: "/home/jfindlay/Source/.../salt"
-command: "venv/bin/mypy foo.py"
-```
+Set `workdir` on shell calls rather than prefixing `cd` (AGENTS.md, directory context). It applies
+to that call only; give file tools explicit paths.
 
 **Use the native tools for files; shell filters are for command output.** Follow the tool-discipline
 rule in AGENTS.md. In short:
@@ -50,7 +42,7 @@ tool (`python3`, `node`, a different command). Report the block to your caller i
 command: "sed -n '5160,5260p' /path/to/large-file"
 
 # GOOD — Read tool with offset/limit
-Read: { filePath: "/path/to/large-file", offset: 5160, limit: 100 }
+Read: { path: "/path/to/large-file", offset: 5160, limit: 100 }
 ```
 
 **Parallelize independent tool calls in a single turn.** If three Reads or three Greps don't

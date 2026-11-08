@@ -52,20 +52,8 @@ and response scale (collapse clusters, pivotal facts only) shape the quality of 
 
 ## Critical tool discipline
 
-**Never `cd X && cmd`.** Always use the bash tool's `workdir` parameter. But then prefer
-the dedicated tool over bash entirely:
-
-```
-# BAD — two violations: cd && and bash grep instead of the Grep tool
-command: "cd /home/jfindlay/Source/.../salt && grep -n 'foo' src/foo.py"
-
-# GOOD — fix the cd with workdir
-workdir: "/home/jfindlay/Source/.../salt"
-command: "grep -n 'foo' src/foo.py"
-
-# BETTER — skip bash entirely, use the Grep tool
-Grep: { pattern: "foo", path: "src/foo.py" }
-```
+Set `workdir` on shell calls rather than prefixing `cd` (AGENTS.md, directory context); then prefer
+the dedicated tool over bash entirely, e.g. `Grep: { pattern: "foo", path: "src/foo.py" }`.
 
 **Never use bash for file or content operations.** Use the dedicated tools:
 

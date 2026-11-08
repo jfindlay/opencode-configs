@@ -118,12 +118,22 @@ uncommitted work.
 
 ## The loop
 
-Repeat until all session-list rows are `done` in the ledger, or a halt condition fires.
+Repeat until all session-list rows are `done` (or `skipped`, see below) in the ledger, or a halt
+condition fires.
 
 ### 1. Select the next session
 
 - Read the ledger. Find the lowest-numbered session row whose status is `pending` and whose
-  `Consumes` dependencies are all `done`.
+  `Consumes` dependencies are all `done` (a `skipped` row counts as satisfied).
+- **Skippable row check.** `/plan-shard` ends every plan with an `Anneal cleanup (skippable)` row.
+  When the selected row carries `(skippable)`, decide before dispatching whether the sweep is worth
+  a session. Skip it when the evidence says it would be a near no-op: the per-sub-track anneal gates
+  already ran clean, the ledger records no deferred line-length overruns (or only a trivial few),
+  and a quick denylist grep plus a `.{101,}` grep over the arc's durable files finds nothing
+  material. Run it when any of those fail. To skip: mark the row `skipped` with a one-line reason in
+  the ledger and commit it as `Ledger: <session-id> skipped` (step 6b). Never skip a row that is not
+  tagged `(skippable)`. If the row runs, dispatch `@build` to carry out `/plan-anneal` over the
+  project (REGISTER rule and Fix-loop dispatch rules apply; the line-length pass is in scope here).
 - If none is runnable but `pending` rows remain → halt (`BLOCKED: dependency deadlock`), surface the
   offending rows.
 - If none remain → the chain is complete; go to Completion.
@@ -648,7 +658,8 @@ defect — it is scoped to that defect, not a re-opening of the whole feature st
 
 ## Exit report
 
-- Sessions completed this run (with commit hashes), sessions remaining.
+- Sessions completed this run (with commit hashes), sessions remaining, and any `(skippable)` row
+  skipped with its reason.
 - Juncture fork count: how many times `@plan-juncture` was paged (inflection / discovery / boundary), and the
   verdict from each.
 - Any paired `(F/C)` units run this pass: unit id, whether both stages completed or one is left

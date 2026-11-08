@@ -153,6 +153,16 @@ Produce `docs/PLAN.md` with exactly these sections. `/plan-run` preconditions on
    rows `◆` and inflection points `@architect`. Mark a row selected for the conditional
    feature/completion branch above with a trailing `(F/C)` on the Session title; absent by default,
    which is the fully backward-compatible case for ordinary rows.
+
+   **Default final row — anneal cleanup.** End every session list with one extra row, `Anneal
+   cleanup (skippable)`, Cat I, no tier override, Consumes: none (it runs last by row order).
+   Expected files: durable files the arc touched (source, tests, human docs), never the rolling
+   docs. Its deliverable is `/plan-anneal` over the whole project: leaked plan coordinates
+   translated, plus the line-length pass that absorbs overruns earlier sessions deferred (see
+   `multisession/multi-session-planning.md`, "Line length is deferred to the anneal sweep"). The
+   `(skippable)` tag authorizes the `/plan-run` driver to skip the row when it judges the sweep
+   unnecessary. Include the row by default; omit it only when the user declines it at the shard
+   confirm gate, or when the PLAN is a single-session plan.
 - `## Session detail` — per-row deliverable, ≥1 KAT (a row whose deliverable can't be a KAT has an
   undefined contract — flag it), subtleties, deferrals. Lower-fidelity sketches for rows after the
   substrate session are correct, not lazy: sessions inside a sub-track are crisply specified only
@@ -172,8 +182,8 @@ Produce `docs/PLAN.md` with exactly these sections. `/plan-run` preconditions on
   prose-enforced, with Defined-in and Consumed-by. The inflection juncture fork writes the resolved
   substrate interface into the relevant subsection at execution time; mark not-yet-frozen ones
   *"to be frozen at <session>"*.
-- **`## Progress ledger`** ★ — table: `#` | `Session` | `Status` (pending/done) | `Commit` | `Froze`.
-  All rows `pending` at shard time. `/plan-run` maintains this.
+- **`## Progress ledger`** ★ — table: `#` | `Session` | `Status` (pending/done, plus `skipped` for a `(skippable)` row the driver
+  waived) | `Commit` | `Froze`. All rows `pending` at shard time. `/plan-run` maintains this.
 - **`## Action-frame digest`** ★ — empty at shard time (`*(none yet)*`). The externalized action
   frame `/plan-run` appends to and the juncture forks consume.
 - `## Completion handoffs` — present (may be empty, `*(none yet)*`) only when at least one row is

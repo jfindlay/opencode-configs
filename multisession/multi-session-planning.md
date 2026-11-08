@@ -462,6 +462,11 @@ count, no more) and moves on; the general anneal cleanup — `/plan-anneal`'s li
 the end of the arc or whenever convenient — rewraps them in one fresh, cheap context. Agents still
 write to the limit; this rule only removes the cost of *chasing* the last few characters.
 
+`/plan-shard` therefore ends every session list with a default `Anneal cleanup (skippable)` row. The
+`/plan-run` driver may waive it — ledger status `skipped`, with a one-line reason — when the
+sub-track anneal gates ran clean and no material overruns were ledgered, so a plan that stayed clean
+pays nothing for the safety net.
+
 The one exception is a project gate that hard-fails on line length (e.g. a lint rule in the combined
 gate). That is a green-gate requirement, not cosmetic, and is fixed in-session with the project's
 formatter rather than by hand-editing.

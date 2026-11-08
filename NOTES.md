@@ -108,6 +108,21 @@ acceptance"); that file and the closeout plan were retired after this commit.
   thresholds. Compatibility only: no savings or permission claim. Further paid runs need fresh
   authorization.
 
+## Shell policy simplified (2026-11-08)
+
+Rationale and change list: `AGENTS-LOG.md` (2026-11-08). Open follow-ups, none measured:
+
+- Reload the shared service (`location.reload`, or restart) so the symlinked `opencode.json` and
+  agent files take effect; until then the old rules (including `cat`/`sed` denies) still apply.
+- Check per-agent rule evaluation (`permission.create`, no model call) for `explore`, `committer`,
+  `git-editor`: expected `git push` deny everywhere, `git commit` allowed only in `committer` and
+  `git-editor`, ask elsewhere.
+- Scanner behavior for `$(...)`, backticks, subshells, heredocs is unmeasured; scanner errors are
+  not fixable by rules.
+- External-directory checks (`external_directory * ask`) still apply to shell paths outside the
+  project, e.g. `/tmp`; not changed here.
+- If prompt-layer drift (`cat`/`grep` for file reads) returns, measure it before restoring any deny.
+
 ## Open items (owner / gate)
 
 - **`build` edit policy for the config directory: applied as `ask`, three limits open (owner:
@@ -145,18 +160,17 @@ acceptance"); that file and the closeout plan were retired after this commit.
   Verified per agent with `permission.create` evaluation (no model call), not by live tool calls:
   - Environment files: `read *.env`, `*.env.*` ask and `*.env.example` allow restored after the
     global `read * allow` that had overridden the engine defaults.
-  - `explore`, `verify`, `session-scan`: shell is an allowlist of read-only commands (`verify` adds
-    mypy) with redirects (`*>*`) and `git * --output*` denied; `ls 2>&1` is denied too.
-  - `general`: explicit `edit * ask` (what it already resolved to), plus `ask` on redirects.
+  - `explore`, `verify`, `session-scan`, `general`: shell allowlists and redirect rules applied
+    here were removed 2026-11-08 (see "Shell policy simplified" below); `general` keeps its explicit
+    `edit * ask`.
   - Removed no-op rules: global `list`, `lsp`, `todoread`, `todowrite`, and `committer`'s
     `todowrite` deny.
   - Sampling: `top_p` and `temperature` in an agent file are ignored with a warning; the V2 agent
     schema has no sampling key. Left unset. `request.body` is accepted; that it reaches the provider
     is unmeasured.
-  Still open: allowlisted commands can write through a redirect for `build`, `architect`,
-  `committer` (a `*>*` deny would block `Co-authored-by: Name <email>` in commit messages) and
-  `git-editor`; global `git branch *` and `git reflog *` allows cover mutating forms
-  (`git branch -D`); the `grep`/`glob` tools were not given an env-file rule.
+  Still open: the `grep`/`glob` tools were not given an env-file rule. (The redirect and
+  `git branch`/`git reflog` items are moot after the 2026-11-08 simplification: those allows no
+  longer exist and shell is not treated as containment.)
 
 ## Large-write requests correlate with long tool spans (corrected 2026-09-28)
 

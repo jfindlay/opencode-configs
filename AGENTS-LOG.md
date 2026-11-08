@@ -657,3 +657,38 @@ edit failures). `AGENTS-HINTS.md` and earlier log entries still carry the old wo
 **Checked.** Wording against the V2 tools/commands pages and the loaded schemas; repository search
 for surviving "never `cd`", "subprocess cd", and `filePath`: only `AGENTS-HINTS.md`, this log, and
 `PLAN.md` remain. Documentation only: no live-agent run, no permission change.
+
+## 2026-11-08 — Shell permissions simplified: default-allow, a few consent gates
+
+**Context.** Denials kept hitting compound and complex shell expressions that had nothing to do with
+file access. Cause: V2 checks every extracted subcommand, so a global `shell * ask` with a short
+allowlist, hard denies on `cat`/`sed`/`awk`/`find`/`rg`, and `shell * deny` allowlists in `explore`,
+`verify`, `session-scan` and `committer` made any pipeline with one unlisted part fail (a deny, not a
+prompt, in the restricted roles). Each fix since 2026-05-02 widened an allowlist for one more
+symptom. `AGENTS-HINTS.md` also still taught the V1 "whole string" model and advised splitting
+commands into separate calls.
+
+**Changed.** `opencode.json`: `shell * allow`, with `git push *` deny and `git commit *`,
+`git reset --hard *`, `git clean *`, `sudo *` ask; the read-only allowlist, output-filter allows,
+tool-preference denies and mypy/py_compile allows are gone. `explore`/`verify`/`session-scan` keep
+only `edit * deny` and state "read-only" as a prompt contract; `general` drops its redirect asks;
+`committer` and `git-editor` allow `git commit *` and keep their history-shaping denies (`git-editor`
+also keeps `git push` deny and its `edit`/`subagent`/`webfetch` rules). `AGENTS.md`, `build.md`,
+`general.md`: native-tool preference is guidance, not a restriction; a denial or scanner rejection
+is reported, not rephrased. `AGENTS-HINTS.md` permission section rewritten (tripwires, per-subcommand
+checking, scanner errors as a separate class).
+
+**Why.** The harness is not a security boundary: rules match command text, not effects, so every
+allowlist was both incomplete (redirects, interpreters, `env`) and a source of friction. Denials
+should mark authorization boundaries, not preferred spellings of an authorized task. Isolation
+belongs in a sandbox, credentials and network policy.
+
+**Accepted tradeoffs.** Read-only roles can now write through shell if they disobey their prompt;
+`architect` and `dialectic` can write through shell despite `edit` asks; tool-preference violations
+are no longer intercepted (the 2026-05-02 count of chronic `grep`/`cat` use was the reason for those
+denies and may recur as prompt-layer drift).
+
+**Verified.** `opencode debug config --standalone` parsed the new `opencode.json`. Not verified: rule
+evaluation per agent, live behavior, or the scanner's handling of `$(...)`, subshells, heredocs.
+The running service reads the symlinked config directory without a watcher; reload it for the change
+to take effect.

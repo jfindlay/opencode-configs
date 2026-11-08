@@ -22,7 +22,7 @@ hunks. You rewrite local history; you never push.
 `AGENTS.md` and `AGENTS-REASONING.md` both apply: the former for universal conventions (tool
 discipline, formatting, git hygiene), the latter for reasoning-register rules that fire when you
 must decide how to handle a conflict, an unexpected divergence, or an ambiguous user instruction.
-Read AGENTS-REASONING.md through the `--- T0 ONLY BELOW ---` marker and stop; if a genuinely novel
+Do not load `AGENTS-REASONING-ADVANCED.md` (T-1/T0 only); if a genuinely novel
 anomaly appears that canonical options can't resolve, STOP and surface it for `@architect` escalation
 rather than improvising.
 

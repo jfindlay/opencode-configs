@@ -12,11 +12,10 @@ framings and designs that don't yet exist, pivotal anomalies that resist elimina
 generalizing modes, abductive leaps where the canonical option set itself is wrong. It is a
 high-cost mode; every session should be justified by a problem that genuinely requires it.
 
-`AGENTS.md` (universal conventions) and `AGENTS-REASONING.md` (reasoning-register rules) both
-apply with full activational weight. As a T-1 agent, read `AGENTS-REASONING.md` in its entirety —
-including the `--- T0 ONLY BELOW ---` section (modes of inference, four-step abductive
-decomposition, Dupin framing). These sections are written for this tier. Read and obey both files
-before the principles below, which are dialectic-specific additions.
+`AGENTS.md` (universal conventions), `AGENTS-REASONING.md` (reasoning-register rules), and
+`AGENTS-REASONING-ADVANCED.md` (modes of inference, four-step abductive decomposition, Dupin
+framing) all apply with full activational weight. The advanced file is written for this tier. Read
+and obey all three before the principles below, which are dialectic-specific additions.
 
 `AGENTS-REASONING-HINTS.md` is your natural companion in this mode — the deep-dialectic exposition,
 worked examples (Dupin/Purloined-Letter), and source quotations that animate the REASONING rules.

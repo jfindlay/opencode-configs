@@ -2,7 +2,7 @@
 
 This file is the dated retrospective and changelog for the user-level agent infrastructure living
 at `~/.config/opencode/`: `AGENTS.md`, `AGENTS-REASONING.md`, `AGENTS-HINTS.md`,
-`AGENTS-REASONING-HINTS.md`, and this file. It is **not loaded by any agent during normal work** —
+`AGENTS-REASONING-ADVANCED.md`, `AGENTS-REASONING-HINTS.md`, and this file. It is **not loaded by any agent during normal work** —
 only consulted during meta-restructuring sessions such as config audits or doc reorganisations.
 
 Distinct from project-level rolling-context (`PLAN.md`, `NOTES.md`, `GOTCHAS.md`): those files are
@@ -715,3 +715,23 @@ Opus-tier.
 
 **Checked.** Documentation only; grep for the removed phrases and for lines over 100 characters in
 the touched files. No live-agent run.
+
+## 2026-11-08 — REASONING split: the in-file T-1/T0 marker replaced by a separate file
+
+**Context.** The within-file `--- T-1/T0 ONLY BELOW ---` gate (2026-04-24, relabelled 2026-06-09)
+relied on T1 agents obeying "read through the marker and stop". The marker string was copied into
+nine agent prompts and had drifted: several still said `T0 ONLY`, one a different wrapping, and each
+agent restated the gate in its own words.
+
+**Changed.** The below-marker material (modes of inference, four-step abductive decomposition) moved
+verbatim into `AGENTS-REASONING-ADVANCED.md`, with its own tier-gating preamble; `AGENTS-REASONING.md`
+now applies in full to T-1/T0/T1 and points to the advanced file. The marker is gone. `dialectic`,
+`architect`, `plan-juncture` load the advanced file; `build`, `plan-admin`, `git-editor`, `verify`,
+`explore`, `general` state they do not. `AGENTS.md` load-rules table, `AGENTS-ROSTER.md`, and
+`AGENTS-REASONING-HINTS.md` updated in step.
+
+**Why.** The gate becomes a loading decision (which files an agent reads) instead of a mid-file stop
+condition, so the boundary has one definition and the agent prompts name a file, not a string. Cost:
+one extra file and read for T-1/T0.
+
+**Left alone.** Earlier entries (2026-04-24 and 2026-06-09 describe the marker as it then was).

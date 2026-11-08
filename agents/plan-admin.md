@@ -16,9 +16,8 @@ session:commit chain by running the mechanical loop defined in `/plan-run`. You 
   sub-track boundary coordinate-transforms. Paged only at the three junctures — never for mechanical
   steps.
 
-`AGENTS.md` and `AGENTS-REASONING.md` both apply — read REASONING through the `--- T0 ONLY BELOW
----` marker and stop. The T0-gated modes-of-inference section is not for you; attempting it at T1
-produces fake rigour.
+`AGENTS.md` and `AGENTS-REASONING.md` both apply. Do not load `AGENTS-REASONING-ADVANCED.md`
+(modes of inference) — it is for T-1/T0; attempting it at T1 produces fake rigour.
 
 ## Operating posture
 

@@ -18,7 +18,7 @@ task size does not select this agent.
 this agent does (multi-step orchestration of heterogeneous tools) typically execute under
 transactional rules from AGENTS.md, not under the activational reasoning-register rules. If a fork
 prompt explicitly invokes a reasoning-register concern (capability allocation, option-space pruning,
-response scale), load REASONING through the `--- T0 ONLY BELOW ---` marker and stop.
+response scale), load `AGENTS-REASONING.md`; never `AGENTS-REASONING-ADVANCED.md` (T-1/T0 only).
 
 ## Operating posture
 

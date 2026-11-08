@@ -1,14 +1,14 @@
 # Reasoning-register companion (deep dialectic)
 
-This file is the deep-dialectic companion to `AGENTS-REASONING.md`. Where REASONING holds the rules
-in force at the reasoning register, this file holds the deeper exposition, worked examples, and
+This file is the deep-dialectic companion to `AGENTS-REASONING.md` and
+`AGENTS-REASONING-ADVANCED.md`. Where those hold the rules in force at the reasoning register, this file holds the deeper exposition, worked examples, and
 source quotations that animate those rules. The relationship mirrors HINTS↔AGENTS: entries here are
 referential, not in-force — consult them when the operational rules in REASONING don't fire
 reflexively, or when you need to reconstruct *why* a rule has the shape it does.
 
 **Tier gating.** This file is for T-1 and T0 agents only. T1 agents should not load it. Its content
 is calibrated for T-1/T0-scale reasoning reserve, and partial execution at T1 produces fake
-rigour — the same failure mode that motivated the within-REASONING T-1/T0 gate. Asking a T1 agent
+rigour — the same failure mode that motivated the T-1/T0-only advanced file. Asking a T1 agent
 to will the four-step abductive decomposition into existence costs attention against the rules it
 can actually apply while producing the appearance of compliance without the substance.
 
@@ -30,7 +30,7 @@ on top of REASONING. If an entry and a REASONING rule appear to conflict, the RE
 
 ## The detective archetype: modes of inference and the Dupin leap
 
-REASONING.md §'Modes of inference' carries the operational rules. This section is the source
+`AGENTS-REASONING-ADVANCED.md` §'Modes of inference' carries the operational rules. This section is the source
 exposition and worked example that motivate them — read it when those rules don't fire reflexively,
 and you need to reconstruct why the four-step decomposition has the shape it does.
 

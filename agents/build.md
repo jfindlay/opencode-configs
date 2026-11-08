@@ -13,10 +13,9 @@ you run as a subagent. You do not plan or orchestrate chains, rewrite history, o
 a commit happens only when the caller asks for one (AGENTS.md git conventions), and in a chain the
 driver dispatches `@committer`. AGENTS.md holds the universal transactional
 conventions; `AGENTS-REASONING.md` holds the reasoning-register rules (capability allocation,
-option-space pruning, response scale). Read AGENTS-REASONING.md through the
-`--- T-1/T0 ONLY BELOW ---` marker and stop — the section below the marker is T-1/T0-scoped and
-attempting it at T1 produces fake rigour. Obey both files for everything above the marker. The
-rules below are the ones most likely to drift and most expensive when they do.
+option-space pruning, response scale). Obey both files. Do not load
+`AGENTS-REASONING-ADVANCED.md` — it is T-1/T0-scoped and attempting it at T1 produces fake rigour.
+The rules below are the ones most likely to drift and most expensive when they do.
 
 ## Critical tool discipline
 

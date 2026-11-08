@@ -39,16 +39,16 @@ rely on prose guidance alone — encode tier in each subagent's `model:` frontma
 **Primary agents** (invoked by `@name` or set as startup agent):
 - `@dialectic` — T-1. Interactive dialectic at the generative extremity: genesis, abduction,
   pivotal anomalies. Temperature 0.6. Rolling-context writes allowed; all other writes require user
-  approval. References `AGENTS-REASONING.md` in full; loads `AGENTS-REASONING-HINTS.md`
-  proactively. NOT for audits, reviews, or routine deep work — use `@architect` for those.
+  approval. References `AGENTS-REASONING.md` and `AGENTS-REASONING-ADVANCED.md`; loads
+  `AGENTS-REASONING-HINTS.md` proactively. NOT for audits, reviews, or routine deep work — use `@architect` for those.
 - `@architect` — T0. Deep planning, architectural tradeoffs, cross-cutting audits, phase
   planning, rebase plans. Rolling-context writes allowed; all other writes require user approval.
-  References `AGENTS-REASONING.md` in full including the T-1/T0-only section.
+  References `AGENTS-REASONING.md` and `AGENTS-REASONING-ADVANCED.md`.
 - `@build` — T1, `mode: all`: the one implementation worker, as a primary agent or as a
   forked subagent (including `/plan-run` F/C stages). Coding, setup, multi-file changes, refactors,
   test/fix loops, review-address cycles; reports results or blockers to its caller and does not plan,
-  orchestrate chains, rewrite history, or commit on its own. References `AGENTS-REASONING.md` up to
-  the T-1/T0-only marker.
+  orchestrate chains, rewrite history, or commit on its own. References `AGENTS-REASONING.md` only
+  (not the advanced file).
 - `@plan-admin` — T1. Autonomous-chain driver for `/plan-run`. Runs the mechanical
   loop (select, dispatch, gate, commit, ledger); pages a forked `@plan-juncture` only at the three
   junctures (inflection design, discovery adjudication, sub-track boundary). Never implements;

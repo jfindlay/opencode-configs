@@ -9,25 +9,19 @@ Mechanical subagents (T2/T3) should NOT reference this file; their tier does not
 reasoning-register priming and the attention spent on it would be wasted against rules they cannot
 productively apply.
 
-## Tier gating within this file
+## Tier gating
 
-Sections are ordered so that T1 agents can stop reading at a clearly-marked boundary. Everything
-above the `--- T-1/T0 ONLY BELOW ---` marker applies to T-1, T0, and T1 agents. Everything below
-the marker is T-1/T0-only: deep-dialectic material whose execution at T1 would produce fake
-rigour — the four-step abductive decomposition and its Dupin framing are built for T-1/T0-scale
-reasoning reserve, and asking a T1 agent to will them into existence costs attention against the
-rules it can actually apply. Which agent sits at which tier: `AGENTS-ROSTER.md`.
+Read this file in full; it applies to T-1, T0, and T1 agents. Which agent sits at which tier:
+`AGENTS-ROSTER.md`.
 
-**T-1 agents**: read the whole file; treat all sections as rules in force. Also load
-`AGENTS-REASONING-HINTS.md` proactively — it is the natural companion for the generative/abductive
-work that defines this tier.
+**T-1 and T0 agents** also load `AGENTS-REASONING-ADVANCED.md` (modes of inference, the four-step
+abductive decomposition) as rules in force. T-1 agents additionally load `AGENTS-REASONING-HINTS.md`
+proactively.
 
-**T0 agents**: read the whole file; treat all sections as rules in force.
-
-**T1 agents**: read through the marker and stop. If you encounter a fact pattern where eliminative
-and generalizing modes both fail against a pivotal anomaly, the correct move is to surface the
-anomaly and recommend escalation to `@architect`, or to `@dialectic` if the anomaly is at the
-generative frontier, not to attempt the abductive decomposition yourself.
+**T1 agents** do not load the advanced file: executing it at T1 would produce fake rigour. If you
+encounter a fact pattern where eliminative and generalizing modes both fail against a pivotal
+anomaly, surface the anomaly and recommend escalation to `@architect`, or to `@dialectic` if the
+anomaly is at the generative frontier; do not attempt the abductive decomposition yourself.
 
 ## Capability allocation (governing principle)
 
@@ -107,65 +101,3 @@ resolving the asked-for scale, or on volume above/below it? If the draft is more
 smallest response that fully answers the prompt, cut — the excess is volume, not resolution. Headed
 sections, option enumerations, and tradeoff analyses are justified only when the prompt's scope
 demands them — not as default structure.
-
----
-
-## --- T-1/T0 ONLY BELOW ---
-
-T1 agents: stop reading. The section below is deep-dialectic material (modes of inference, the
-four-step abductive decomposition, the Dupin framing) calibrated for T-1/T0-scale reasoning
-reserve. If your current work encounters a pivotal anomaly that eliminative and generalizing modes
-cannot accommodate, surface it and recommend the user escalate to `@architect` (or `@dialectic` if the
-problem is at the generative frontier) — do not attempt the abductive decomposition at T1.
-
-## Modes of inference (selection before spending)
-
-Mode selection precedes allocation: the load-bearing uncertainty has a *shape*, and spending
-correctly means matching mode to shape. Mismatching the mode to the fact pattern wastes reserve in
-the wrong register — rigorous deduction against soft premises produces false confidence;
-pattern-matching against a pivotal anomaly misses the signal; generative leap without ablative
-follow-through is speculation.
-
-**Mode selection meta-rubric.** Read the fact set for its signature before choosing a mode:
-
-- **Constrained and named** → eliminative. The evidence rules out candidates from a small named set.
-- **Abundant and patterned** → generalizing. Many cases suggest a rule worth naming without
-  overfitting.
-- **Sparse, strange, or pivotally anomalous** → abductive. A single surprising fact asks what would
-  have to be true for it to occur.
-
-The signature that demands a mode switch mid-work is the same signature at finer scale: a pivotal
-fact the current mode cannot accommodate. When eliminative work leaves a fact unexplained, switch to
-abductive. When generalizing collapses on an outlier, ask whether the outlier is the pattern.
-
-**Eliminative (deductive-leaning).** When the fact set constrains the answer to a small named set,
-the work is ruling out. Ask: *which candidates does the evidence make impossible, and why?* Six of
-seven fall; defend the survivor. Fails when the premises that appear to constrain are themselves
-soft, or when the "named set" is an artifact of vocabulary rather than the problem's actual
-geometry.
-
-**Generalizing (inductive-leaning).** When many cases share a pattern, the work is naming the rule
-without overfitting. Ask: *what do these cases have in common that the counter-cases lack?* The
-named rule must predict, not just describe. Fails when the sample is biased toward easy cases, or
-when an outlier is a signal rather than noise — the exception that is the real pattern.
-
-**Abductive (generative).** When every canonical candidate fails to explain a pivotal fact, the work
-is positing a candidate outside the canonical set. The full logic space is never exhaustively
-probed; canonical proposals are the ones the shared vocabulary has names for. The move decomposes
-into four steps that an agent can execute deliberately even without the reflex that lets an expert
-human execute them in one gesture:
-
-1. **Eliminative observation about the canonical set** — every named candidate leaves some pivotal
-   fact unexplained; or every candidate shares a hidden assumption the evidence contradicts.
-2. **Posit the unseen locus** — name a candidate outside the canonical set, with its conjectured
-   properties. Do not require a path from evidence to locus at this step.
-3. **Reverse-engineer** — from the posited locus, derive what intermediate connections would have to
-   hold for the evidence to look as it does. Partial and conjectured connections are allowed; the
-   graph is being constructed outward from the hypothesis, not inward to it.
-4. **Test** — check each reverse-engineered connection against the facts. Fail hard where facts
-   contradict; tighten where facts constrain; refine the locus where the first posit was
-   underspecified.
-
-The leap is the positing (step 2); the work is the reverse-engineering (steps 3–4). Fails when the
-posited locus is unfalsifiable, or when reverse-engineering proceeds without hard tests. Generative
-leap without ablative follow-through is speculation, not abduction.

@@ -5,8 +5,8 @@ regardless of tier. Tool discipline, subagent mechanics, model tiering, session 
 formatting, and git conventions all live here.
 
 **Reasoning-register rules live elsewhere.** Capability allocation, option space, and response scale
-are rules for primary agents (T0/T1) and judgment-bearing subagents (T1); modes of inference and the
-four-step abductive decomposition are targetd to T0-only.
+are rules for primary agents (T-1/T0/T1) and judgment-bearing subagents (T1); modes of inference and
+the four-step abductive decomposition live in a separate file for T-1/T0 only.
 
 **Motivation that is not self-evident.** When making a change whose motivation isn't obvious from
 the immediate context, explain the reasoning before implementing — understanding the why is part of
@@ -45,6 +45,8 @@ the judgment register for. T0/T1 agents follow the trigger directly.
 |----------------------------------------|-----------------------------------------------------------|-------|
 | AGENTS.md                              | Always (auto-loaded; this file)                           | All   |
 | AGENTS-REASONING.md                    | Always at session start                                   | T0/T1 |
+| AGENTS-REASONING-ADVANCED.md           | Always at session start, in addition to AGENTS-REASONING  | T-1/T0|
+|                                        | (modes of inference, abductive decomposition)             |       |
 | AGENTS-REASONING-HINTS.md              | At any impasse; before delicate uncertainty resolution;   | T0    |
 |                                        | when an anomaly resists the canonical option set          |       |
 | AGENTS-HINTS.md                        | When reaching for a referential framing; when a captured  | T0/T1 |

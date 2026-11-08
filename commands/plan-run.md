@@ -510,7 +510,9 @@ YOUR SCOPE
 Run the full project gate. Complete missing branch cases and necessary regression tests, typing,
 lint/format, and documentation/shape/layering conformance. Small behavior-preserving corrections are
 permitted within the unit's expected files. Do NOT weaken assertions, lower coverage, add
-convenience exclusions, change public behavior, or redesign the feature to obtain green.
+convenience exclusions, change public behavior, or redesign the feature to obtain green. Do not
+spend turns rewrapping a few over-100-character lines the gate does not enforce — report them in
+your return; the general anneal sweep takes them.
 
 IF YOU FIND A DEFECT
 A substantive defect in the feature's behavior is not yours to fix by reinterpreting intent — name it
@@ -609,7 +611,11 @@ CONSTRAINTS:
 
 When dispatching a `@build` fix subagent (step 4f, the F-fix defect-check dispatch, or the
 anneal-fix in step 7), include one line in the prompt: "REGISTER rule applies — see dispatch
-template." Fix forks edit durable files and the same plan-coordinate prohibition applies. A bounded
+template." Fix forks edit durable files and the same plan-coordinate prohibition applies. Line-length
+overruns are not a fix trigger: a session whose only blemish is lines over 100 characters is green;
+note them in the ledger for the general anneal sweep (`/plan-anneal` line-length pass) and do not
+open a Fix-loop iteration over them. Exception: a project gate that hard-fails on line length —
+fix those with the project formatter. A bounded
 F-fix dispatch for a paired unit additionally includes the unit's intent capsule and the named
 defect — it is scoped to that defect, not a re-opening of the whole feature stage.
 

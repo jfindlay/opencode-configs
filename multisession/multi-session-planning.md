@@ -450,6 +450,22 @@ limited to claims this sub-track affected, and it adds no verdict, phase, or loo
 through the existing correction and escalation paths. The anneal gate stays a separate mechanical
 check and cannot certify that this sweep passed.
 
+### Line length is deferred to the anneal sweep
+
+Every agent already knows to hold the 100-character wrap, and mostly does. The residue is a few lines
+a handful of characters over. **A line-length overrun is never a reason to extend a session, open a
+Fix-loop iteration, or dispatch a fix.** Re-engaging a spent session to rewrap a few lines re-reads
+and re-bills the whole session history for a cosmetic change worth almost nothing.
+
+Overruns are factored out instead: the executing agent notes them in the ledger (file and rough
+count, no more) and moves on; the general anneal cleanup — `/plan-anneal`'s line-length pass, run at
+the end of the arc or whenever convenient — rewraps them in one fresh, cheap context. Agents still
+write to the limit; this rule only removes the cost of *chasing* the last few characters.
+
+The one exception is a project gate that hard-fails on line length (e.g. a lint rule in the combined
+gate). That is a green-gate requirement, not cosmetic, and is fixed in-session with the project's
+formatter rather than by hand-editing.
+
 ---
 
 ## The two reference frames

@@ -1,5 +1,5 @@
 ---
-description: "[jf] Sweep a project's durable files (source, tests, human docs) for leaked plan coordinates — session ids, category letters, ◆, 'frozen contract', sub-track names, PLAN/ROADMAP references — and translate each into a standalone statement of the actual property, reason, or invariant. The manually-invokable whole-project form of the per-sub-track anneal gate /plan-run runs at each ◆ boundary. Mechanical grep-against-denylist + Edit-fix loop; verifies green; never edits rolling docs. Args: [scope-path-or-glob]."
+description: "[jf] Sweep a project's durable files (source, tests, human docs) for leaked plan coordinates — session ids, category letters, ◆, 'frozen contract', sub-track names, PLAN/ROADMAP references — and translate each into a standalone statement of the actual property, reason, or invariant. The manually-invokable whole-project form of the per-sub-track anneal gate /plan-run runs at each ◆ boundary. Mechanical grep-against-denylist + Edit-fix loop; verifies green; never edits rolling docs. Also the home for line-length overruns deferred by multi-session chains. Args: [scope-path-or-glob]."
 agent: build
 ---
 
@@ -108,6 +108,14 @@ walk-state invariant `W = a·G + b·Q`"), not by nothing ("KAT for S4" → delet
 
    In any non-clean stop: summarize what remains and ask for direction. Do not grind.
 
+8. **Line-length pass.** This command is also the general cleanup home for line-length overruns that
+   multi-session chains deliberately deferred (see `multisession/multi-session-planning.md`, "Line
+   length is deferred to the anneal sweep"). Find durable in-scope lines over 100 characters — use
+   the project's formatter/linter if it reports them (never a local formatter outside the project's
+   dev/CI environment), else grep for `.{101,}`. Rewrap them with `Edit` to the 100-character limit
+   per the formatting conventions; do not rewrap lines under 100, and skip lines that cannot wrap
+   (URLs, long literals, tables). Re-run the verify gate from step 6.
+
 ## Constraints
 
 - **Never edit the rolling/static docs.** `docs/PLAN.md`, `docs/ROADMAP.md`, `docs/NOTES.md`, and
@@ -129,6 +137,7 @@ walk-state invariant `W = a·G + b·Q`"), not by nothing ("KAT for S4" → delet
 - Genuine leaks translated: count, with a short before→after list.
 - False positives left in place: count, with the patterns that produced them (denylist-tuning hint).
 - Needs-human items: leaks whose referent could not be recovered — file, line, and the coordinate.
+- Line-length pass: lines rewrapped (count) and unwrappable lines left in place.
 - Final status: **clean** / **stuck** (non-converging, with remaining leaks) / **needs-human**.
 - Verify gate result (green / the failure, if the loop stopped red).
 - Files modified (from `git diff --stat`).

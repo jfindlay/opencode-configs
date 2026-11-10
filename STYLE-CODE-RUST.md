@@ -23,6 +23,17 @@ incidental, not a dependency of this guide.
 - `#[must_use]` on pure functions whose return value is the whole point (e.g. a formatter that has
   no useful side effect).
 
+### Classifying rustdoc and comment edits (gate evidence)
+
+A rustdoc or comment edit in a `.rs` file is **executable input, not prose**, until the diff proves
+otherwise: `///`/`//!` code blocks compile and run as doctests, `missing_docs` and rustdoc lints
+(broken intra-doc links) fail under `-D warnings` or `cargo doc`, `#[doc = include_str!(..)]` pulls
+files into the build, and added or removed lines shift coverage line attribution. So after any such
+edit — including boundary corrections and review fixes — re-run the unit gate and the coverage floor
+on the new inputs; do not reuse earlier evidence. Only an edit that provably touches no compiled or
+executed text (a Markdown file nothing includes, the ledger) takes the prose-only path. Uncertain
+means code path. This is the Rust instance of the plan-run rule "Classifying inputs".
+
 ## Preferences
 
 - **Validating constructors are the data-contract boundary** — the Pydantic `BaseModel` analogue.

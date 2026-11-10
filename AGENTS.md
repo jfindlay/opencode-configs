@@ -161,7 +161,8 @@ decorator/dataclass/Pydantic guidance; test philosophy).
   purpose of the commit. Keep details out of the commit message. They should be evident from the
   commit body.
 - Commit message width (single authority): title aims for ≤72 characters, no trailing period; body
-  wraps at 72 characters. `/commit` and `@committer` defer here.
+  wraps at 72 characters. `/commit` and `@committer` defer here. Pass a hard-wrapped message to git
+  with `-F` (stdin heredoc); a body given through `-m` has come back unwrapped.
 - **Agent attribution**: commits where an agent produced the diff carry a `Co-authored-by:` trailer
   crediting the content agent(s). Attribution is default ON. Full convention (who gets credited,
   identity string format, suppression conditions) lives in `AGENTS-ROSTER.md` under "Agent

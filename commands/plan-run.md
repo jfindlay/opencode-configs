@@ -161,8 +161,10 @@ explicit block in the Progress ledger (see step 6a); no general caching framewor
 executed documentation, fixtures, generators, build inputs, and configuration are potentially
 executable, not automatically prose. Classify by the actual diff and actual usage; an uncertain
 classification takes the code-change path. Only proven non-executable edits (prose, ledger) leave
-code evidence valid. Dependency evidence is keyed to dependency inputs (manifests, lockfile,
-resolution/feature settings, dependency policy, checking-tool versions), not to unrelated source.
+code evidence valid (for Rust, a rustdoc or comment edit in a `.rs` file is not proven
+non-executable; see `STYLE-CODE-RUST.md`). Dependency evidence is keyed to dependency inputs
+(manifests, lockfile, resolution/feature settings, dependency policy, checking-tool versions), not
+to unrelated source.
 An edit to the verify gate, the declared cadence, or a named contract changes the *obligations*:
 re-evaluate them, even when no executable input changed.
 

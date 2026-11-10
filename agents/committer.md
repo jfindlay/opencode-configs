@@ -161,8 +161,12 @@ Set `workdir` on shell calls rather than prefixing `cd` (AGENTS.md, directory co
      output names an over-long line; re-wrap those lines and re-run until the output is empty. The
      only tolerated hit is a line holding a single unbreakable token. Then check for under-filled
      lines: if a line plus the first word of the next line would still fit in 72 characters, re-wrap.
-   - `git commit -m "<title>" -m "<body>"`. Use one `-m` per paragraph; newlines inside a quoted
-     body are preserved, so the hard wraps survive.
+   - **Commit with `-F -`, never `-m`.** Pass the whole message (title, blank line, hard-wrapped
+     body, blank line, trailer) on stdin through a quoted heredoc:
+     `git commit -F - <<'EOF'` … `EOF`. Bodies passed through `-m` have come back unwrapped, with
+     the wraps lost between the draft and the commit; `-F` writes the message verbatim, so the
+     committed body is exactly the body you pre-flighted. Run the width pre-flight on the same
+     text.
 
 8. **Verify.** Run `git log -1 --stat` and `git status` to confirm:
    - HEAD now points to the new commit.

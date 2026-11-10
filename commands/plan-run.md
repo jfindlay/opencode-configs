@@ -39,7 +39,17 @@ override a false precondition mid-run.
    - `package.json` scripts → `npm test` / `npm run typecheck` or equivalents.
    - Else ask the user.  Record the bound commands in the ledger header for cold-resume reuse. Where
      the bound command is a combined gate (e.g. `tox -m analyze`), one green run satisfies 4a AND 4b
-     (and any lint/format/coverage it enforces) — note this in the ledger.
+     (and any lint/format/coverage it enforces) — note this in the ledger. A combined command stays
+      indivisible unless the project explicitly declares it split.
+
+3. **Bind CADENCE — the project's declared gate cadence, if any.** Read PLAN's `## Verify gate` (and
+   the project documents it points to) for an explicit cadence declaration: which checks run per
+   completed code-change unit, which at sub-track and final boundaries, which are freshness checks
+   (dependency/security) with their triggers, and what the project treats as executable input. Bind
+   only what is declared; never infer a cadence, and never bake a project's commands into this
+   driver. **No declaration → no cadence:** the whole "Gate cadence and evidence reuse" section below
+   is inert and every gate requirement in steps 4–7 applies exactly as written. Record the bound
+   cadence (or `none declared`) in the ledger header for cold-resume reuse.
 
 ## Terminology: paired units (feature/completion)
 
@@ -116,6 +126,73 @@ uncommitted work.
      skipping step 1's normal row selection for this one iteration.
 6. VERIFY commands (bound in Preflight) are resolved. The verify gate depends on them.
 
+## Gate cadence and evidence reuse (only when a cadence is bound in Preflight)
+
+Purpose: stop re-running a check solely because work passed between agents, without weakening what
+is verified. The driver still owns acceptance; it is not obliged to execute a command already run on
+the same relevant inputs. Projects declare the cadence; this section defines how evidence is
+recorded, validated, and reused. Without a bound cadence nothing here applies (Preflight 3).
+
+**Check classes** (the project declares which of its commands fall in each and their triggers):
+
+| Class | Required cadence |
+|---|---|
+| Targeted checks and named KATs | Worker edit/fix loop; every unit-specific obligation before acceptance |
+| Per-unit gate (the project's test and type commands) | Once on final inputs per completed code-change unit |
+| Boundary checks (e.g. a coverage floor) | Each ◆ sub-track completion and final delivery; earlier only when the project names a trigger |
+| Freshness checks (e.g. dependency policy and advisory audit) | When their declared inputs change; first active run of each calendar day; before release |
+| Non-executable prose and ledger | The project's documentation/contract checks only; no automatic code suite |
+
+A boundary check run at its checkpoint does not replace the per-unit gate, and a combined command
+declared as one check stays one check (it cannot be half-run to satisfy two classes).
+
+**Evidence record.** For each completed check, the worker (or the driver, when it ran the check
+itself) produces one compact record: exact command and working directory; exit status; completion
+time; output/log reference; tested-input identity; relevant environment (toolchain, flags,
+features, target, config). Never include credentials. **Input identity** covers the base revision
+plus staged and unstaged changes, deletions, and the contents of relevant untracked additions, and
+is a content identity, so an unchanged executable-input set has the same identity across commits.
+HEAD alone, or `git status` filenames alone, never establish identity. Records live in a small
+explicit block in the Progress ledger (see step 6a); no general caching framework.
+
+**Classifying inputs.** Source (including doc comments the toolchain compiles or runs), included or
+executed documentation, fixtures, generators, build inputs, and configuration are potentially
+executable, not automatically prose. Classify by the actual diff and actual usage; an uncertain
+classification takes the code-change path. Only proven non-executable edits (prose, ledger) leave
+code evidence valid. Dependency evidence is keyed to dependency inputs (manifests, lockfile,
+resolution/feature settings, dependency policy, checking-tool versions), not to unrelated source.
+An edit to the verify gate, the declared cadence, or a named contract changes the *obligations*:
+re-evaluate them, even when no executable input changed.
+
+**Validity — evidence is reused only when all hold:** it is backed by actual command output (a
+readable log; an unsupported statement that tests passed is not evidence); its input identity and
+environment match the inputs *as recomputed now*; and no obligation changed since. Otherwise the
+check is missing or invalidated and the driver runs it. Any edit after a check ran invalidates the
+affected evidence — post-validation fixes, hook-modified trees, boundary corrections, and
+completion-stage edits included. If a log or identity cannot be verified (cold resume, lost
+temporary files), rerun; never infer a pass.
+
+**Freshness checks** are reusable only with successful evidence for the *current* dependency inputs
+and policy, refreshed on the *current* day. The record names the advisory database identity and its
+refresh time; a new database revision invalidates the corresponding advisory result. An offline or
+failed refresh is not a fresh pass. Audit and dependency policy are separate checks, not
+interchangeable. No scheduler exists: the loop enforces freshness (step 1 and step 4g), and a
+release requires the checks.
+
+**Outcomes.** Record each check as `passed` (the driver ran it), `reused` (valid evidence from a
+worker or an earlier run), or `deferred` (cadence puts it later; name the next mandatory checkpoint).
+A unit may complete under its per-unit gate while a boundary check is deferred; the ledger must
+never call that a full-gate pass. A known failure is never `deferred`. A boundary is incomplete
+until every check required there is `passed` or validly `reused`; missing evidence blocks it.
+Historical ledger evidence is never rewritten as fresh, and a historical row with no record is
+`unrecorded`, not `passed`.
+
+**Stage rules.** An F-stage's checks are partial and never accepted as final acceptance; an F-stage
+checkpoint is not a completed unit. The C-stage, or the single stage of an ordinary row, runs the
+per-unit gate once on its final inputs and returns the records. Fix workers return fresh records for
+their final inputs. Retry limits (Fix-loop cap) and F-stage handoff rules are unchanged. Do not make
+unrelated edits to the tree while a gate is running.
+
 ## The loop
 
 Repeat until all session-list rows are `done` (or `skipped`, see below) in the ledger, or a halt
@@ -134,9 +211,15 @@ condition fires.
   the ledger and commit it as `Ledger: <session-id> skipped` (step 6b). Never skip a row that is not
   tagged `(skippable)`. If the row runs, dispatch `@build` to carry out `/plan-anneal` over the
   project (REGISTER rule and Fix-loop dispatch rules apply; the line-length pass is in scope here).
+- **Freshness check (cadence only).** Before dispatching, confirm each declared freshness check has
+  valid evidence for the current dependency inputs, policy, and calendar day. Missing, stale, from an
+  earlier day, or unverifiable after a cold resume → run it now (the first active iteration of a day
+  does this). Success is recorded; a failure against inputs this chain has not changed (e.g. a newly
+  published advisory) is a dependency-graph finding, not a regression from any unit: halt
+  (`BLOCKED: freshness finding`), surface it, and leave triage to the project's stated procedure.
 - If none is runnable but `pending` rows remain → halt (`BLOCKED: dependency deadlock`), surface the
   offending rows.
-- If none remain → the chain is complete; go to Completion.
+- If none remain → go to Completion (final delivery) — the chain is complete only after it passes.
 - **Paired-unit check.** If the selected row is marked `(F/C)`, check PLAN's `## Completion
   handoffs` for an entry for this row:
   - No entry → this iteration dispatches the **F-stage** (step 3 as normal, F-stage dispatch
@@ -241,7 +324,13 @@ iteration or used to widen the Fix-loop budget (planned F→C is not a retry —
 
 a. **Tests green.** Run VERIFY_TEST. Red → go to Fix-loop (step 4f).  b. **Types clean.** Run
 VERIFY_TYPES. Red → Fix-loop. (When VERIFY is one combined gate — e.g. `tox -m analyze` — a single
-green run satisfies both, plus any lint/format/coverage it enforces.) c. **KAT present.** The
+green run satisfies both, plus any lint/format/coverage it enforces.) **With a bound cadence**, 4a
+and 4b instead *validate the returned evidence records* against the current inputs (see "Gate
+cadence and evidence reuse"): valid → record `reused`, no command executed; missing or invalidated
+(source edit, relevant untracked addition, changed environment, unverifiable log) → run the check
+yourself, record `passed`. A unit whose whole diff is proven non-executable owes no code gate: only
+the project's declared documentation/contract checks, noted in the ledger as `non-executable diff`
+(boundary and freshness checks still follow their own cadence). Red → Fix-loop either way. c. **KAT present.** The
 session entry names ≥1 KAT. Confirm a new/changed test asserts it (search the test file named in the
 entry using the Grep tool). Absent → the contract is undefined; dispatch `@build` once to add the
 KAT, then re-verify. Still absent after one retry → halt (`BLOCKED: KAT contract undefined`).  d.
@@ -287,11 +376,25 @@ it is never resolved unilaterally by C.)
        from the defect check above — the planned F→C handoff itself never consumes or resets the
        budget; only corrective dispatches do. On non-convergence, preserve the intent capsule and
        checkpoint in PLAN exactly as they stand (do not revert or clear them) and halt — a future
-       cold resume reconciles from that state per Precondition 5's in-flight exception.
+       cold resume reconciles from that state per Precondition 5's in-flight exception. With a bound
+cadence, a fix worker's records for its final inputs are reused by the same validity rule; the fix
+iteration still counts against the cap, and any edit made after a record was taken invalidates it.
+
+g. **Cadence checks on the unit (cadence only).** After 4a–4b: if the unit's diff touches a declared
+freshness-check input (e.g. manifests, lockfile, dependency policy, checking-tool configuration),
+run or validate those checks on the unit's final dependency inputs; failure here is the unit's own
+failure → Fix-loop. If the diff touches a declared boundary-check trigger (e.g. substantial test
+removal, a coverage-related change), run that boundary check now. Otherwise record each boundary
+check as `deferred` with its next mandatory checkpoint (the next ◆ boundary or final delivery).
+Classify the diff before relying on any of this: a diff that is provably non-executable (prose,
+ledger) keeps existing code evidence valid; an uncertain one takes the code path.
 
 ### 5. Commit the session via @committer
 
-Only when steps 4a–4e pass. For a paired unit this is the **feature commit** — one commit for the
+Only when steps 4a–4e (and 4g, with a cadence) pass. Under a cadence, the evidence must still match
+the tree about to be committed: any edit since the last validation — including by a worker after
+its records, or by a hook (below) — invalidates it; re-validate before dispatching `@committer`,
+never commit under stale green. For a paired unit this is the **feature commit** — one commit for the
 combined F+C diff; there is no separate commit for F's partial work, and nothing is committed at the
 F→C boundary itself. Dispatch `@committer` per the autonomous-chain carve-out in AGENTS.md with:
 - `SESSION CONTRACT`: the session entry's commit-title + one-line why.
@@ -308,7 +411,9 @@ F→C boundary itself. Dispatch `@committer` per the autonomous-chain carve-out 
 - `empty diff` / `scope drift` / `incomplete` → the verify gate and committer disagree; halt
   (`BLOCKED: committer refusal`), surface the committer output. Do not work around.
 - `hook failure` → dispatch one `@build` fix subagent with the hook output, re-verify from 4a,
-  re-commit. This is part of the Fix-loop budget (cap 2).
+  re-commit. This is part of the Fix-loop budget (cap 2). A hook that rewrote files changed the
+  tree: treat it as a post-validation edit (invalidate affected evidence, re-verify) before any
+  re-commit.
 - `secret risk` → HALT immediately, surface, never bypass.
 
 ### 6. Update the ledger and digest
@@ -323,6 +428,13 @@ a. **Ledger:** write to PLAN's `## Progress ledger`:
    - Mark any contracts the session FROZE (substrate interfaces, KAT additions) as frozen, so later
      iterations treat them as fixed.
    - Note any allowed scope extras and any logged discoveries.
+   - **Gate evidence (cadence only).** In the ledger's gate-evidence block, record one line per check
+     for this unit: check, outcome (`passed` / `reused` / `deferred`), command and working
+     directory, exit status, completion time, log reference, input identity, environment; for a
+     `deferred` check, its next mandatory checkpoint. Keep a one-line "pending checks" summary
+     current (what is deferred, due where). Write the row `done` with the per-unit gate recorded;
+     never describe a row with a deferred check as a full-gate pass. This write is non-executable
+     and does not invalidate code evidence. Never edit earlier entries to look fresh.
 
 b. **Action-frame digest:** if this was a non-trivial iteration (discovery flagged, contract flexed,
 or meaningful texture), append one block to `## Action-frame digest`:
@@ -366,6 +478,15 @@ If the just-completed session is the last in a sub-track (marked ◆ in the plan
     `\bS[0-9]+\b` (plan session ids), `sub-track`, `frozen contract`, `PLAN\.md`, `ROADMAP\.md`,
     `action-frame`, `◆`, `\bCat [ABC]\b`, `plan-(run|shard|juncture)`.
 
+- **Boundary checks (cadence only; run after the anneal gate is clean, before forking).** Run or
+  validate every declared boundary check (e.g. the coverage floor) on the boundary's final inputs,
+  plus any freshness check not valid for today. Valid existing evidence for the same executable
+  inputs is `reused` — a prose-only last row does not exempt the boundary, but it does not invalidate
+  a valid result either; missing evidence is run, never assumed. A `deferred` result is not allowed at
+  a boundary. Red → Fix-loop (counts against the cap); a boundary is incomplete, and the chain does
+  not proceed past it, until each required check is `passed` or validly `reused`. Record outcomes
+  in the ledger's boundary note. Any later correction in this step that touches executable inputs
+  invalidates the affected result: re-run it after the correction.
 - **Stale-claim candidates (gathered before forking; the anneal gate cannot stand in for this).**
   List the claims this sub-track corrected, invalidated, or flexed, from the digest and ledger. For
   each, search the durable surfaces it touches (human docs, comments, tests) for surviving
@@ -395,6 +516,18 @@ halt for human sign-off at ◆ unless the fork returns `drift-HALT` or the run c
 `halt-at-boundaries`.
 
 Then return to step 1.
+
+## Completion (final delivery)
+
+Reached when every row is `done` or `skipped`. Without a bound cadence there is no further gate:
+report per the Exit report. With a cadence: run or validate every declared boundary check and every
+freshness check on the final inputs, exactly as in step 7's boundary checks. Valid evidence from the
+last ◆ boundary (or any later run) is `reused` when no executable or dependency input has changed
+since — a final prose-only row does not force a rerun, and does not waive the requirement. Missing
+or invalidated evidence is run. Red → Fix-loop (cap 2, one dispatch at a time, each followed by
+re-validation); non-convergence halts. A correction needed here is committed per step 5. Record the
+outcomes in the ledger's gate-evidence block and commit that update per 6b. The chain is not
+complete until all required checks are `passed` or validly `reused`; no `deferred` check may remain.
 
 ## Boundary policy (this is plan-size-dependent)
 
@@ -448,6 +581,16 @@ DONE WHEN
 - <VERIFY_TEST> and <VERIFY_TYPES> are green (orchestrator substitutes the bound commands, e.g.
   `~/.local/bin/tox -m analyze`).
 - Exactly these files are modified: <expected files>.
+
+CADENCE VARIANT (include only when a cadence is bound; replaces the VERIFY line above)
+- The KAT(s) and any targeted checks pass during your edit/fix loop.
+- Run <VERIFY_TEST> and <VERIFY_TYPES> once, on your FINAL inputs, after your last edit. Do not run
+  boundary or freshness checks unless this prompt names them. If you edit anything after a recorded
+  run, rerun the affected check.
+- Return one compact EVIDENCE RECORD per completed check: exact command and working directory, exit
+  status, completion time, log/output reference (keep the log readable), tested-input identity
+  (base revision plus staged and unstaged changes, deletions, and untracked additions — HEAD or
+  filenames alone are not identity), relevant toolchain/flags/features/target/config. No credentials.
 ```
 
 ## Feature/completion dispatch templates (paired units only)
@@ -478,8 +621,9 @@ HANDOFF-READY, NOT DONE
 Implement behavior, the substantive success/error/integrity tests, and focused docs. Run the
 narrowest meaningful project-managed checks and report the exact commands and results; a full
 project gate run is optional and diagnostic only — its long closure tail belongs to the completion
-stage, not to you. Return `handoff-ready`, never `done`, `green`, or `verified`, unless the full
-gate has actually run green. A known feature-correctness failure is not a compliance handoff — report
+stage, not to you. Label every check result you report as partial; with a bound cadence the driver
+never accepts F's records as final acceptance. Return `handoff-ready`, never `done`, `green`, or
+`verified`, unless the full gate has actually run green. A known feature-correctness failure is not a compliance handoff — report
 it plainly; do not paper over it to look handoff-ready, and do not deliberately leave an obvious test
 gap for the completion stage to find.
 
@@ -519,7 +663,7 @@ INTENT CAPSULE
 <the full six-field capsule for unit <N>, verbatim — see Intent-capsule template below>
 
 YOUR SCOPE
-Run the full project gate. Complete missing branch cases and necessary regression tests, typing,
+Run the unit's full gate (see DONE WHEN). Complete missing branch cases and necessary regression tests, typing,
 lint/format, and documentation/shape/layering conformance. Small behavior-preserving corrections are
 permitted within the unit's expected files. Do NOT weaken assertions, lower coverage, add
 convenience exclusions, change public behavior, or redesign the feature to obtain green. Do not
@@ -539,7 +683,9 @@ plan coordinate, exactly as the feature stage was instructed.
 DONE WHEN
 - All KATs named in the capsule, and any you added, pass.
 - <VERIFY_TEST> and <VERIFY_TYPES> are green (the full project gate; orchestrator substitutes the
-  bound commands, e.g. `~/.local/bin/tox -m analyze`).
+  bound commands, e.g. `~/.local/bin/tox -m analyze`). With a bound cadence: run them once on your
+  final inputs after your last edit, rerun any check you invalidated by editing afterwards, and
+  return one EVIDENCE RECORD per check (fields as in the Dispatch template's CADENCE VARIANT).
 - Exactly the unit's expected files are modified.
 
 RETURN
@@ -562,9 +708,11 @@ into one entry in PLAN's `## Completion handoffs`, before dispatching C:
   or a stale resume is detected, never "same filenames" alone>
 **Goal:** <one sentence — the meaningful goal, observable behavior, non-negotiable invariants>
 **Design & qualifications:** <what F implemented and learned; reasons not obvious in the diff>
-**KATs:** <names, exact files, important cases already tested, commands/results, known failures>
+**KATs:** <names, exact files, important cases already tested, commands/results, known failures;
+  under a bound cadence, F's partial evidence records by reference — a cold resume treats them as
+  unverified history, never as final acceptance>
 **Remaining closure work:** <what F believes is left, and the permitted correction envelope for C>
-**Acceptance contract:** <full gate, required KATs, expected files, any named deferred non-goals>
+**Acceptance contract:** <unit gate (full gate, or per-unit gate under a cadence), required KATs, expected files, any named deferred non-goals>
 ```
 
 The driver organizes F's report into these fields; it does not invent intent. Missing intent or a
@@ -623,13 +771,14 @@ CONSTRAINTS:
 
 When dispatching a `@build` fix subagent (step 4f, the F-fix defect-check dispatch, or the
 anneal-fix in step 7), include one line in the prompt: "REGISTER rule applies — see dispatch
-template." Fix forks edit durable files and the same plan-coordinate prohibition applies. Line-length
-overruns are not a fix trigger: a session whose only blemish is over-width lines is green;
-note them in the ledger for the general anneal sweep (`/plan-anneal` line-length pass) and do not
-open a Fix-loop iteration over them. Exception: a project gate that hard-fails on line length —
-fix those with the project formatter. A bounded
-F-fix dispatch for a paired unit additionally includes the unit's intent capsule and the named
-defect — it is scoped to that defect, not a re-opening of the whole feature stage.
+template." Under a bound cadence, also require the fix worker to return fresh evidence records for
+its final inputs (CADENCE VARIANT fields). Fix forks edit durable files and the same plan-coordinate
+prohibition applies. Line-length overruns are not a fix trigger: a session whose only blemish is
+over-width lines is green; note them in the ledger for the general anneal sweep (`/plan-anneal`
+line-length pass) and do not open a Fix-loop iteration over them. Exception: a project gate that
+hard-fails on line length — fix those with the project formatter. A bounded F-fix dispatch for a
+paired unit additionally includes the unit's intent capsule and the named defect — it is scoped to
+that defect, not a re-opening of the whole feature stage.
 
 ## Constraints
 
@@ -644,8 +793,9 @@ defect — it is scoped to that defect, not a re-opening of the whole feature st
   implement and never self-commit; `@committer` commits and never verifies. Roles stay separate (per
   AGENTS.md autonomous-chain carve-out).
 - The Fix-loop is capped (2 iterations) — non-convergence halts, never grinds.
-- The four halt classes (`design-uncertain-HALT` from an inflection fork, `destructive-HALT` from a
-  discovery fork, committer secret/refusal, non-convergence/deadlock) are the ONLY autonomous stops
+- The halt classes (`design-uncertain-HALT` from an inflection fork, `destructive-HALT` from a
+  discovery fork, committer secret/refusal, non-convergence/deadlock, and — cadence projects only —
+  `BLOCKED: freshness finding` against inputs the chain did not change) are the ONLY autonomous stops
   on the happy path. Everything else continues. The enrolled agents hold fiduciary latitude under
   fidelity to the PLAN; halts are reserved for the irreconcilable, never for mere deviation.
 - PLAN is committed only as its own rolling-context commit (step 6b), never folded into a session
@@ -666,6 +816,9 @@ defect — it is scoped to that defect, not a re-opening of the whole feature st
   verdict from each.
 - Any paired `(F/C)` units run this pass: unit id, whether both stages completed or one is left
   in-flight, and the checkpoint location in `## Completion handoffs` for a cold resume.
+- Gate outcomes (cadence projects): per check `passed` / `reused` / `deferred`, any check still
+  deferred with its next checkpoint, and the freshness evidence's database identity and refresh time.
+  Never summarize a run with a deferred check as a full-gate pass.
 - Any halt: class, the surfaced detail, and the resume instruction.
 - Ledger path and last-updated row.
 - Capture candidates surfaced during the run (per AGENTS.md three-axis test).

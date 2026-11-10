@@ -101,7 +101,10 @@ walk-state invariant `W = a·G + b·Q`"), not by nothing ("KAT for S4" → delet
    `make`: `Makefile` test/typecheck targets → `make test` / `make typecheck`; `tox` → the analyze
    invocation; `package.json` scripts → `npm test`; else ask). Translations touch comments/docstrings
    and occasionally test names, so a green gate confirms nothing behavioural moved. Red → fix the
-   narrowest cause and re-run (this is part of the loop budget below).
+   narrowest cause and re-run (this is part of the loop budget below). Under a `/plan-run`-declared
+   gate cadence, run the per-unit gate once on the final inputs (after the last edit, i.e. after
+   step 8) and return evidence records as that dispatch's prompt specifies; comment and doc-comment
+   edits are classified by `/plan-run`'s rules, and an uncertain edit takes the code path.
 
 7. **Re-scan.** Re-grep the denylist over the in-scope durable files. Loop steps 4–7 until:
    - **Clean** — no genuine leaks remain (only noted false positives / needs-human items), OR

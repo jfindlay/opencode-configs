@@ -276,15 +276,34 @@ stay single-stage. The F/C split earns its cost only when the tail is both mater
 
 **The fidelity contract.** F implements behavior, the substantive tests, and the design decisions,
 then hands off at a `handoff-ready` checkpoint — never `done`, `green`, or `verified`. C does not
-redesign; it closes the gate: completes branch coverage, typing, lint/format, and conformance checks
-within F's design, using the intent F left behind. A substantive defect C discovers is not C's to
-fix by reinterpreting intent — it returns as a bounded fix request to a fresh F-fix context sharing
-the same intent; a discovery that would change a cross-session contract follows the existing
+redesign; it closes the unit's gate: completes branch coverage, typing, lint/format, and conformance
+checks within F's design, using the intent F left behind. A substantive defect C discovers is not
+C's to fix by reinterpreting intent — it returns as a bounded fix request to a fresh F-fix context
+sharing the same intent; a discovery that would change a cross-session contract follows the existing
 juncture-adjudication path, exactly as it would for a single-stage unit. The pair still produces
 exactly one commit and one ledger row — the delivery unit remains the unit of composition; only its
 internal execution has two contexts instead of one. The concrete handoff mechanism (the intent
 capsule, the checkpoint, the gate sequencing) lives in `/plan-run`, which is the operational owner
 of this pattern; this section states the rationale and the contract, not the mechanics.
+
+### Gate cadence: verifying once per input, not once per handoff
+
+A green commit boundary does not require every expensive check to run at every boundary, or to run
+twice because two agents touched the unit. Where a project *declares* a verification cadence, the
+chain separates three things: the **per-unit gate** (tests and types, evidenced once on the unit's
+final inputs), **boundary checks** (such as a coverage floor, due at sub-track completion and final
+delivery), and **freshness checks** (such as dependency policy and advisory audit, due when their
+inputs change and on each active day). The driver accepts a worker's evidence record instead of
+re-running a command only when the record's input identity, environment, and log still match the
+tree as recomputed now; anything else is rerun. A deferred check is recorded as deferred with its
+next checkpoint, never as passed.
+
+The tradeoff is deliberate: per-unit behavioural checking is preserved, while regressions a
+boundary check would catch surface later (at the next boundary), and security freshness is bounded
+by a stated interval rather than re-proved on every unit. This is opt-in: a project with no
+declared cadence keeps every-unit gating, and `/plan-run` owns the mechanics (evidence record,
+validity rule, freshness rule, outcome vocabulary, cold-resume behaviour). Projects own the
+declaration — which commands, which triggers, what counts as executable input.
 
 ---
 

@@ -45,8 +45,8 @@ The three-axis test still applies to each stage's *internal* work (an F or C con
 `@explore` mid-investigation follows the same rules as any other context). What the F/C pattern adds
 is a planned, driver-owned phase transition between two bounded stages — never a tool for escaping an
 in-progress interactive loop. A feature-stage return (`handoff-ready`) is a checkpoint, not
-completion of the delivery unit; the unit is not done until the completion stage and the full gate
-both pass.
+completion of the delivery unit; the unit is not done until the completion stage and the unit's gate
+(the full project gate, or the per-unit gate under a project-declared cadence) both pass.
 
 ## Subagent prompt template
 

@@ -129,7 +129,7 @@ resumption distinction in `multisession/multi-session-planning.md`.
 
 When selected, the row becomes a **paired unit**: still exactly one session-list row, one entry in
 `## Cross-session contracts`, and one final ledger outcome (`done` only once both stages and the
-full gate pass) — the pairing is internal to how the row executes, not a second row. Mark the row's
+unit gate pass) — the pairing is internal to how the row executes, not a second row. Mark the row's
 Session title with a trailing `(F/C)` tag; this is the only session-list change, and its absence
 means the row runs single-stage exactly as before (full backward compatibility for ordinary rows).
 
@@ -145,7 +145,12 @@ Produce `docs/PLAN.md` with exactly these sections. `/plan-run` preconditions on
 
 - `## Purpose (design intent)` — the prose intent, re-read at every ◆ boundary (anti-defocus anchor).
 - `## Verify gate` — the bound VERIFY_TEST / VERIFY_TYPES commands (discover them; do not assume
-  `make`). `/plan-run` re-discovers these but stating them here documents the gate.
+  `make`). `/plan-run` re-discovers these but stating them here documents the gate. If the project
+  itself declares a verification cadence (per-unit gate, boundary checks, freshness checks and their
+  triggers, what counts as executable input), copy that declaration here by reference to the
+  project's authority document; do not invent or tune one while sharding. Absent a project
+  declaration, state none — `/plan-run` then keeps its existing every-unit gate. A combined command
+  stays one gate unless the project explicitly splits it.
 - **`## Session list`** ★ — one commit-shaped session per row. Columns: `#` | `Session` (commit-title
   shaped) | `Cat` (A substrate / B algorithm / C optimization / I integrative) | `Tier` (T0 only
   where cost-of-wrong demands) | `Consumes` (contract names) | `Expected files`. Mark sub-track-final
@@ -171,11 +176,12 @@ Produce `docs/PLAN.md` with exactly these sections. `/plan-run` preconditions on
   get their public form" — the anneal is the same act). A row marked `(F/C)` additionally carries a
   **Completion appendix**: the shared one-sentence goal; two stage-specific done conditions (F:
   `handoff-ready` — behavior, substantive success/error/integrity tests, and focused docs
-  implemented, narrowest meaningful project-managed checks run and reported; C: full gate — complete
-  branch coverage, typing, lint/format, and documentation/shape/layering conformance, named KATs
-  passing); and the handoff/checkpoint requirements (base commit, the row's own expected files, and
-  a pointer to `/plan-run`'s intent-capsule template for the fields the driver fills in at execution
-  time from F's return). No new feature scope belongs in the Completion appendix — it is a closure
+  implemented, narrowest meaningful project-managed checks run and reported; C: the unit's gate
+  (the full project gate, or the per-unit gate where the project declares a cadence) — complete
+  branch coverage, typing, lint/format, and documentation/shape/layering conformance as that gate
+  requires, named KATs passing); and the handoff/checkpoint requirements (base commit, the row's
+  own expected files, and a pointer to `/plan-run`'s intent-capsule template for the fields the
+  driver fills in at execution time from F's return). No new feature scope belongs in the Completion appendix — it is a closure
   and acceptance contract, not a second deliverable list.
 - **`## Cross-session contracts`** ★ — one subsection per contract, each tagged compiler- / test- /
   prose-enforced, with Defined-in and Consumed-by. The inflection juncture fork writes the resolved

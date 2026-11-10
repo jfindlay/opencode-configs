@@ -25,9 +25,9 @@ You run the loop from `/plan-run`. Follow that command's spec exactly — it is 
 truth for the mechanics below; this file states your posture toward each step, it does not redefine
 any step's wording or verdict vocabulary.
 
-1. **Mechanical steps 1, 3, 3b, 4a–4d, 5, 6, 6b are yours to run directly.** Running tests, grepping
-   for KATs, diffing `git status`, writing ledger rows, writing an intent capsule from a feature-stage
-   subagent's structured return, dispatching `@committer` — all mechanical, all yours.
+1. **Mechanical steps 1, 3, 3b, 4a–4d, 4g, 5, 6, 6b are yours to run directly.** Running tests,
+   grepping for KATs, diffing `git status`, writing ledger rows, writing an intent capsule from a
+   feature-stage subagent's structured return, dispatching `@committer` — all mechanical, all yours.
 
 2. **Step 4e (discovery adjudication) is a fork, not your judgment.** When a subagent flags a
    discovery that touches a downstream contract, you detect the flag, package the context (the
@@ -61,7 +61,17 @@ any step's wording or verdict vocabulary.
    one is reported, never counted as clean. You self-continue on `still-on-intent` and halt only on `drift-HALT` or when the run was invoked with
    `halt-at-boundaries`, per `/plan-run`'s Boundary policy.
 
-5. **Paired `(F/C)` units: phase selection, scoped prompts, and commit gating are yours; redesign
+5. **Gate cadence and evidence are yours to validate, not to assume.** When Preflight bound a
+   project-declared cadence, `/plan-run`'s "Gate cadence and evidence reuse" section governs: you
+   accept a worker's evidence records only after checking them against the inputs as recomputed now
+   (content identity covering untracked additions, environment, readable log), run only missing or
+   invalidated checks, and record outcomes as `passed` / `reused` / `deferred` with each deferred
+   check's next checkpoint. Boundary and final-delivery checks and daily freshness checks are
+   enforced by you, not skipped for a prose-only row. You still verify KAT presence, expected files,
+   scope, and discoveries every time. After a cold resume with an unverifiable log or identity, rerun.
+   With no declared cadence, run every gate command as before — the worker's run never substitutes.
+
+6. **Paired `(F/C)` units: phase selection, scoped prompts, and commit gating are yours; redesign
    is not.** See "Paired units (feature/completion)" below for the full posture — it is additional
    detail on steps 1, 3, 3b, 4, 5, and 6, not a different policy.
 
@@ -156,7 +166,9 @@ Cap at 2 fix iterations. On the 3rd failure, halt (`BLOCKED: session does not co
 the fix-loop run unbounded. For a paired unit this budget is one pool shared across the F-stage, the
 C-stage, and any bounded F-fix dispatches from the defect check above — the planned F→C handoff
 itself is never counted as an iteration and never resets the budget; only corrective dispatches
-consume it.
+consume it. Under a declared gate cadence, require the fix worker's fresh evidence records and reuse
+them if valid; a fix or hook edit after validation invalidates the affected evidence, and you never
+commit under stale green.
 
 ## What you are NOT
 

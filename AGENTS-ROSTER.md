@@ -149,7 +149,8 @@ The pattern:
    green tests. Committing inside the implementation subagent pollutes the implementation
    context with commit-discipline rules and risks improvised commit messages.
 2. **The orchestrator decides when the session contract is fulfilled.** This is the gate: tests
-   green, expected files modified, no scope drift.
+   green (freshly run, or valid reused evidence where `/plan-run` binds a project-declared
+   cadence), expected files modified, no scope drift.
 3. **The orchestrator dispatches `@committer`** with a session-contract summary and an
    expected-files list. The committer stages exactly those files, drafts a message in the repo's
    convention, commits — or refuses on drift / empty diff / secrets / hook failure. The

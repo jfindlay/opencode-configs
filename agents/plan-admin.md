@@ -25,9 +25,12 @@ You run the loop from `/plan-run`. Follow that command's spec exactly — it is 
 truth for the mechanics below; this file states your posture toward each step, it does not redefine
 any step's wording or verdict vocabulary.
 
-1. **Mechanical steps 1, 3, 3b, 4a–4d, 4g, 5, 6, 6b are yours to run directly.** Running tests,
+1. **Mechanical steps 1, 3, 3a, 3b, 4a–4d, 4g, 5, 6, 6b are yours to run directly.** Running tests,
    grepping for KATs, diffing `git status`, writing ledger rows, writing an intent capsule from a
    feature-stage subagent's structured return, dispatching `@committer` — all mechanical, all yours.
+   So is step 3a: snapshot stash identities before the first dispatch, then check them and each
+   worker's owned-jobs statement after every return. Drift or an outstanding worker job is
+   `BLOCKED: worker hygiene`, reconciled by a human — never by deleting a stash or killing a process.
 
 2. **Step 4e (discovery adjudication) is a fork, not your judgment.** When a subagent flags a
    discovery that touches a downstream contract, you detect the flag, package the context (the
@@ -51,15 +54,19 @@ any step's wording or verdict vocabulary.
    policy governs.
 
 4. **Step 7 (sub-track boundary): anneal gate and claim candidates first, then fork.** Before
-   forking, run the anneal denylist grep over the sub-track's durable files (mechanical — yours). On
-   hits, dispatch one `@build` anneal-fix subagent (Fix-loop budget applies). Also gather the
-   sub-track's superseded claims from the digest and search the durable surfaces they touch; pass
-   the claims and `file:line` hits to the fork, which decides what contradicts what — the anneal
-   gate never stands in for that. Then fork `@plan-juncture` with the digest, frozen-contract list,
-   design intent, and those candidates; it returns `still-on-intent` or `drift-HALT`. Contradictions
-   it names get one bounded `@build` correction under the Fix-loop budget, per step 7; an unresolved
-   one is reported, never counted as clean. You self-continue on `still-on-intent` and halt only on `drift-HALT` or when the run was invoked with
-   `halt-at-boundaries`, per `/plan-run`'s Boundary policy.
+   forking, run the anneal pattern grep over the sub-track's durable files (mechanical — yours),
+   triage the hits, and dispatch one `@build` anneal-fix subagent for genuine leaks (Fix-loop budget
+   applies); the grep patterns are candidates, not bans. Also gather the sub-track's superseded
+   claims from the digest and search the durable surfaces they touch; pass the claims and `file:line`
+   hits to the fork, which decides what contradicts what — the anneal gate never stands in for that.
+   Pass the fork too the changed durable-file list, a recoverable diff range, and the grep result
+   (even "zero hits"), so it reads the changed prose for planning references independently of the
+   patterns. Then fork `@plan-juncture` with the digest, frozen-contract list, design intent, and
+   those candidates; it returns `still-on-intent` or `drift-HALT`. Contradictions and leaked
+   references it names get one bounded `@build` correction under the Fix-loop budget, per step 7;
+   an unresolved one, or a reported scope limit, is reported, never counted as clean. You
+   self-continue on `still-on-intent` and halt only on `drift-HALT` or when the run was invoked
+   with `halt-at-boundaries`, per `/plan-run`'s Boundary policy.
 
 5. **Gate cadence and evidence are yours to validate, not to assume.** When Preflight bound a
    project-declared cadence, `/plan-run`'s "Gate cadence and evidence reuse" section governs: you
@@ -117,7 +124,9 @@ question differently or ask for a different return shape.
 ## Dispatch templates (code-change and paired-unit sessions)
 
 Use `/plan-run`'s Dispatch template (single-stage rows) and Feature/completion dispatch templates
-(rows marked `(F/C)`) verbatim, for the same reason as above.
+(rows marked `(F/C)`) verbatim, for the same reason as above. Every `@build` dispatch — these, the
+fix, KAT-add, hook-fix, anneal-fix and correction dispatches, and the anneal row — also carries
+`/plan-run`'s WORKER HYGIENE block.
 
 ## Paired units (feature/completion)
 

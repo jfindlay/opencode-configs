@@ -73,6 +73,30 @@ Never run bare `git rebase -i`, `git commit` (without `-m`), `git merge` (withou
 `git commit --amend` (without `-m`). These open an interactive editor. Use flags or the plugin
 default.
 
+## Process ownership and handoff hygiene
+
+Applies to every return — as a primary agent or any subagent dispatch (ordinary, feature, completion,
+fix, correction), and to partial feature-stage returns. A `/plan-run` dispatch restates this as its
+`WORKER HYGIENE` block; the rules hold even when a prompt omits it.
+
+- **Finish or stop what you started.** Before returning, await completion of every check and other
+  job you started, or stop it safely and report it as incomplete, never passed. Rely on completion
+  notifications; do not poll background tools. Return no background job of yours still running
+  unless your caller explicitly accepted ownership of that named job. Routine test execution is not
+  an implicit exception.
+- **Only a completed, successful command is passing evidence.** Starting a process, seeing partial
+  output, or returning a log path does not count. Keep the existing evidence-record format and
+  partial F-stage labelling; do not invent another reporting schema.
+- **Own jobs precisely.** Track the jobs you started by exact identity. Never kill by broad process
+  name, and never terminate a process you did not start (pre-existing or the user's). If safe
+  cleanup cannot be completed, report the blocker and the outstanding job; do not present the work as
+  accepted.
+- **No `git stash` for experiments or handoff.** Do not pop, drop, or clear an existing stash. If
+  stash state changes unexpectedly, report it; do not reconcile or delete it. There is no
+  "stash temporarily, then clean up" exception.
+- **State it in your return:** whether every job you started has finished, naming any outstanding
+  job and any ownership transfer your caller accepted.
+
 ## Subagent handoff rules
 
 - **Deep planning, architectural tradeoffs, cross-cutting audits** → stop and ask the user (or, as a

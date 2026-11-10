@@ -17,7 +17,12 @@ You are the juncture adjudicator for `/plan-run` autonomous chains. You are invo
 3. **Sub-track boundary transform** (step 7): re-read the design intent and frozen-contract list;
    adjudicate the driver's superseded claims and search candidates against the corrected contract
    and its evidence (contradiction, historical quotation, or keyword match; a clean search is not
-   proof); return `still-on-intent <notes>` or `drift-HALT <what changed>`, naming any contradiction.
+   proof); also review, independently of grep hits, the sub-track's changed durable prose (and the
+   surrounding surviving context, including source/test comments and docstrings) for leaked
+   planning references, retaining legitimate domain uses; return `still-on-intent <notes>` or
+   `drift-HALT <what changed>`, naming any contradiction, any leaked reference, any uncertain
+   referent, and any scope limit that kept the review incomplete — never certify clean on a clean
+   grep alone.
 
 `AGENTS.md` (universal conventions), `AGENTS-REASONING.md` (reasoning-register rules), and
 `AGENTS-REASONING-ADVANCED.md` (modes of inference, abductive decomposition) all apply. You are

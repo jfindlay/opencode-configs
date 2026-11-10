@@ -438,11 +438,13 @@ loses nothing by not seeing the session id.
 The mechanism is hybrid: (1) **in-process prevention** — the dispatch template in `/plan-run`
 carries a REGISTER block instructing each build agent to state the actual property, never the plan
 coordinate; (2) **per-sub-track anneal gate** — at each ◆ boundary the driver greps the sub-track's
-durable files against a denylist before the boundary-transform juncture fork, dispatching a fix
-subagent on hits. The temporal asymmetry: compact coordinates aid mid-arc agent reconstruction only
-while the defining doc is co-present; after the arc they are noise. The hybrid strategy keeps the
-anneal a near-no-op verification (prevention makes leaks rare) rather than a large end-of-arc strip
-diff.
+durable files against candidate patterns before the boundary-transform juncture fork, triaging the
+hits and dispatching a fix subagent for genuine leaks; the fork then reads the sub-track's changed
+prose for planning references independently of the grep, because a clean grep proves only that its
+patterns found nothing. The temporal asymmetry: compact coordinates aid mid-arc agent
+reconstruction only while the defining doc is co-present; after the arc they are noise. The hybrid
+strategy keeps the anneal a near-no-op verification (prevention makes leaks rare) rather than a
+large end-of-arc strip diff.
 
 Sessions outside a `/plan-run` chain never see the dispatch template, so `/plan-shard` also seeds a
 short register rule into the project's `AGENTS.md`, which ad-hoc sessions auto-load. That file is
@@ -450,9 +452,10 @@ durable, so the seed holds no pointer into PLAN or ROADMAP (neither outlives the
 denylist (the gates read PLAN's, or fall back to the seed default). It is excluded from anneal
 sweeps because the rule names the vocabulary it prohibits.
 
-The per-project denylist (seeded from the default in `/plan-run`, tunable in PLAN's
-`## Notes for executors`) targets plan coordinates, not domain terms — "KAT"/"known-answer test" is
-legitimate domain vocabulary in a crypto library; `\bS4\b` as a session id is not.
+The per-project denylist (seeded from the canonical seed in `/plan-run`, tunable in PLAN's
+`## Notes for executors`) lists candidate patterns, not bans, aimed at plan coordinates rather than
+domain terms — "KAT"/"known-answer test" is legitimate domain vocabulary in a crypto library;
+`\bS4\b` as a session id is not.
 
 ### Claim verification is not annealing
 

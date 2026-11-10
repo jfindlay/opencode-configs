@@ -149,7 +149,9 @@ declared as one check stays one check (it cannot be half-run to satisfy two clas
 **Evidence record.** For each completed check, the worker (or the driver, when it ran the check
 itself) produces one compact record: exact command and working directory; exit status; completion
 time; output/log reference; tested-input identity; relevant environment (toolchain, flags,
-features, target, config). Never include credentials. **Input identity** covers the base revision
+features, target, config). Never include credentials. A record exists only for a command that ran
+to completion; a started, interrupted, or still-running check has no record and counts as missing.
+**Input identity** covers the base revision
 plus staged and unstaged changes, deletions, and the contents of relevant untracked additions, and
 is a content identity, so an unchanged executable-input set has the same identity across commits.
 HEAD alone, or `git status` filenames alone, never establish identity. Records live in a small
@@ -206,11 +208,14 @@ condition fires.
   When the selected row carries `(skippable)`, decide before dispatching whether the sweep is worth
   a session. Skip it when the evidence says it would be a near no-op: the per-sub-track anneal gates
   already ran clean, the ledger records no deferred line-length overruns (or only a trivial few),
-  and a quick denylist grep plus a `.{101,}` grep over the arc's durable files finds nothing
-  material. Run it when any of those fail. To skip: mark the row `skipped` with a one-line reason in
+  and a quick seed-pattern grep plus a `.{101,}` grep over the arc's durable files finds nothing
+  material. A clean grep alone is thin evidence for skipping: the boundary reviews are the
+  independent check, so also confirm each boundary note records a completed planning-reference
+  review. Run it when any of those fail. To skip: mark the row `skipped` with a one-line reason in
   the ledger and commit it as `Ledger: <session-id> skipped` (step 6b). Never skip a row that is not
   tagged `(skippable)`. If the row runs, dispatch `@build` to carry out `/plan-anneal` over the
-  project (REGISTER rule and Fix-loop dispatch rules apply; the line-length pass is in scope here).
+  project (REGISTER rule, WORKER HYGIENE block and Fix-loop dispatch rules apply; the line-length
+  pass is in scope here).
 - **Freshness check (cadence only).** Before dispatching, confirm each declared freshness check has
   valid evidence for the current dependency inputs, policy, and calendar day. Missing, stale, from an
   earlier day, or unverifiable after a cold resume → run it now (the first active iteration of a day
@@ -286,12 +291,37 @@ gate on this session. Do not poll for it, do not reshard or page `@plan-juncture
 warning fired on its own, and do not add a fourth juncture type for it. All halt, commit, scope, and
 correctness gates in steps 4–7 remain the only authorities on whether a session passed.
 
+### 3a. Worker hygiene: snapshot before dispatch, assert after every return
+
+`git status` does not show stashes, so the driver checks them itself.
+
+- **Before the iteration's first dispatch**, record the stash identities in order:
+  `git stash list --format=%H` (commit hashes are stable; `stash@{n}` names shift). Keep the list in
+  working notes — it need not be written to PLAN. If it is lost (compaction, cold resume), re-take
+  it and note in the ledger that drift before that point is unchecked.
+- **After every worker return** (F, C, fix, KAT-add, anneal and correction dispatches alike — a
+  partial F-stage return included), before gating or capsuling it: compare the current list with the
+  recorded one, and read the return's owned-jobs statement (WORKER HYGIENE).
+  - A missing statement: send one clarification to the same worker; it changes no code and
+    does not count against the Fix-loop budget.
+  - An outstanding or unstoppable worker job, a stash difference in identity or order (not merely
+    count), or a worker that changed pre-existing processes or stashes: halt
+    (`BLOCKED: worker hygiene`), surface the job or stash difference, and do not accept the
+    return as a pass. Never delete, pop, or drop a stash, and never kill by process name, to
+    reconcile; leave that to human reconciliation.
+  - A worker-reported incomplete (stopped) check is a missing check, never a pass; the driver runs it
+    or reuses valid evidence per step 4 as for any missing check.
+- Accepted returns with valid evidence records proceed to step 4 unchanged: the parent does not
+  rerun a completed check whose evidence is valid, and later edits invalidate only the evidence
+  they affect under the existing policy.
+
 ### 3b. Paired units only: capsule the F-stage return, then dispatch C
 
 Runs only when the row just dispatched was an F-stage (step 3's `(F/C)` branch). Unmarked rows and
 C-stage dispatches skip straight to step 4.
 
-a. **Read F's structured return.** Confirm it actually reports `handoff-ready` with the four-point
+a. **Read F's structured return** (after the step 3a hygiene assertions). Confirm it actually
+   reports `handoff-ready` with the four-point
    report the F-stage template requires (goal/invariants, design and qualifications, KATs and
    results, remaining work). A return that claims `done`/`green`/`verified` without the full gate
    actually having run green, or that reports a known feature-correctness failure, is NOT
@@ -316,9 +346,9 @@ f. Proceed to step 4 once C returns, gating the **combined F+C diff** as a singl
 
 ### 4. Verify the session contract (mechanical gate — driver only, no `@plan-juncture`)
 
-After the implementation subagent returns, the driver — NOT a paged `@plan-juncture` fork — verifies,
-mechanically. For an unmarked row this runs once, after its single dispatch. For a row marked
-`(F/C)` this runs exactly once as well — after C returns (step 3b.f) — against the **combined F+C
+After the implementation subagent returns and passes the step 3a hygiene assertions, the driver —
+NOT a paged `@plan-juncture` fork — verifies, mechanically. For an unmarked row this runs once,
+after its single dispatch. For a row marked `(F/C)` this runs exactly once as well — after C returns (step 3b.f) — against the **combined F+C
 diff**; it never runs against F's return alone, and reaching C is never itself counted as a Fix-loop
 iteration or used to widen the Fix-loop budget (planned F→C is not a retry — see Fix-loop below).
 
@@ -467,16 +497,19 @@ If the just-completed session is the last in a sub-track (marked ◆ in the plan
 
 - **Anneal gate (run before forking).** Grep the sub-track's durable files (source, tests, human
   docs — excluding PLAN, ROADMAP, NOTES, the project's `AGENTS.md`, and git metadata) against the
-  anneal denylist from PLAN's `## Notes for executors` (seed default below). This is mechanical —
-  no juncture fork needed.
-  - **Hits → dispatch one `@build` anneal-fix subagent** to translate plan coordinates into
-    standalone statements. Counts against the Fix-loop budget (cap 2). Re-grep. Still hitting →
-    halt (`BLOCKED: anneal failed to converge`).
-  - **No hits → continue to the boundary-transform fork.**
-  - Seed denylist (per-project tunable in PLAN's `## Notes for executors`; target plan coordinates,
-    not domain terms — e.g. "KAT"/"known-answer test" is legitimate domain vocabulary):
-    `\bS[0-9]+\b` (plan session ids), `sub-track`, `frozen contract`, `PLAN\.md`, `ROADMAP\.md`,
-    `action-frame`, `◆`, `\bCat [ABC]\b`, `plan-(run|shard|juncture)`.
+  anneal patterns from PLAN's `## Notes for executors`, or the canonical seed (see Anneal candidate
+  seed below) when PLAN carries none. The grep is mechanical; the matches are candidates and need
+  contextual triage.
+  - **Triage each hit.** A genuine leak is a plan coordinate standing in for a property. A legitimate
+    match (mathematical symbol, algorithmic phase, domain principle, literal identifier, historical
+    quotation) is retained and noted in the ledger's boundary note as a pattern-tuning hint. A hit
+    whose referent is uncertain is neither fixed nor dismissed: pass it to the boundary fork.
+  - **Genuine leaks → dispatch one `@build` anneal-fix subagent** to translate plan coordinates into
+    standalone statements. Counts against the Fix-loop budget (cap 2). Re-grep and re-read the
+    named prose; legitimate matches remaining are not a failure. Still leaking → halt
+    (`BLOCKED: anneal failed to converge`).
+  - **No genuine leaks, or zero hits → continue.** A clean grep proves only that its patterns found
+    nothing; it never stands in for the planning-reference review the boundary fork performs below.
 
 - **Boundary checks (cadence only; run after the anneal gate is clean, before forking).** Run or
   validate every declared boundary check (e.g. the coverage floor) on the boundary's final inputs,
@@ -494,17 +527,32 @@ If the just-completed session is the last in a sub-track (marked ◆ in the plan
   whole-repository audit. Record each hit as `file:line` with the claim it may contradict. No
   claims, or no hits, is a stated result in the fork prompt, not an omission. Gathering is
   mechanical; deciding whether a hit contradicts anything is the fork's.
+- **Planning-reference review inputs (gathered before forking).** Compute the sub-track's changed
+  durable-file list (`git diff --name-only` over the range, minus the anneal exclusions) and a
+  recoverable diff range: the commit preceding the sub-track's first session commit (from the
+  ledger) through the current tip. Also gather the anneal grep result: patterns used, hits with
+  your triage, uncertain hits, or an explicit "zero hits".
 - Fork `@plan-juncture` (subagent) with juncture type `boundary-transform`. Include the `## Purpose (design
-  intent)`, the frozen-contract list, the full current `## Action-frame digest`, and the superseded
-  claims with their search candidates (see the Juncture fork template).
+  intent)`, the frozen-contract list, the full current `## Action-frame digest`, the superseded
+  claims with their search candidates, and the planning-reference review inputs (see the Juncture
+  fork template). This is the one boundary fork; the review is part of it, not a second fork, and
+  not a whole-repository audit.
 - The fork returns: `still-on-intent <notes>` or `drift-HALT <what changed and why>`. Its notes
   classify each candidate as a contradiction, a harmless historical quotation, or a keyword match,
-  against the corrected contract and its evidence; a clean search is not proof of correctness.
-- **Contradictions found.** One `@build` correction dispatch (REGISTER rule applies) fixes them in
-  the durable files; it counts against the Fix-loop budget (cap 2). Re-check the named candidates.
-  A contradiction still standing after that is not a clean review: report it in the ledger's
+  against the corrected contract and its evidence; a clean search is not proof of correctness. Its
+  notes also report the planning-reference review: each leaked planning reference found by reading
+  (including paraphrases outside the grep patterns), uncertain referents, and any scope limit that
+  kept the review incomplete.
+- **Contradictions or leaked planning references found.** One `@build` correction dispatch
+  (REGISTER rule applies) fixes them in the durable files; it counts against the Fix-loop budget
+  (cap 2). Re-check the named candidates and re-read the named prose, not only the patterns.
+  A contradiction or leak still standing after that is not a clean review: report it in the ledger's
   boundary note and in your summary, and halt as non-convergence naming it. A contradiction that
-  would invalidate a frozen contract or the design intent is `drift-HALT`, not a fix dispatch.
+  would invalidate a frozen contract or the design intent is `drift-HALT`, not a fix dispatch. An
+  uncertain referent is reported in the boundary note, not invented or deleted. If the fork reports
+  a scope limit, record it in the boundary note and your summary; the review is then incomplete,
+  never certified clean. Corrections follow the existing evidence-invalidation rules: an executable
+  edit invalidates the affected evidence, a proven prose-only edit does not.
 - If `still-on-intent`: the fork judged work is trending toward design intent, tolerating medium
   deviation that trends toward intent. Reconcile the ledger's frozen contracts against the plan's
   stated contracts, note drift in the ledger, and continue per Boundary policy.
@@ -536,7 +584,8 @@ human-relevant coordinate-transform happens; sessions are not. Default policy:
 
 - **Halt-for-human:** `design-uncertain-HALT` from an inflection fork (step 2), `drift-HALT` from a
   boundary fork (step 7), `destructive-HALT` from a discovery fork (4e), committer secret/refusal
-  (step 5), non-convergence (4f), dependency deadlock. These are the irreconcilable cases.
+  (step 5), non-convergence (4f), dependency deadlock, worker hygiene (3a). These are the
+  irreconcilable cases.
 - **Self-review-and-continue:** inflection points when the fork returns `design-confident` (step 2),
   ◆ sub-track boundaries when the fork returns `still-on-intent` (step 7), and all medium deviation
   / discovery that the relevant fork reconciles against the PLAN.
@@ -548,6 +597,64 @@ A run may be invoked with `halt-at-boundaries` to force human sign-off at every 
 treat every inflection as a halt regardless of the fork's verdict. Use for the FIRST run of a new
 project, before the shard pattern is proven — this is the "I don't trust the shard pattern yet"
 mode.
+
+## Anneal candidate seed (canonical)
+
+The one authoritative seed for the anneal grep. `/plan-anneal` loads this section when PLAN has no
+override, and `/plan-shard` seeds PLAN's `## Notes for executors` from it; neither keeps a copy. A
+project may tune its PLAN copy (drop patterns that collide with domain vocabulary, add its own).
+
+These are **candidate detectors, not bans**. Each match needs contextual triage. Mathematical
+symbols, algorithmic phases, domain principles, literal identifiers and historical quotations are
+retained when legitimate; never treat all Greek letters or all uses of "phase" as violations. An
+uncertain referent is reported, not invented or deleted. "KAT"/"known-answer test" is domain
+vocabulary and is not listed. Patterns use ripgrep syntax (the Grep tool's engine, Unicode-aware):
+
+```
+\bS[0-9]+\b                                    plan session ids
+sub-track
+frozen contract
+PLAN\.md
+ROADMAP\.md
+action-frame
+◆
+\bCat(egory)?[ -][A-Z]\b                       category labels: Cat B, Cat-C, Cat I
+plan-(run|shard|juncture)
+\b[A-Z]{1,2}-[A-Z]+[0-9][A-Za-z0-9]*\b         alphanumeric contract labels: C-F2m
+(?i)\bprinciples?[ -]?[0-9]+\b                 numbered: principle 4, Principle-4, Principle4
+(?i)\bthe plan['’]s\b                          plan possessives (straight and curly apostrophe)
+(?i)\b(phase|session|stage)[ -][α-ωΑ-Ω]\b     Greek phase/session labels: Phase β, session γ
+(?i)\b[α-ωΑ-Ω][ -](phase|session|stage)\b     the reversed order: α-phase
+```
+
+Expected legitimate matches: "phase φ" of a signal, an algorithm's own phase names, a domain
+identifier that happens to fit a label shape. (Names such as `SHA-256` and `UTF-8` do not match.) A
+planning paraphrase outside these patterns ("the second milestone", "as agreed earlier") is not
+detectable by grep; the boundary fork's planning-reference review and `/plan-anneal`'s contextual
+read exist to find it.
+
+## Worker hygiene block
+
+Every `@build` dispatch from this command carries the block below, verbatim, as `WORKER HYGIENE` —
+the Dispatch template, both feature/completion templates, the KAT-add dispatch (4c), fix and
+F-fix dispatches (4f), the hook-failure fix (5), anneal-fix and boundary correction dispatches
+(7), and the skippable anneal row (1). It applies to partial F-stage returns as much as final ones.
+
+```
+WORKER HYGIENE
+- Before returning, await every check or job you started (use completion notifications; do not poll
+  background tools), or stop it safely and report it as incomplete, never passed. Do not return with
+  a background job of yours still running unless the caller explicitly accepted ownership of that
+  named job; routine test execution has no such exception.
+- Only a completed, successful command is passing evidence. A started process, partial output, or a
+  log path alone is not.
+- Track the jobs you own precisely. Never kill by broad process name or touch processes you did
+  not start. If safe cleanup cannot be completed, report the blocker and the outstanding job.
+- Do not use `git stash` for experiments or handoff. Do not pop, drop, or clear an existing stash.
+  Report unexpected stash changes; do not reconcile or delete them.
+- Your return states whether every job you started has finished, naming any outstanding job and any
+  ownership transfer the caller accepted.
+```
 
 ## Dispatch template (code-change session)
 
@@ -572,9 +679,12 @@ CONTRACTS YOU PRODUCE
 
 REGISTER (durable artifacts)
 In code, tests, and human docs, state the actual property, reason, or invariant — never the
-plan coordinate. Plan vocabulary (session ids, categories, "frozen contract", sub-track
-names, PLAN/ROADMAP references) belongs in PLAN, the ledger, and commit messages only.
+plan coordinate. Plan vocabulary (session ids, contract and category labels, numbered principles,
+phase names, "frozen contract", sub-track names, "the plan's ...", PLAN/ROADMAP references, and
+paraphrases of any of these) belongs in PLAN, the ledger, and commit messages only.
 E.g. "known-answer test for the walk-state invariant W = a·G + b·Q", not "KAT for S4".
+
+<WORKER HYGIENE block, verbatim>
 
 DONE WHEN
 - <the entry's KAT(s)> pass.
@@ -637,9 +747,12 @@ REPORT (the driver turns this into the intent capsule — be complete)
 
 REGISTER (durable artifacts)
 In code, tests, and human docs, state the actual property, reason, or invariant — never the
-plan coordinate. Plan vocabulary (session ids, categories, "frozen contract", sub-track
-names, PLAN/ROADMAP references, "F-stage"/"C-stage") belongs in PLAN, the ledger, and commit
+plan coordinate. Plan vocabulary (session ids, contract and category labels, numbered principles,
+phase names, "frozen contract", sub-track names, "the plan's ...", PLAN/ROADMAP references,
+"F-stage"/"C-stage", and paraphrases of any of these) belongs in PLAN, the ledger, and commit
 messages only.
+
+<WORKER HYGIENE block, verbatim — applies to this partial return as well>
 
 Do not commit, freeze contracts, or start another unit.
 ```
@@ -679,6 +792,8 @@ bounded feature-fix dispatch for the former, the existing juncture-adjudication 
 REGISTER (durable artifacts)
 In code, tests, and human docs, state the actual property, reason, or invariant — never the
 plan coordinate, exactly as the feature stage was instructed.
+
+<WORKER HYGIENE block, verbatim>
 
 DONE WHEN
 - All KATs named in the capsule, and any you added, pass.
@@ -759,6 +874,19 @@ JUNCTURE QUESTION:
   its evidence, a harmless historical quotation, or a keyword match; name every contradiction. A
   clean search is not proof the claims are gone — check the surviving prose you can see, not only
   the hits.
+  PLANNING-REFERENCE REVIEW (distinct from the claim check above; independent of grep hits):
+    CHANGED DURABLE FILES: <the sub-track's changed durable-file list>
+    DIFF RANGE: <recoverable range, e.g. <base>..<tip>>
+    ANNEAL GREP: <patterns used; hits with the driver's triage and any uncertain hits, or "zero
+    hits">. A clean grep proves only that its patterns found nothing.
+    Read the changed durable prose in those files, with enough surrounding surviving context, for
+    leaked planning references — session, contract or category labels, numbered principles, phase
+    names, "the plan's ...", paraphrases of plan structure — whether or not grep matched them.
+    Include source and test comments and docstrings, not only Markdown. Triage by context: retain
+    legitimate domain uses (mathematical symbols, algorithmic phases, literal identifiers,
+    historical quotations). Report each genuine leak as file:line, and each uncertain referent
+    separately; do not invent a referent. If you cannot complete the review, return the scope limit
+    explicitly — never imply the files are clean.
 
 CONSTRAINTS:
 - Return one-shot. Do not ask the user anything — anything needing human sign-off comes back as a
@@ -770,9 +898,10 @@ CONSTRAINTS:
 ## Fix-loop dispatch
 
 When dispatching a `@build` fix subagent (step 4f, the F-fix defect-check dispatch, or the
-anneal-fix in step 7), include one line in the prompt: "REGISTER rule applies — see dispatch
-template." Under a bound cadence, also require the fix worker to return fresh evidence records for
-its final inputs (CADENCE VARIANT fields). Fix forks edit durable files and the same plan-coordinate
+anneal-fix and boundary correction in step 7), include one line in the prompt: "REGISTER rule
+applies — see dispatch template." Include the WORKER HYGIENE block in these and every other
+`@build` dispatch (see Worker hygiene block). Under a bound cadence, also require the fix worker to
+return fresh evidence records for its final inputs (CADENCE VARIANT fields). Fix forks edit durable files and the same plan-coordinate
 prohibition applies. Line-length overruns are not a fix trigger: a session whose only blemish is
 over-width lines is green; note them in the ledger for the general anneal sweep (`/plan-anneal`
 line-length pass) and do not open a Fix-loop iteration over them. Exception: a project gate that
@@ -794,7 +923,8 @@ that defect, not a re-opening of the whole feature stage.
   AGENTS.md autonomous-chain carve-out).
 - The Fix-loop is capped (2 iterations) — non-convergence halts, never grinds.
 - The halt classes (`design-uncertain-HALT` from an inflection fork, `destructive-HALT` from a
-  discovery fork, committer secret/refusal, non-convergence/deadlock, and — cadence projects only —
+  discovery fork, committer secret/refusal, non-convergence/deadlock, `BLOCKED: worker hygiene`
+  (outstanding worker job or stash drift, step 3a), and — cadence projects only —
   `BLOCKED: freshness finding` against inputs the chain did not change) are the ONLY autonomous stops
   on the happy path. Everything else continues. The enrolled agents hold fiduciary latitude under
   fidelity to the PLAN; halts are reserved for the irreconcilable, never for mere deviation.

@@ -47,19 +47,12 @@ walk-state invariant `W = a·G + b·Q`"), not by nothing ("KAT for S4" → delet
 
 2. **Resolve the denylist.** Check for a per-project denylist in `docs/PLAN.md`'s
    `## Notes for executors` (the tunable list `/plan-shard` seeds and the ◆ gate greps). If present,
-   use it. If absent, use the seed default (identical to `/plan-run` step 7):
-
-   ```
-   \bS[0-9]+\b      (plan session ids)
-   sub-track
-   frozen contract
-   PLAN\.md
-   ROADMAP\.md
-   action-frame
-   ◆
-   \bCat [ABC]\b
-   plan-(run|shard|juncture)
-   ```
+   use it. If absent, **read the `## Anneal candidate seed (canonical)` section of
+   `~/.config/opencode/commands/plan-run.md`** and use its patterns; there is no copy here, so do not
+   work from memory. Its patterns are candidate detectors, not bans: they cover alphanumeric contract
+   labels, category labels, numbered principles, plan possessives and Greek phase/session labels as
+   well as the older session-id and file-name patterns, so expect more false positives than a plain
+   coordinate list produces, and triage them in step 4.
 
    The denylist targets plan coordinates, **not** domain terms. "KAT"/"known-answer test" is
    legitimate crypto-library vocabulary and is not on the list; if a project's denylist has drifted
@@ -77,17 +70,29 @@ walk-state invariant `W = a·G + b·Q`"), not by nothing ("KAT for S4" → delet
 
    Collect every hit with its file, line, and the matched coordinate.
 
-4. **Triage each hit (the one judgment step).** For each match decide:
+4. **Triage each hit (the one judgment step), then read for what grep cannot see.** For each match
+   decide:
    - **Genuine leak** — the token is a plan coordinate standing in for a property (`"KAT for S4"`,
      `"see the frozen contract from the substrate sub-track"`, `"this is the Cat B algorithm"`).
      → translate (step 5).
    - **False positive / legitimate domain use** — the pattern matched a real domain symbol, not a
      coordinate (a variable literally named `S4`; a sentence about a "sub-track" of a railway in a
-     docstring's example). → leave it, and note it in the exit report so the user can tighten the
-     denylist.
+     docstring's example; a Greek letter used as a mathematical symbol; an algorithm's own "phase";
+     a domain "principle"; a historical quotation). → leave it, and note it in the exit report so
+     the user can tighten the denylist. Never treat all Greek letters or every "phase" as leaks.
 
    When genuinely unsure whether a hit is a leak or content, do **not** guess-edit: list it under
    "needs-human" in the exit report and leave the file unchanged.
+
+   **Contextual read (independent of the grep).** A clean grep proves only that these patterns
+   found nothing. Within the requested scope, also read the durable prose — changed files first if
+   a diff range is available, and including source and test comments and docstrings, not only
+   Markdown — with its surrounding context, looking for planning references the patterns cannot
+   name (paraphrases of plan structure, milestone or phase names, "as agreed earlier"). Treat finds
+   exactly like grep hits: genuine leak → step 5; legitimate or uncertain → note or "needs-human".
+   For a very large scope, read the changed files and the surrounding files they touch rather than
+   the whole tree, and state that limit in the exit report; never report the scope as clean on the
+   strength of the grep alone.
 
 5. **Translate genuine leaks via `Edit`.** Replace each leaked coordinate with the standalone
    property it points at — the actual invariant, reason, or interface name. Recover the referent
@@ -106,7 +111,8 @@ walk-state invariant `W = a·G + b·Q`"), not by nothing ("KAT for S4" → delet
    step 8) and return evidence records as that dispatch's prompt specifies; comment and doc-comment
    edits are classified by `/plan-run`'s rules, and an uncertain edit takes the code path.
 
-7. **Re-scan.** Re-grep the denylist over the in-scope durable files. Loop steps 4–7 until:
+7. **Re-scan.** Re-grep the denylist over the in-scope durable files and re-read the prose you
+   edited or flagged, not only the pattern matches. Loop steps 4–7 until:
    - **Clean** — no genuine leaks remain (only noted false positives / needs-human items), OR
    - 2 consecutive iterations with no reduction in genuine-leak count (not converging), OR
    - a hard cap of 4 iterations.
@@ -139,7 +145,8 @@ walk-state invariant `W = a·G + b·Q`"), not by nothing ("KAT for S4" → delet
 
 ## Exit report
 
-- Scope swept (path/glob or "whole project") and the denylist source (PLAN override / seed default).
+- Scope swept (path/glob or "whole project") and the denylist source (PLAN override / canonical
+  seed), plus the contextual-read coverage and any scope limit.
 - Genuine leaks translated: count, with a short before→after list.
 - False positives left in place: count, with the patterns that produced them (denylist-tuning hint).
 - Needs-human items: leaks whose referent could not be recovered — file, line, and the coordinate.

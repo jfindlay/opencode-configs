@@ -171,7 +171,8 @@ Produce `docs/PLAN.md` with exactly these sections. `/plan-run` preconditions on
   undefined contract — flag it), subtleties, deferrals. Lower-fidelity sketches for rows after the
   substrate session are correct, not lazy: sessions inside a sub-track are crisply specified only
   after the substrate freezes. The integrative (Cat I) session's deliverable includes the
-  planning-register anneal: durable files free of plan coordinates, denylist grep clean, any leaked
+  planning-register anneal: durable files free of plan coordinates (candidate grep triaged, plus a
+  contextual read for planning references the patterns cannot name), any leaked
   coordinates translated into standalone prose (the integrative session is already "where contracts
   get their public form" — the anneal is the same act). A row marked `(F/C)` additionally carries a
   **Completion appendix**: the shared one-sentence goal; two stage-specific done conditions (F:
@@ -201,8 +202,10 @@ Produce `docs/PLAN.md` with exactly these sections. `/plan-run` preconditions on
   into the roadmap — happens in the reconciliation step above, not here.
 - `## Notes for executors` — tier routing, register (PEDAGOGY), invariants to preserve, the
   suggested first `/plan-run` invocation (`halt-at-boundaries` for an unproven shard pattern), and
-  the **anneal denylist**: the per-project denylist the ◆ boundary gate greps, seeded from the
-  default in `/plan-run` and tuned here (drop/add patterns that collide with domain vocabulary).
+  the **anneal denylist**: the per-project list of candidate patterns the ◆ boundary gate greps,
+  seeded from the canonical `## Anneal candidate seed` section of `/plan-run` (copy it here at shard
+  time, and tune: drop/add patterns that collide with domain vocabulary). Matches are candidates
+  needing contextual triage, not bans, and a clean grep is not a clean review.
 
 Apply the three contract flavours deliberately: compiler contracts (traits/signatures) catch
 interface drift, KATs catch behavioural drift, prose invariants catch invariant drift. Each session
@@ -238,15 +241,16 @@ In greenfield mode, the whole session is a dialogue: elicit intent → propose s
    ## Register in durable files
 
    In code, tests, and human docs, state the actual property, reason, or invariant — never the
-   plan coordinate (session ids, category letters, sub-track names, "frozen contract", references
-   to plan or roadmap files). Plan vocabulary lives in the rolling plan docs, the ledger, and
+   plan coordinate (session ids, contract and category labels, numbered principles, phase names,
+   sub-track names, "frozen contract", "the plan's ...", references to plan or roadmap files, and
+   paraphrases of any of these). Plan vocabulary lives in the rolling plan docs, the ledger, and
    commit messages only.
    ```
 
    Idempotent: skip if a `## Register in durable files` heading is already present. Keep the block
    self-contained — no pointer into PLAN or ROADMAP (the file is durable; they are not) and no
-   denylist copy (the anneal gates read PLAN's, or fall back to the seed default). The block names
-   the vocabulary it prohibits, so `AGENTS.md` is excluded from anneal sweeps. This covers agents
+   denylist or pattern copy (the anneal gates read PLAN's, or fall back to the canonical seed). The
+   block names the vocabulary it prohibits, so `AGENTS.md` is excluded from anneal sweeps. This covers agents
    outside `/plan-run` chains — ad-hoc sessions auto-load the repo's `AGENTS.md` and never see the
    dispatch template.
 5. If the design statement (greenfield) or a discovery during sharding is a durable roadmap-level

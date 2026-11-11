@@ -3,9 +3,10 @@ description: "[jf] Forward-commit primitive: stages a named fileset (whole paths
 mode: subagent
 model: anthropic/claude-haiku-5-5
 permissions:
-  # Shell follows the global policy except that committing is this role's job, so the global
-  # commit `ask` is lifted. Everything below is a tripwire for history-shaping operations that
-  # belong to @git-editor; the role's real limits are the procedure and refusal taxonomy below.
+  # Shell follows the global policy (ask by default) except that staging and committing are this
+  # role's job. The denies are prefix tripwires for history-shaping operations that belong to
+  # @git-editor; the role's real limits are the procedure and refusal taxonomy below.
+  - { action: shell, resource: "git add -- *", effect: allow }
   - { action: shell, resource: "git commit *", effect: allow }
   # Explicit denies — these belong to @git-editor, not here.
   - { action: shell, resource: "git commit --amend", effect: deny }

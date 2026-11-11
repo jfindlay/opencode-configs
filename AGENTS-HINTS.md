@@ -14,11 +14,16 @@ stay part of the matched text. Syntax the scanner cannot analyze is rejected bef
    `env VAR=1 git push`, or a push inside a script; an allow for `git diff *` also matches
    `git diff > f`. Rules are consent gates for recognizable forms; isolation belongs in a sandbox,
    credentials, and network policy.
-2. **A restrictive allowlist makes every unlisted part a deny or ask**, breaking ordinary pipelines,
-   `2>&1`, and `cd dir && cmd`. The config therefore allows shell by default with a few gates (push,
-   commit, destructive git) and states role limits such as "read-only" in the agent's prompt.
+2. **Default ask with narrow allows.** The config asks for any shell command not listed, so an
+   unfamiliar form (wrapper, absolute executable path, `git -C`, compound line with an unlisted
+   part) asks. The allowed inspection prefixes are conveniences, not read-only guarantees:
+   `git diff > f` and `git log --output=f` match. Role limits such as "read-only" stay in the
+   agent's prompt.
 3. **Scanner errors are a separate class** from configured denials; widening rules does not fix
    them. Report the failing expression rather than rephrasing it.
+4. **Allow once, or edit the config.** Approve an individual request with Allow once. Allow always
+   persists per project across sessions, so recurring authority belongs in reviewed config, not in
+   broad saved approvals.
 
 ## Commands cannot scope permissions; agents can
 

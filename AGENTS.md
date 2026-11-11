@@ -71,10 +71,11 @@ placeholders; a command expands its input in its own body and passes it explicit
   `Grep`, `Glob`, `Edit`, `Write` — not cat/sed/awk/find/rg, `cat <<EOF`, or `echo >`. This is
   guidance, not a shell restriction: use ordinary shell composition (pipes, `&&`, redirects of
   command output, `2>&1`) when the task is about commands, and don't split a command or hunt for an
-  alternative spelling to satisfy the permission matcher. Shell permissions are a few deliberate
-  consent gates (push, commit, destructive git), not a sandbox. If a call is denied or the scanner
-  rejects it, report the block: a denial never authorizes reaching the same effect through another
-  interpreter or tool (`python3`, `node`), and a rejected expression is not a puzzle to rephrase.
+  alternative spelling to satisfy the permission matcher. Shell permissions ask by default, with
+  narrow inspection allows and a push deny: consent gates, not a sandbox, and an unfamiliar form
+  asks. If a call is denied or the scanner rejects it, report the block: a denial never authorizes
+  reaching the same effect through another interpreter or tool (`python3`, `node`), and a rejected
+  expression is not a puzzle to rephrase.
 - **Directory context.** For agent-issued shell calls, set `workdir` rather than prefixing the
   command with `cd`. It selects only that call's directory; file tools take explicit paths and
   `session_move` relocates the session. A subagent prompt's "Working directory:" is an instruction

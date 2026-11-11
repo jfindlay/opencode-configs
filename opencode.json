@@ -49,7 +49,7 @@
       ".mypy_cache/**"
     ]
   },
-  // Global: shell allowed with a few checkpoints (push, commit, destructive git); edits ask.
+  // Global: shell and edits ask, except the inspection allows and the push deny below.
   // Applies to every agent as the base; agent rules append after it.
   // Ordered rules; the last matching rule wins. `edit` covers edit/write/patch.
   "permissions": [
@@ -60,14 +60,25 @@
     { "action": "read", "resource": "*.env", "effect": "ask" },
     { "action": "read", "resource": "*.env.*", "effect": "ask" },
     { "action": "read", "resource": "*.env.example", "effect": "allow" },
-    // Shell is allowed by default; the rules below are consent checkpoints, not containment
+    // Credential file of this config. Each rule matches only the spelling it names: the
+    // project-relative form, and the absolute forms through the symlink and its target.
+    { "action": "read", "resource": "service.json", "effect": "ask" },
+    { "action": "read", "resource": "~/.config/opencode/service.json", "effect": "ask" },
+    { "action": "read", "resource": "~/Source/opencode-config/service.json", "effect": "ask" },
+    // Shell asks by default; the allows are inspection conveniences, not a read-only guarantee
     // (AGENTS-HINTS.md, "Shell permission rules are tripwires").
-    { "action": "shell", "resource": "*", "effect": "allow" },
+    { "action": "shell", "resource": "*", "effect": "ask" },
+    { "action": "shell", "resource": "pwd *", "effect": "allow" },
+    { "action": "shell", "resource": "ls *", "effect": "allow" },
+    { "action": "shell", "resource": "git status *", "effect": "allow" },
+    { "action": "shell", "resource": "git diff *", "effect": "allow" },
+    { "action": "shell", "resource": "git log *", "effect": "allow" },
+    { "action": "shell", "resource": "git show *", "effect": "allow" },
+    { "action": "shell", "resource": "git ls-files *", "effect": "allow" },
+    { "action": "shell", "resource": "git rev-parse *", "effect": "allow" },
+    { "action": "shell", "resource": "git branch --show-current", "effect": "allow" },
+    { "action": "shell", "resource": "git stash list *", "effect": "allow" },
     { "action": "shell", "resource": "git push *", "effect": "deny" },
-    { "action": "shell", "resource": "git commit *", "effect": "ask" },
-    { "action": "shell", "resource": "git reset --hard *", "effect": "ask" },
-    { "action": "shell", "resource": "git clean *", "effect": "ask" },
-    { "action": "shell", "resource": "sudo *", "effect": "ask" },
     { "action": "edit", "resource": "*", "effect": "ask" },
     // The user-level config dir is allowed so on-demand AGENTS-*.md and skill references load
     // without an external_directory prompt per file.

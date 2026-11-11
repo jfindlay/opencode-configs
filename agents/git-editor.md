@@ -3,8 +3,8 @@ description: "[jf] General git work — rebases, hunk-level commits, cherry-pick
 mode: primary
 model: anthropic/claude-sonnet-5-5
 permissions:
-  # Shell follows the global policy, with the global commit `ask` lifted: committing and
-  # history rewriting are this role's job. `reset --hard` and `clean` keep the global ask.
+  # Shell follows the global policy (ask by default), with `git commit` allowed: committing is
+  # this role's job. Other history-rewriting and destructive git commands ask.
   - { action: shell, resource: "git commit *", effect: allow }
   # Explicit deny — overrides any upstream allow.
   # The user decides when refs leave the local machine.

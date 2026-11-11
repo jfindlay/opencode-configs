@@ -59,9 +59,9 @@ permission beyond what this file already grants.
 ## Git and editor safety
 
 The `no-interactive-editor.js` plugin sets `EDITOR`, `GIT_EDITOR`, `GIT_SEQUENCE_EDITOR`,
-`VISUAL`, and `PAGER` to safe non-interactive defaults for every bash call. You do not need to
+`VISUAL`, and `PAGER` to safe non-interactive defaults for every shell call. You do not need to
 think about this for normal git use. If you are executing a scripted rebase with a pre-composed
-todo list, override `GIT_SEQUENCE_EDITOR` in your bash call:
+todo list, override `GIT_SEQUENCE_EDITOR` in your shell call:
 
 ```
 GIT_SEQUENCE_EDITOR="cp /tmp/rebase-todo.txt" git rebase -i <base>
@@ -69,14 +69,14 @@ GIT_SEQUENCE_EDITOR="cp /tmp/rebase-todo.txt" git rebase -i <base>
 
 The plugin respects caller overrides. See AGENTS-HINTS.md for the full scripted-rebase pattern.
 
-Never run bare `git rebase -i`, `git commit` (without `-m`), `git merge` (without `-m`), or
+Never run bare `git rebase -i`, `git commit` (without `-m` or `-F`), `git merge` (without `-m`), or
 `git commit --amend` (without `-m`). These open an interactive editor. Use flags or the plugin
 default.
 
 ## Process ownership and handoff hygiene
 
 Applies to every return — as a primary agent or any subagent dispatch (ordinary, feature, completion,
-fix, correction), and to partial feature-stage returns. A `/plan-run` dispatch restates this as its
+fix, correction), and to partial feature-stage returns. A `/plan/run` dispatch restates this as its
 `WORKER HYGIENE` block; the rules hold even when a prompt omits it.
 
 - **Finish or stop what you started.** Before returning, await completion of every check and other
@@ -97,16 +97,18 @@ fix, correction), and to partial feature-stage returns. A `/plan-run` dispatch r
 - **State it in your return:** whether every job you started has finished, naming any outstanding
   job and any ownership transfer your caller accepted.
 
-## Subagent handoff rules
+## Escalation and delegation
 
 - **Deep planning, architectural tradeoffs, cross-cutting audits** → stop and ask the user (or, as a
   subagent, tell your caller) to switch to `@architect`. For interactive generative work at the
   extremity (genesis, abduction, pivotal anomalies), `@dialectic` instead.
-- **Read-only exploration of a large unknown codebase** → fork `@explore`.
-- **Test loops and format loops** → stay in this agent; these require turn-by-turn steering
-  and must not be forked.
+- **Read-only exploration of a large unknown codebase** → as a primary agent, fork `@explore`. As a
+  forked subagent, do not assume you can dispatch further agents: use your own tools, or return a
+  delegation request to your caller.
+- **Test and format loops** → stay in this agent; they require turn-by-turn steering and must not be
+  forked.
 
-## Dispatched as a feature or completion stage under `/plan-run`
+## Dispatched as a feature or completion stage under `/plan/run`
 
 When `@plan-admin` dispatches you as the F-stage or C-stage of a paired `(F/C)` unit, you still own
 your own steering within your stage. The stage's scope, report, and return contract are in
@@ -127,7 +129,7 @@ easy to get wrong:
   environment — no credentials). As F, run only the narrowest checks the prompt names and label
   every record partial. Never report a pass without the record's backing output.
 
-See `AGENTS-ROSTER.md` (tier ladder) and `AGENTS-CAPTURE.md` (capture-candidate tagging).
+See `AGENTS-CAPTURE.md` (capture-candidate tagging).
 
 ## Responding to a session-economics notice
 

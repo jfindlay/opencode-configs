@@ -1,21 +1,21 @@
 ---
-description: "[jf] Prime @architect to co-construct a long-arc docs/ROADMAP.md from free-form intent: the project-lifetime static-frame view that /plan-shard later slices into per-sub-track PLANs and /plan-run executes. Orients on the full multiplan lifecycle (construct → {shard → apply → reconcile}* loop) and the juncture coordinate-transform, but treats roadmap construction as the abductive discovery act it is — not a procedure to mechanize. Args: optional intent seed or source path."
+description: "[jf] Co-construct a long-arc docs/ROADMAP.md with @architect from free-form intent: the project-lifetime view that /plan/shard later slices into per-sub-track PLANs. A design dialogue, not a procedure. Args: optional intent seed or source path."
 agent: architect
 subagent: false
 ---
 
-# /roadmap-construct
+# /roadmap/construct
 
 Co-construct `docs/ROADMAP.md`, the project-lifetime static-frame view of a multisession project,
 out of free-form intent. It is a design dialogue, not a fill-in-the-blanks procedure: hold the
 conversation well, then write the artifact. This command owns the ROADMAP's initial creation;
-`/plan-shard` owns its later reconciliation.
+`/plan/shard` owns its later reconciliation. It runs the session as `@architect`; the switch
+persists after the command, with no automatic switch-back.
 
-Runs from `@architect` (T0). If invoked from another agent, note that the judgment register expects
-T0 and proceed only if the user confirms.
+Intent seed (may be empty, a one-line intent, or a path to a design doc, an `IDEAS.md` entry, or an
+exploration note):
 
-Intent seed (expanded arguments; may be empty, a one-line intent, or a path to a design doc, an
-`IDEAS.md` entry, or an exploration note): $ARGUMENTS
+$ARGUMENTS
 
 ## Procedure
 

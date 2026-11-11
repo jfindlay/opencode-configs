@@ -89,9 +89,9 @@
     { "action": "webfetch", "resource": "*", "effect": "allow" }
   ],
   "agents": {
-    // Architect mode: read-only by default (global), but allows writes to rolling-context docs
+    // Architect mode: edits ask (as globally), except the rolling-context docs, which are allowed
     // without prompting. The ask comes before the docs allows so the docs allows win
-    // (last-match-wins).
+    // (last-match-wins). The agent's own contract (agents/architect.md) bounds what it writes there.
     "architect": {
       "permissions": [
         { "action": "edit", "resource": "*", "effect": "ask" },
@@ -100,7 +100,7 @@
         { "action": "edit", "resource": "**/docs/ROADMAP.md", "effect": "allow" }
       ]
     },
-    // /plan-run agents write the default PLAN. In-project paths reach the engine project-relative,
+    // /plan/run agents write the default PLAN. In-project paths reach the engine project-relative,
     // so the rule names `docs/PLAN.md`; an absolute rule or `**/docs/PLAN.md` is not a substitute.
     // A non-default PLAN path needs explicit user authorization. File rules cannot enforce which
     // section either agent may write: the driver writes ledger and digest, the juncture fork

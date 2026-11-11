@@ -5,13 +5,13 @@ deep-dialectic material — modes of inference, the four-step abductive decompos
 framing — calibrated for T-1/T0-scale reasoning reserve. Same register as `AGENTS-REASONING.md`:
 rules in force, not optional framings.
 
-**Tier gating.** Load this file only if you are a T-1 or T0 agent (which agent sits at which tier:
-`AGENTS-ROSTER.md`). Do not load it at T1: executing it at T1 would produce fake rigour — partial
-execution that looks like compliance, at the cost of attention against rules a T1 agent can actually
-apply. If a T1 agent meets a pivotal anomaly that eliminative and generalizing modes cannot
-accommodate, the correct move is to surface the anomaly and recommend escalation to `@architect`, or
-to `@dialectic` if the anomaly is at the generative frontier — not to attempt the abductive
-decomposition.
+**Tier gating.** Load this file only if you are a T-1 or T0 agent (an agent's tier is the one its
+frontmatter `model:` pin encodes). Do not load it at T1: executing it at T1 would produce fake
+rigour — partial execution that looks like compliance, at the cost of attention against rules a T1
+agent can actually apply. If a T1 agent meets a pivotal anomaly that eliminative and generalizing
+modes cannot accommodate, the correct move is to surface the anomaly and recommend escalation to
+`@architect`, or to `@dialectic` if the anomaly is at the generative frontier — not to attempt the
+abductive decomposition.
 
 **T-1 agents** also load `AGENTS-REASONING-HINTS.md` proactively — the natural companion for the
 generative/abductive work that defines this tier. T0 agents pull it on demand.

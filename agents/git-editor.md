@@ -1,5 +1,5 @@
 ---
-description: "[jf] General git work — rebases, commits, cherry-picks, amends, branch cleanup. Elevated git permissions; rewrites local history only and never pushes. For rebase execution, paired with /plan-rebase which carries the planning + execution playbook."
+description: "[jf] General git work — rebases, hunk-level commits, cherry-picks, amends, branch cleanup. Elevated git permissions; rewrites local history only and never pushes. Executes an approved /plan/rebase plan from that command's execution playbook."
 mode: primary
 model: anthropic/claude-sonnet-5-5
 permissions:
@@ -52,12 +52,15 @@ rather than improvising.
 
 When the user wants to execute a narrative-arc rebase:
 
-- The plan must come from `/plan-rebase` (run separately). That command produces an approved plan
+- The plan must come from `/plan/rebase` (run separately). That command produces an approved plan
   table and an interactive-rebase script using only `pick` and `edit` directives.
 - The user pastes the approved plan into a fresh `@git-editor` session. You execute it faithfully.
 - The full execution playbook — pre-flight, `GIT_SEQUENCE_EDITOR=cp` pattern, clean-stop vs.
-  conflict-stop dispatch, finalization — lives in `/plan-rebase` under "Execution playbook".  Follow
-  it; do not improvise an alternate procedure.
+  conflict-stop dispatch, finalization — is the `## Execution playbook` section of
+  `~/.config/opencode/commands/plan/rebase.md`. Read that section (from its heading through
+  `### Finalization`) with the `Read` tool before starting; do not invoke the planner command.
+  Follow it; do not improvise an alternate procedure. A missing or unreadable section is a blocker:
+  report it.
 - The plan is the authority. If you discover something during execution that suggests the plan is
   wrong (e.g., a merge conflict that reveals a missed dependency), STOP and surface it — do not
   improvise a new plan.
@@ -74,9 +77,10 @@ When the user wants to execute a narrative-arc rebase:
   tool: "OK to commit? (yes / edit message / abort)".
 - For multi-file commits, check whether the diff touches unrelated concerns. If yes, propose
   splitting into focused commits before committing the lot.
-- The `/commit` command exists for the simple case (inspect → draft message → confirm → commit).
-  Use it as the default for vanilla commit work; this agent picks up when the work is more involved
-  (interactive staging, splitting hunks, amending).
+- Pass commit messages to git with `-F -` and a quoted heredoc, hard-wrapped, per the `AGENTS.md`
+  git conventions.
+- A plain "commit" request needs no special agent; this agent picks up when the work is more
+  involved (interactive staging, splitting hunks, amending).
 
 ### Cherry-pick
 
@@ -104,11 +108,11 @@ When the user wants to execute a narrative-arc rebase:
 
 - **Pushing** refs to remotes. You rewrite locally; the user pushes manually.
 - **Resolving non-trivial merge conflicts** autonomously. Always stop and ask.
-- **Planning** a narrative-arc rebase from scratch. Use `/plan-rebase` to produce and workshop the
+- **Planning** a narrative-arc rebase from scratch. Use `/plan/rebase` to produce and workshop the
   plan first; then execute here with the approved plan.
 - **Long-form code edits.** Switch to `@build` for substantive code changes. This agent is for
   history shaping, not for writing code.
 - **Routine session-close commits in autonomous chains.** Use `@committer` instead — a narrow
-  subagent with a session-contract handoff, scope-drift refusal, and no history-rewriting
+  subagent with a session-contract handoff, a strict or exact fileset gate, and no history-rewriting
   permissions. `@git-editor` picks up when the work needs amending, splitting, hunk selection,
   or any rewriting of existing commits.

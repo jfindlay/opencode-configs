@@ -1,12 +1,18 @@
 ---
-description: "[jf] Process pasted code-review output (OpenCode Code Review bot, Codex, MR comments). Classifies findings by severity, groups them, and drafts a fix plan before any edits."
+description: "[jf] Process pasted code-review output (review bot, Codex, MR comments): classify and verify findings, plan fixes, then apply them with checkpoints."
+agent: build
 ---
 
-Review output to address (paste after invocation): $ARGUMENTS
+This command runs the session as `@build`. The switch persists after the command finishes; switch
+back to another agent yourself if you want one.
+
+Review output to address (paste after invocation; may be empty or multiline):
+
+$ARGUMENTS
 
 ## Steps
 
-1. If $ARGUMENTS is empty, ask me to paste the review output. Otherwise parse it as the review
+1. If the supplied review output is empty, ask me to paste it. Otherwise parse it as the review
    content.
 
 2. **Summarize — do not quote verbatim.** Review bot output is noisy (HTML, emoji, collapsed
@@ -24,24 +30,23 @@ Review output to address (paste after invocation): $ARGUMENTS
    - **Out of scope** — valid but belongs in a different PR.
    - **Already done** — resolved since the review was written.
 
-  a. **Conditional code cross-check (fork if ≥5 findings AND any require code verification).**
-     Before proposing a fix plan, verify that "accept and fix" findings are actually correct as stated.
+   a. **Code cross-check (always).** Before proposing a fix plan, verify against the actual code
+      that every code-dependent "accept and fix" finding is correct as stated. Findings that do not
+      depend on code (process remarks, questions) need no check. The finding count only selects who
+      verifies, never whether verification happens:
+      - **Fewer than 5 code-dependent findings:** verify inline. Read the cited code (or search for
+        the symbol when no location is given) and assign each finding a verdict: accurate /
+        inaccurate / needs-discussion, with one line of evidence.
+      - **5 or more:** fork a `@verify` subagent with the list of findings (one per line: finding
+        text + file:line citation if available), the working directory, and the instruction: "For
+        each finding, read the cited code and return a verdict: accurate / inaccurate /
+        needs-discussion, with one line of evidence."
 
-     Fork a `@verify` subagent with:
-     - The list of "accept and fix" findings (one per line: finding text + file:line citation if
-       available).
-     - The working directory.
-     - Instruction: "For each finding, read the cited code and return a verdict: accurate /
-       inaccurate / needs-discussion, with one line of evidence."
-
-     When the subagent returns:
-     - Downgrade any "inaccurate" finding to "discuss / push back" with the subagent's evidence as
-       the pushback rationale.
-     - Flag "needs-discussion" findings for me before proceeding.
-     - Proceed with only the confirmed-accurate findings in the fix plan.
-
-     Skip this step if there are fewer than 5 findings or if all findings are trivially verifiable
-     from the review output alone (e.g., pure style nits with explicit line citations).
+      Then, whichever path ran:
+      - Downgrade any "inaccurate" finding to "discuss / push back" with the evidence as the
+        pushback rationale.
+      - Flag "needs-discussion" findings for me before proceeding.
+      - Proceed with only the confirmed-accurate findings in the fix plan.
 
 4. Propose a plan:
    - Group findings by file and by logical change.
@@ -54,12 +59,12 @@ Review output to address (paste after invocation): $ARGUMENTS
 6. On approval:
    - Apply fixes in the agreed order.
    - After each logical group, pause. Show the diff of that group. Run any scoped tests and run
-     formatting and linting. Ask whether to commit or continue. To commit, run the `/commit` flow,
-     which gates the message on approval and delegates the mechanical commit work to `@committer`.
+     formatting and linting. Ask whether to commit or continue. On "commit", commit that group's files per the
+     `AGENTS.md` git conventions.
 
 ## Constraints
 
 - If a finding is from the "OpenCode Code Review" agent itself, treat its output critically. The
-  review agent can be wrong. Cross-check against the actual code before committing.
+  review agent can be wrong; the verification above is not optional for it.
 - Never bypass hooks. If a hook fails after applying a fix, the fix is wrong or incomplete.
 - If a finding's severity is unclear, err toward asking me.

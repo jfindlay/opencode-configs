@@ -12,7 +12,7 @@ no `(F/C)` row and no declared cadence never need either.
   keeps ledger and digest. Never implements, never adjudicates, never edits source.
 - **`@build` / `@explore`:** `@build` implements (setup and multi-file work included); `@explore`
   does research. Workers never commit.
-- **`@committer`:** stages exactly the authorized files and commits.
+- **`@committer`:** stages exactly the authorized files and commits, or refuses; it repairs nothing.
 - **`@plan-juncture` (T0):** forked one-shot at the three junctures only; never resident.
 - `Tier` in the session list is required design judgment, not a worker-model selector. Dispatch and
   model pins are unchanged.
@@ -26,7 +26,7 @@ no `(F/C)` row and no declared cadence never need either.
   path in step 4e. Its gates are code-oriented (KAT, tests, types, commit), so a row whose
   deliverable cannot meet them is surfaced, never waived or reported as passed (`planning.md`,
   "Horizons, participation, and delegation").
-- **Fiduciary latitude.** Invoking `/plan-run` accepts the implementation path-space the agents
+- **Fiduciary latitude.** Invoking `/plan/run` accepts the implementation path-space the agents
   judge best, not a literal line-item contract. Medium deviation that a fork reconciles against the
   PLAN rides through, reported in the digest; halts are reserved for the irreconcilable (see Stops).
 
@@ -82,7 +82,7 @@ Repeat until every row is `done` or authorized `skipped`, or a stop fires (Stops
   each boundary note records a completed planning-reference review (a clean grep alone is thin
   evidence). Run it when any of those fail. To skip, mark the row `skipped` with a one-line reason
   and commit as `Ledger: <session-id> skipped` (6b). If it runs, dispatch `@build` to carry out
-  `/plan-anneal` over the project with the line-length pass in scope, under the usual REGISTER and
+  `/plan/anneal` over the project with the line-length pass in scope, under the usual REGISTER and
   WORKER HYGIENE blocks and Fix-loop rules.
 - **Freshness (cadence only).** Before dispatching, apply the freshness rule in `verification.md`.
 - None runnable but `pending` rows remain → stop (`BLOCKED: dependency deadlock`), surface the rows.
@@ -153,10 +153,14 @@ diff.
 - **c. KAT present.** The entry names at least one KAT; confirm a new or changed test asserts it
   (Grep the named test file). Absent → dispatch `@build` once to add it, then re-verify; still
   absent → stop (`BLOCKED: KAT contract undefined`).
-- **d. Expected files match** `git status` versus the entry. PLAN may be dirty from an inflection
-  write or an uncommitted intent capsule; it is never part of the session commit. A plainly in-unit
-  extra file (e.g. `__init__.py`) is allowed and noted; one touching another session's surface →
-  stop (`BLOCKED: scope drift`).
+- **d. Scope gate (authoritative).** Validate every dirty path in `git status` against the accepted
+  implementation fileset (the entry's list plus allowed in-unit extras) plus the actual PLAN path
+  bound at preflight. PLAN may be dirty from an inflection write or an uncommitted intent
+  capsule; it is never part of the session commit. A plainly in-unit extra file (e.g.
+  `__init__.py`) is allowed and noted; any other dirty path, including one touching another
+  session's surface → stop (`BLOCKED: scope drift`). The session commit's `exact` staging mode
+  (step 5) does not waive this gate: it is the only check that rejects unrelated dirty work before
+  the commit.
 - *Paired row:* the defect check (`paired-units.md`) runs here, before 4e.
 - **e. Discovery check.** Did the worker report a discovery contradicting a downstream contract (a
   frozen interface, a KAT, a named prose invariant)? None → step 5. Flagged → fork `@plan-juncture`
@@ -180,7 +184,7 @@ diff.
 - **g. Cadence checks on the unit** (cadence only): `verification.md` "Unit-level checks".
 
 **Line length.** A session whose only blemish is over-width lines is green. Note file and rough
-count in the ledger for the `/plan-anneal` line-length pass; never open a Fix-loop iteration over
+count in the ledger for the `/plan/anneal` line-length pass; never open a Fix-loop iteration over
 them. Exception: a project gate that hard-fails on line length is a green-gate requirement, fixed
 in-session with the project formatter.
 
@@ -188,18 +192,25 @@ in-session with the project formatter.
 
 Only when 4a–4e (and 4g under a cadence) pass. Under a cadence, evidence must still match the tree
 about to be committed; revalidate after any worker or hook edit, never commit under stale green.
-Dispatch `@committer` per the AGENTS.md autonomous-chain carve-out with:
+Dispatch `@committer` per the AGENTS.md git conventions for autonomous chains with:
 
 - `SESSION CONTRACT`: the entry's commit title and one-line why.
-- `EXPECTED FILES`: the entry's list plus allowed extras from 4d. PLAN is never included; instruct
-  the committer to stage only these files explicitly (not `git add -A`) and refuse if PLAN is
-  staged.
+- `EXPECTED FILES`: the entry's list plus allowed extras from 4d. PLAN is never included.
+- `STAGING MODE`: `exact`. PLAN is often dirty at this point by design, so the committer commits
+  only the named paths, leaves PLAN's unstaged edits alone, and refuses if PLAN (or any other
+  unrelated path) is staged. The tradeoff: one authoritative scope gate (4d) and fewer contract
+  inputs, but on this call the committer no longer independently rejects every unrelated unstaged
+  change.
 - `COMMIT TITLE HINT`: the entry's title.
-- `CO_AUTHOR`: the content agent(s) that produced the diff, per `AGENTS-ROSTER.md` attribution
+- `CO_AUTHOR`: the content agent(s) that produced the diff, per the AGENTS.md attribution rules
   (same-model stages dedupe to one trailer; do not invent a stage-specific identity).
 
-On refusal: `empty diff` / `scope drift` / `incomplete` → stop (`BLOCKED: committer refusal`),
-surface the output, do not work around it. `hook failure` → one `@build` fix with the hook output,
+Never hide unrelated work to get a commit through: no stash, reset, cleanup, extra commit, or
+invented exclusion.
+
+On refusal: any of `empty diff` / `scope drift` / `incomplete` / `unrelated staged` / `staged
+mismatch` / `missing input` / `message policy` → stop (`BLOCKED: committer refusal`), surface the
+output, do not work around it. `hook failure` → one `@build` fix with the hook output,
 re-verify from 4a, re-commit; this consumes the Fix-loop budget, and a hook that rewrote files is a
 post-validation edit (invalidate affected evidence, re-verify). `secret risk` → HALT immediately;
 never bypass.
@@ -216,10 +227,11 @@ rolling-context write permission.
 
 ### 6b. Commit the ledger
 
-Immediately dispatch `@committer` staging ONLY PLAN, titled `Ledger: <session-id> done, freeze
-<contract>` (or `Ledger: <session-id> done`). It is a separate commit, never folded into the session
-commit. Afterward the tree is clean and the committed ledger and digest match the last committed
-session.
+Immediately dispatch `@committer` staging ONLY PLAN (`EXPECTED FILES`: the actual PLAN path), titled
+`Ledger: <session-id> done, freeze <contract>` (or `Ledger: <session-id> done`). Only PLAN is dirty
+by now, so it uses the default `strict` mode and any other dirty path refuses. It is a separate
+commit, never folded into the session commit. Afterward the tree is clean and the committed ledger
+and digest match the last committed session.
 
 ### 7. Sub-track boundary (◆)
 
@@ -274,7 +286,7 @@ Everything not listed continues. Halts are for the irreconcilable; mere deviatio
 | `destructive-HALT` | discovery fork | 4e |
 | reshard not honoured | `additive-reshard` without `may-reshard`, or not additive | 4e |
 | `BLOCKED: session does not converge` | third failed fix; boundary or final-delivery non-convergence | 4f, 7, Completion |
-| `BLOCKED: committer refusal` | empty diff / scope drift / incomplete | 5 |
+| `BLOCKED: committer refusal` | any committer refusal other than hook failure and secret risk | 5, 6b |
 | secret risk | committer reports it | 5 |
 | `BLOCKED: anneal failed to converge` | leak persists after anneal-fix | 7 |
 | `drift-HALT` | boundary fork | 7 |

@@ -1,13 +1,16 @@
 ---
-description: "[jf] Plan (do not execute) a narrative-arc rebase of the current branch. Groups commits into logical stages, proposes an ordering, and flags risks. Output is a rebase script for human review; the execution playbook below is what @git-editor follows when the user pastes the approved plan into a fresh session."
+description: "[jf] Plan (do not execute) a narrative-arc rebase of the current branch: group commits into stages, emit a rebase script for review. Also holds the execution playbook @git-editor follows for an approved plan. Args: optional base ref."
 ---
 
-Base reference for the rebase: $ARGUMENTS (e.g., `master`, `jfindlay/main`). If empty, resolve it
-via step 0 below.
+Base reference for the rebase (e.g., `master`, `jfindlay/main`; may be empty, in which case resolve
+it via step 0 below):
+
+$ARGUMENTS
 
 This command does PLANNING. The "Execution playbook" section near the end carries the procedure
-`@git-editor` follows when the user pastes an approved plan into a fresh session. Keep both halves
-together so a planner can see what the executor will actually do.
+`@git-editor` follows when the user pastes an approved plan into a fresh session; the executor reads
+that section directly from this file and never runs the planner. Keep both halves together so a
+planner can see what the executor will actually do.
 
 **Never assume `origin`.** This user does not use `origin` as a remote name. Always run `git remote`
 to discover the actual remote name(s); never hardcode `origin/...` in any command, prompt, or
@@ -20,7 +23,7 @@ use a stale ref.
 
 ## Steps
 
-0. **Resolve the base reference** (only if `$ARGUMENTS` is empty):
+0. **Resolve the base reference** (only if none was supplied):
 
    a. Run `git remote` to list remotes.
    b. If exactly one remote exists, try in order until one resolves via `git rev-parse --verify`:
@@ -74,16 +77,16 @@ use a stale ref.
 
    **Directive rules** — use only `pick` and `edit`; never `squash`, `fixup`, or `reword`. Those
    directives open `$GIT_EDITOR`, which the agent cannot drive. All message changes are handled at
-   `edit` stops via `--amend -m`.
+   `edit` stops via `git commit --amend -F -`.
 
    - **`pick`**: commit passes through unchanged (title, body, content).
    - **`edit` — message change**: commit content unchanged but title or body needs updating. Agent
-     will `--amend -m` at the stop.
+     will `--amend -F -` at the stop.
    - **`edit` — combine**: this commit merges into the previous one. Mark clearly in the Notes
      column of the table (step 3) so the agent knows which `edit` stops are combines. The combine
      *intent* is what the planner specifies; the agent picks the procedure at execution time based
-     on stop-state (clean stop → `reset --soft HEAD~1` + `--amend -m`; conflict stop → `git add` +
-     `--amend -m` + `--skip`, no `reset --soft`). Do not bake a procedure choice into the plan.
+     on stop-state (clean stop → `reset --soft HEAD~1` + `--amend -F -`; conflict stop → `git add` +
+     `--amend -F -` + `--skip`, no `reset --soft`). Do not bake a procedure choice into the plan.
    - **`edit` — split**: commit needs to be broken into two or more commits.  Mark clearly in Notes;
      the agent will surface the split instructions and pause for user guidance.
 
@@ -143,8 +146,9 @@ failure.
 2. **Install the approved todo list and start the rebase.**
 
    The approved plan uses only `pick` and `edit` directives — never `squash`, `fixup`, or `reword`
-   (those would open `$GIT_EDITOR`; all message changes are handled via explicit `--amend -m` at
-   `edit` stops instead).
+   (those would open `$GIT_EDITOR`; all message changes are handled via explicit `--amend -F -` at
+   `edit` stops instead). Pass each approved message hard-wrapped on stdin through a quoted heredoc,
+   per the `AGENTS.md` git conventions; bodies given through `-m` have come back unwrapped.
 
    Write the approved todo list to a tempfile using the `Write` tool (NOT `printf > file` or `echo >
    file` — those violate AGENTS.md tool discipline and complicate permission matching).  Pick a
@@ -154,14 +158,14 @@ failure.
    ```
    # Step 1: use the Write tool to create /tmp/rebase-todo-<branch>.txt
    #         with one line per commit (pick or edit only).
-   # Step 2: run exactly this single bash call:
+   # Step 2: run exactly this single shell call:
    GIT_SEQUENCE_EDITOR="cp /tmp/rebase-todo-<branch>.txt" git rebase -i <base>
    ```
 
    Git invokes `$GIT_SEQUENCE_EDITOR <todo-path>`, so `cp <tempfile>` copies our file over git's
    template. No editor opens.
 
-   Do NOT split the env-var assignment from the git invocation into separate bash calls — the env
+   Do NOT split the env-var assignment from the git invocation into separate shell calls — the env
    var wouldn't persist across subprocesses.
 
    If `$GIT_EDITOR` or `$VISUAL` is invoked at any point during execution, that is a bug — STOP and
@@ -190,7 +194,11 @@ failure.
       `edit`-stop has already applied the commit, so `--amend` rewrites the just-applied commit in
       place:
       ```
-      git commit --amend -m "<approved title>" -m "<approved body>"
+      git commit --amend -F - <<'EOF'
+      <approved title>
+
+      <approved body, trailers included>
+      EOF
       git rebase --continue
       ```
 
@@ -199,7 +207,11 @@ failure.
       the just-applied changes staged; `--amend` then rolls them in:
       ```
       git reset --soft HEAD~1
-      git commit --amend -m "<combined title>" -m "<combined body>"
+      git commit --amend -F - <<'EOF'
+      <combined title>
+
+      <combined body, trailers included>
+      EOF
       git rebase --continue
       ```
 
@@ -215,8 +227,8 @@ failure.
    and silently drop a commit. The correct procedure (after the user-guided resolution of step 4) is
    `git add <resolved files>` followed by either `git rebase --continue` (which creates the
    conflicting commit on top of `HEAD`, preserving its identity) or, when the plan calls for
-   combining the conflicting commit into `HEAD = predecessor`, `git commit --amend -m "<combined
-   title>" -m "<combined body>"` followed by `git rebase --skip` to drop the now-absorbed entry from
+   combining the conflicting commit into `HEAD = predecessor`, `git commit --amend -F -` with the
+   combined message on stdin, followed by `git rebase --skip` to drop the now-absorbed entry from
    the todo and proceed.
 
    Always show `git log --oneline <base>..HEAD` after `--continue` (or `--skip`) resolves, before
@@ -228,7 +240,7 @@ failure.
    clean-stop combine procedure (`reset --soft HEAD~1` is wrong on the conflict path).
 
 5. Preserve trailer lines (Co-authored-by, Signed-off-by) across combines. When using `reset --soft`
-   + `--amend -m` (clean-stop combine) or plain `--amend -m` (conflict-stop combine) for
+   + `--amend -F -` (clean-stop combine) or plain `--amend -F -` (conflict-stop combine) for
    squash-equivalents, re-append trailers from the absorbed commit if the approved plan includes
    them.
 
@@ -247,7 +259,8 @@ When all stages are complete:
 
 - This command is PLANNING ONLY. Never run `git rebase`, `git commit --amend`, or any
   history-rewriting command from this flow.
-- Never force-push. Even if I later ask you to execute, confirm before pushing.
+- Never push, force or otherwise. The finalization step only prints a suggested command as plain
+  text; the user runs it.
 - Preserve trailer lines (Co-authored-by, Signed-off-by) across squashes.
 - If the rebase base resolves to a trunk branch (`<remote>/main`, `<remote>/master`), double-check —
   usually the base should be a feature-branch ancestor, not the trunk.

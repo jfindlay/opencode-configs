@@ -32,4 +32,4 @@ durability admits hot takes; durable-and-not-bland without unusualness admits lo
 
 Surface survivors with a brief tag: `CAPTURE-CANDIDATE: <one-line summary>`. Do NOT auto-write to
 any file. The tag just makes the insight visible so the user can decide whether to preserve it (via
-`/note`, `/session-end`, or manual edit).
+`/note` or manual edit).

@@ -7,7 +7,7 @@ procedures: `execution.md`.
 
 The project-lifetime static-frame document: it persists for the life of the project and is
 reconciled at sub-track boundaries, but it is rolling context, not permanent shipped documentation.
-`/roadmap-construct` creates it; `/plan-shard` reconciles it before each next shard. Execution never
+`/roadmap/construct` creates it; `/plan/shard` reconciles it before each next shard. Execution never
 writes it. A standalone PLAN does not require one. Retain it until its reconciliation and any
 unresolved handoff are satisfied. Suggested shape (adapt to the project):
 
@@ -52,9 +52,9 @@ unconsumed handoff, deferred check, or unfolded discovery remains.
   entry shape in `paired-units.md`.
 - `## Discoveries & risks` — carried down from the ROADMAP, phrased for discovery adjudication
   (`internal-continue` / `additive-reshard` / `destructive-HALT`); execution appends adjudicated
-  findings. The reverse flow, into the ROADMAP, happens in `/plan-shard` reconciliation.
+  findings. The reverse flow, into the ROADMAP, happens in `/plan/shard` reconciliation.
 - `## Notes for executors` — tier routing, register notes, invariants to preserve, the suggested
-  first `/plan-run` invocation (`halt-at-boundaries` for an unproven shard pattern), and the anneal
+  first `/plan/run` invocation (`halt-at-boundaries` for an unproven shard pattern), and the anneal
   denylist (seeded from `artifact-hygiene.md`, tunable here).
 
 ### Row markers

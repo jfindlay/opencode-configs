@@ -11,8 +11,8 @@ productively apply.
 
 ## Tier gating
 
-Read this file in full; it applies to T-1, T0, and T1 agents. Which agent sits at which tier:
-`AGENTS-ROSTER.md`.
+Read this file in full; it applies to T-1, T0, and T1 agents. An agent's tier is the one its
+frontmatter `model:` pin encodes (`AGENTS.md` model tiers).
 
 **T-1 and T0 agents** also load `AGENTS-REASONING-ADVANCED.md` (modes of inference, the four-step
 abductive decomposition) as rules in force. T-1 agents additionally load `AGENTS-REASONING-HINTS.md`

@@ -65,7 +65,7 @@ kept for this purpose; its history exists only there).
     reproduced on 2.2.5.
   - The edit tool's validation error does not name an unrecognized argument key (a misspelled
     `newString` looked like a missing argument).
-- **Projects seeded with the old `## Notes for executors` pointer.** Older `/plan-shard` runs put
+- **Projects seeded with the old `## Notes for executors` pointer.** Older `/plan/shard` runs put
   a pointer to PLAN into the project's `AGENTS.md`; it dangles after the arc. The current seed is a
   self-contained `## Register in durable files` block. Replace the old pointer by hand when a
   seeded project is next touched (decide whether this is worth tracking).
@@ -107,12 +107,10 @@ expectations. The committer is the first concrete instance, but the pattern gene
 **Where the pattern already shows up implicitly**:
 
 - `@verify` takes a list of review-finding claims; refuses or stalls if the list isn't parseable.
-- `@explore` takes a `GOAL` + `INVESTIGATION TASKS` + `OUTPUT FORMAT` template per the subagent
-  prompt template in `AGENTS.md`. The receiving agent currently parses these as natural-language
-  prose; nothing structural enforces the shape.
-- `@session-scan` takes session-history inputs and emits classified items; the input/output
-  shapes are defined by command-side prose conventions, not by a schema.
-- `/rebase-plan` produces a plan that `@git-editor` later consumes in a fresh session; the
+- `@explore` takes a `GOAL` + `INVESTIGATION TASKS` + `OUTPUT FORMAT` template per
+  `commands/explore.md`. The receiving agent currently parses these as natural-language prose;
+  nothing structural enforces the shape.
+- `/plan/rebase` produces a plan that `@git-editor` later consumes in a fresh session; the
   plan's shape is documented in prose but not validated at handoff.
 
 In every case, the contract is real — the receiving agent breaks or improvises if the input is
@@ -123,8 +121,8 @@ weakest possible enforcement mechanism.
 
 1. **A `schema/` directory** holding YAML or JSON-Schema definitions for each runtime-enforced
    contract. Initial entries:
-   - `schema/committer-handoff.yaml` — `SESSION CONTRACT`, `EXPECTED FILES`, optional `TICKET ID`,
-     optional `COMMIT TITLE HINT`.
+   - `schema/committer-handoff.yaml` — `SESSION CONTRACT`, `EXPECTED FILES`, `CO_AUTHOR`, optional
+     `STAGING MODE`, `COMMIT MESSAGE`, `TICKET ID`, `COMMIT TITLE HINT`.
    - `schema/verify-handoff.yaml` — claim list with per-claim `description`, `evidence-hint`,
      `priority`.
    - `schema/explore-handoff.yaml` — `GOAL`, `INVESTIGATION TASKS`, `OUTPUT FORMAT`,
@@ -135,7 +133,7 @@ weakest possible enforcement mechanism.
 3. **A validator** (maybe a small bash or python script) that orchestrators can run before
    dispatching a subagent. Catches malformed handoffs before they cost a subagent's context.
 4. **Code-structure consolidation**. The subagent prompt templates currently scattered across
-   `AGENTS.md` (subagent prompt template), individual agent files, and command files could be
+   `commands/explore.md`, individual agent files, and other command files could be
    reorganized so the schema is the single source of truth and the prompt templates are
    generated from it. This is the "code structure changes if possible" piece — feasible at the
    repo level via a small template/generation step.

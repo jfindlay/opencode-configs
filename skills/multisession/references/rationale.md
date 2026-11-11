@@ -106,7 +106,7 @@ unadjudicated: it goes to a juncture fork, and an irreconcilable one halts for a
 
 ## Fiduciary latitude
 
-Accepting a sharded PLAN, mechanically by invoking `/plan-run`, accepts the whole implementation
+Accepting a sharded PLAN, mechanically by invoking `/plan/run`, accepts the whole implementation
 path-space the enrolled agents judge best, not a line-item contract. Engineering is the work of
 wresting legibility, durability, and stability out of natural resources: a Chesterton fence here, a
 gauge on noise there, a map of the approximately linear region within a contradictory reality;

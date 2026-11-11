@@ -1,7 +1,7 @@
 # Artifact hygiene: plan register, annealing, boundary review
 
 Keeps planning vocabulary out of durable artifacts. Used by sharding (seed, denylist), execution
-(REGISTER block, boundary procedures), and standalone `/plan-anneal`. The derivation is in
+(REGISTER block, boundary procedures), and standalone `/plan/anneal`. The derivation is in
 `rationale.md`.
 
 ## Two vocabularies
@@ -36,7 +36,7 @@ E.g. "known-answer test for the walk-state invariant W = a·G + b·Q", not "KAT 
 
 ## Project `AGENTS.md` seed
 
-Sessions outside a chain never see dispatch templates, so `/plan-shard` appends this block,
+Sessions outside a chain never see dispatch templates, so `/plan/shard` appends this block,
 verbatim, to the target project's `AGENTS.md` (creating the file with just this block if none
 exists), behind the confirm-before-write gate (a prompted write outside `@architect`'s auto-allowed
 docs):
@@ -141,7 +141,7 @@ The driver gathers, mechanically, before forking; the fork judges.
    7); what still stands after it is reported, not certified. Costs stay limited to claims this
    sub-track affected; this adds no verdict, phase, or loop.
 
-## Standalone annealing (`/plan-anneal`)
+## Standalone annealing (`/plan/anneal`)
 
 Whole-project, on-demand form of the boundary anneal gate: use it when a chain ran without the gate,
 when per-sub-track scope missed cross-cutting leaks, or as a final pass before a PLAN is archived.

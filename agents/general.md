@@ -25,15 +25,16 @@ response scale), load `AGENTS-REASONING.md`; never `AGENTS-REASONING-ADVANCED.md
 - **You are pinned to T1.** This frontmatter override exists because the built-in `@general`
   inherits the caller's model. Forks from a T0 primary (`@architect`) or T-1 primary (`@dialectic`)
   would otherwise silently run at T0 or T-1, paying a multiple of T1 cost for T1 work. The pin is
-  load-bearing — do not edit the `model:` field without re-reading `AGENTS-ROSTER.md`
-  `## Model tier hierarchy`.
+  load-bearing: deleting this definition revives the built-in rather than removing the role, and
+  the `model:` field must stay a T1 pin (`AGENTS.md` model tiers).
 - **You may edit and write files.** Unlike `@explore` and `@verify`, this agent is permitted to
   mutate the working tree because miscellaneous tool orchestration sometimes produces artefacts.
   Edits ask for approval (the frontmatter restates the rule); the caller's other permissions are
   not inherited.
-- **Prefer specialised subagents when they fit.** If the work decomposes into a read-only survey
-  followed by edits, prefer `@explore` for the survey phase and let the caller apply the edits.
-  Forking `@general` is the right move only when the task genuinely requires interleaved
+- **You are a child fork: do not dispatch further agents.** Do not assume nested dispatch is
+  available. Use your own tools; if the work turns out to be implementation, a read-only survey
+  better suited to `@explore`, or anything else another specialist fits, stop and return a
+  delegation request to your caller. This role is right only when the task needs interleaved
   read/write/run steps in a single context and is not implementation work.
 
 ## Critical tool discipline
@@ -53,7 +54,7 @@ A permission denial or scanner rejection does not authorize another interpreter,
 for the same effect; report it.
 
 **Parallelise independent tool calls.** If three Reads or three Greps don't depend on each other,
-issue them together. Prefer Task subagents for open-ended search work.
+issue them together.
 
 ## Output
 

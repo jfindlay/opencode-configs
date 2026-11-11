@@ -5,11 +5,13 @@ description: "[jf] Audit a target for code, doc, and test style violations. Args
 Audit a target (file, dir, or package) for code, doc, and test style violations. Forks one
 read-only `@explore` per applicable surface; merges findings by file; emits proposals only.
 
-User input: $ARGUMENTS
+Target (file, directory, or package; may be empty):
+
+$ARGUMENTS
 
 ## Steps
 
-1. **Resolve target.** If $ARGUMENTS is empty, ask. Resolve to an absolute path; stop if it
+1. **Resolve target.** If the supplied target is empty, ask. Resolve to an absolute path; stop if it
    doesn't exist. Detect language(s) from project markers (`pyproject.toml` → Python,
    `Cargo.toml` → Rust, `go.mod` → Go; absent markers → ask).
 
@@ -56,6 +58,7 @@ User input: $ARGUMENTS
    tag all triggering surface names. Distinguish mechanical findings from structural observations.
 
 5. If Pass A (inline) or rolling-context findings exceed 200 rows total, tooling drift is likely.
-   Recommend `/format-loop` first and stop.
+   Recommend running the project's formatter first and stop; this command stays review-only and
+   never applies fixes.
 
 6. End: "Act on these findings, drill into a specific file, or stop?"

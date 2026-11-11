@@ -39,13 +39,11 @@ Routing model reframes "what's the best model" as "what's the cost of this being
 - **Cost-of-wrong low, judgment mechanical → T3.** Count these items, extract this section,
   regex-and-report.
 
-Models, cost ratios, and usage shares per tier live in `AGENTS-ROSTER.md`.
-
 Upgrade or downgrade is not about task size. Large mechanical tasks stay at T3. Small architectural
 decisions stay at T0. The signal is "if this is wrong, how much work is downstream?"
 
-Cross-check T0 conclusions at phase boundaries with T0-alt (a different model family): ask the alt
-to steelman objections to the T0 plan. Different families catch different failure modes.
+Cross-check T0 conclusions at phase boundaries with a T0-class model from a different family: ask
+it to steelman objections to the T0 plan. Different families catch different failure modes.
 
 ## Subagent prompt anatomy
 
@@ -124,16 +122,16 @@ is fine. Agents are for repeated elevated work within one posture, not one-shot 
 
 ### Addendum: agent-driven rebase execution strategy
 
-Concrete strategy for `@git-editor` when executing a `/plan-rebase`-approved rebase. Load-bearing
+Concrete strategy for `@git-editor` when executing a `/plan/rebase`-approved rebase. Load-bearing
 for the rebase flow to work at all — without this, `git rebase -i` stalls on editor invocation.
 
 **Default editor safety**: the `no-interactive-editor.js` plugin sets `EDITOR`, `GIT_EDITOR`,
-`GIT_SEQUENCE_EDITOR`, `VISUAL`, and `PAGER` to `true`/`cat` for all bash invocations by default.
+`GIT_SEQUENCE_EDITOR`, `VISUAL`, and `PAGER` to `true`/`cat` for all shell invocations by default.
 This covers the general case — bare `git commit`, `git merge`, pager hangs, etc. — across every
 agent without any per-call setup.
 
 The scripted-rebase `cp`-as-editor pattern below is the canonical **opt-in override** of that
-default. When `@git-editor` sets `GIT_SEQUENCE_EDITOR="cp <tempfile>"` explicitly in a bash call,
+default. When `@git-editor` sets `GIT_SEQUENCE_EDITOR="cp <tempfile>"` explicitly in a shell call,
 the plugin's `??`-fallback respects the caller override. One mechanism, two modes: plugin handles
 the 99% default case; `cp` override handles the scripted-rebase case.
 
@@ -141,9 +139,9 @@ the 99% default case; `cp` override handles the scripted-rebase case.
 for every `reword` and `squash` message. An agent driving rebase autonomously has no editor to
     offer, so any directive that triggers `$GIT_EDITOR` stalls the flow.
 
-**The strategy — "edit-everywhere + --amend -m"**:
+**The strategy — "edit-everywhere + --amend -F"**:
 
-1. The plan command (`/plan-rebase`) emits only `pick` and `edit` directives. Never `reword`,
+1. The plan command (`/plan/rebase`) emits only `pick` and `edit` directives. Never `reword`,
    `squash`, or `fixup`. Every directive that would open `$GIT_EDITOR` is replaced by `edit`.
 2. The agent writes the approved todo list to a tempfile, then invokes: `GIT_SEQUENCE_EDITOR="cp
    <tempfile>" git rebase -i <base>`. The `cp` command acts as the "editor" — it overwrites git's
@@ -154,15 +152,15 @@ for every `reword` and `squash` message. An agent driving rebase autonomously ha
    stop**: commit not applied, index has unmerged paths, `HEAD` is the *predecessor* of the current
    line. The agent must run `git status` to classify before dispatching — the combine procedure
    differs by one commit between the two states, and getting it wrong silently drops a commit.
-4. On a clean stop, the agent applies the approved message explicitly via `git commit --amend -m
-   "<title>" -m "<body>"`, then `git rebase --continue`. For squash-equivalents (combine into
+4. On a clean stop, the agent applies the approved message explicitly via `git commit --amend -F -`
+   (message on stdin), then `git rebase --continue`. For squash-equivalents (combine into
    predecessor), the plan emits `edit` on the *second* commit; at that clean stop the agent runs
    `git reset --soft HEAD~1` to move `HEAD` back to the predecessor with the second commit's changes
-   staged, then `git commit --amend -m "<combined message>"`, then `--continue`.
+   staged, then `git commit --amend -F -` (combined message on stdin), then `--continue`.
 5. On a conflict stop, the agent stops and surfaces for user guidance — conflict resolution is not
    autonomous. After the user resolves, the procedure is `git add <files>` then either `git rebase
-   --continue` (preserves the conflicting commit's identity) or `git commit --amend -m "<combined
-   message>"` followed by `git rebase --skip` (combines the conflicting commit into `HEAD =
+   --continue` (preserves the conflicting commit's identity) or `git commit --amend -F -` (combined
+   message on stdin) followed by `git rebase --skip` (combines the conflicting commit into `HEAD =
    predecessor`). **Never run `reset --soft HEAD~1` on the conflict path** — `HEAD` is already the
    predecessor; resetting further would drop a commit.
 6. `$GIT_EDITOR` is never set and never needed. Any editor invocation during execution is a bug to
@@ -176,7 +174,7 @@ for every `reword` and `squash` message. An agent driving rebase autonomously ha
 - `GIT_EDITOR="cp <message-file>"` per step works but requires per-step env plumbing and pre-writing
   every message. Brittle coordination.
 - Cherry-pick sequence (no `rebase -i` at all) is the viable fallback if `cp`-as-editor turns out to
-  have a snag. Every commit via explicit cherry-pick plus `--amend -m`. More commands,
+  have a snag. Every commit via explicit cherry-pick plus `--amend -F -`. More commands,
   better-localised failure modes.
 
 The `cp`-as-editor pattern has been verified in practice; cherry-pick sequence is the fallback if
@@ -292,8 +290,8 @@ user.
 
 ## Nested subagent dispatches can hang on permission prompts
 
-When a subagent (forked via the Task tool) raises a permission prompt for a tool call not covered by
-its frontmatter allowlist, the approval dialog may not route cleanly up through the nesting back to
+When a subagent (forked via the `subagent` tool) raises a permission prompt for a tool call not
+covered by its frontmatter allowlist, the approval dialog may not route cleanly up through the nesting back to
 the user. The inner agent waits for approval; the outer agent waits for the inner agent; the user
 sees neither. Hypothesis unconfirmed — root cause may be nesting-specific or a broader permission
 routing issue.
@@ -346,14 +344,14 @@ the rendered prompt.  This must be preempted by defensively specifying the `agen
 
 ## Engineering as the quantification of error; the fiduciary-latitude contract
 
-2026-06-06: User acceptance of a sharded PLAN — expressed mechanically by invoking `/plan-run
+2026-06-06: User acceptance of a sharded PLAN — expressed mechanically by invoking `/plan/run
 docs/PLAN.md` — is acceptance of the entire implementation path-space the enrolled agents judge best,
 not a line-item contract to be executed literally. Each agent is empowered to make the best possible
 choice among a heterogeneous set of constraints (business demands, technical constraints, resource
 budget); this is the foundational work of engineering itself — to wright legibility, durability, and
 stability out of natural resources: a Chesterton fence here, a gauge on noise there, a map of the
 approximately-linear region within a fantastically contradictory reality. Engineering is
-epistemologically the quantification of error. The operational consequence for `/plan-run`: agents
+epistemologically the quantification of error. The operational consequence for `/plan/run`: agents
 hold fiduciary latitude under fidelity to the PLAN, so deviation (even medium deviation, with
 commensurate evidence) rides through and is reported at the step-3 review; halts are reserved for the
 irreconcilable — something incredibly wrong that the agent cannot reconcile against the PLAN's

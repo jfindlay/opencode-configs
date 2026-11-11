@@ -14,22 +14,33 @@ the work.
 ## OpenCode config files
 
 The authoritative source is the `opencode-config/` git repo. `~/.config/opencode/` is a
-**symlink** to that repo, so edits are live immediately — no apply step. Edit files directly
-in the `opencode-config/` repo; commit per the standard git conventions below. Runtime artifacts
-(`bun.lock`, `package.json`, `node_modules/`, etc.) are managed by OpenCode itself and must NOT
-be committed to the repo — they exist only at the symlink target and are covered by `.gitignore`.
+**symlink** to that repo, so an edit lands in the live files with no apply step. The running service
+does not reliably watch the symlinked directory, so confirm a change took effect (or reload) before
+relying on it. Edit files directly in the `opencode-config/` repo; commit per the standard git
+conventions below. Runtime artifacts (`bun.lock`, `package.json`, `node_modules/`, etc.) are managed
+by OpenCode itself and must NOT be committed to the repo — they exist only at the symlink target and
+are covered by `.gitignore`.
 
 ## Model tiers
 
-T-1 = interactive dialectic at the generative extremity (genesis, abduction, pivotal anomalies).
-T0 = deep planning, architectural tradeoffs, cross-cutting audits. T1 = default (implementation,
-refactors, reviews). T2 = mechanical subagents. Default to T1. Encode tier in each subagent's
-`model:` frontmatter field — never rely on prose guidance alone.
+Tiers route work by cost-of-wrong, not task size:
 
-**Tier notation only.** Everywhere outside `AGENTS-ROSTER.md` (the single authority for the
-tier→model mapping, cost ratios, and usage shares), the `model:` frontmatter fields, and
-`opencode.json`, refer to models by tier (T-1, T0, T1, T2) — never by model name or version, which
-churn. Full tier detail and agent roster: `AGENTS-ROSTER.md`.
+- **T-1** — interactive dialectic at the generative extremity (genesis, abduction, pivotal
+  anomalies). Rare.
+- **T0** — deep planning, architectural tradeoffs, cross-cutting audits. Use when being wrong is
+  expensive and the work is analytical. A different model family can cross-check T0 conclusions at
+  phase boundaries.
+- **T1** — the default: implementation, refactors, tests, docs, reviews, exploration, verification.
+- **T2** — mechanical subagents with low judgment load (classify, scan, group, commit).
+- **T3** — pure mechanical extraction or counting; created on demand, none pre-built.
+
+Escalate or downgrade by cost-of-wrong. Encode the tier in each subagent's `model:` frontmatter
+field: a subagent without a pin inherits its caller's model, so the pin is what keeps T0/T-1 forks
+from silently running at the caller's tier.
+
+**Tier notation only.** The `model:` frontmatter fields and `opencode.json` carry the concrete model
+assignments. Everywhere else, refer to models by tier (T-1, T0, T1, T2) — never by model name or
+version, which churn.
 
 ## Document loading rules
 
@@ -51,9 +62,6 @@ the judgment register for. T0/T1 agents follow the trigger directly.
 | AGENTS-HINTS.md                        | When reaching for a referential framing; when a captured  | T0/T1 |
 |                                        | hint might apply; when AGENTS.md or REASONING points to   |       |
 |                                        | a specific section in HINTS                               |       |
-| AGENTS-ROSTER.md                       | When selecting an agent or command to dispatch; when      | T0/T1 |
-|                                        | pinning a subagent's `model:` field; when in an           |       |
-|                                        | autonomous chain (committer dispatch pattern)             |       |
 | AGENTS-CAPTURE.md                      | When producing or encountering a CAPTURE-CANDIDATE-shaped | T0/T1 |
 |                                        | finding                                                   |       |
 | STYLE-CODE.md                          | Before writing or modifying any code; before reviewing    | T0/T1 |
@@ -71,8 +79,11 @@ the judgment register for. T0/T1 agents follow the trigger directly.
 | `python-lenses` skill                  | When doing a Python code-analysis investigation; when the | T0/T1 |
 |                                        | user names a lens explicitly; when choosing among AST,    |       |
 |                                        | import-graph, call-graph, coverage, or test analysis      |       |
+| `lean` skill                           | When auditing the fidelity of Lean statements or proofs,  | T0/T1 |
+|                                        | or translating Lean declarations into classical           |       |
+|                                        | exposition; Lean projects only                            |       |
 | `multisession` skill                   | When constructing a ROADMAP, sharding a PLAN, running or  | T0/T1 |
-|                                        | annealing a /plan-run chain, or acting as @plan-admin.    |       |
+|                                        | annealing a /plan/run chain, or acting as @plan-admin.    |       |
 |                                        | Its commands and agents load the resources they need; a   |       |
 |                                        | dispatched worker gets its scope in the prompt and does   |       |
 |                                        | not load the skill; load its rationale reference only to  |       |
@@ -102,12 +113,13 @@ These rules exist because violating them costs turns and clutters sessions.
 - **Never `echo` to communicate.** Output directly in chat.
 - **Parallelize independent calls.** If three Reads or three Greps don't depend on each other, call
   them in one assistant turn.
-- **Prefer the `Task` subagent tool over direct search** when the question is open-ended or likely
-  to require multiple search rounds. Reserve direct Grep/Glob for needle queries ("find the
-  definition of X").
+- **Prefer the `subagent` tool over direct search** when the question is open-ended or likely to
+  require multiple search rounds. Reserve direct Grep/Glob for needle queries ("find the definition
+  of X").
 - **Ask structured questions**: When input from the user is needed, leverage the Question tool to
   structure complex decisions.
-- **Reserve bash for what only bash can do**: running pytest, docker, git, make, mypy, sqlite3, etc.
+- **Reserve the shell for what only a shell can do**: running pytest, docker, git, make, mypy,
+  sqlite3, etc.
 - **JSON in tool calls**: when making function calls using tools that accept array or object
   parameters, structure those as JSON when the tool schema requires it. For example:
   ```
@@ -149,7 +161,14 @@ decorator/dataclass/Pydantic guidance; test philosophy).
 
 ## Git conventions
 
-- Ask before creating or editing commits. (Carve-out for autonomous chains: see `AGENTS-ROSTER.md`.)
+- Ask before creating or editing commits. A direct user request to commit ("commit") is the
+  approval: inspect the changes, commit the intended paths in one turn with a message per these
+  conventions, and report the result; ask only when the fileset or attribution is unclear. An
+  approved autonomous chain (`/plan/run`) authorizes its driver to dispatch commits after the
+  contract gate; implementation workers never commit themselves and leave the tree dirty.
+- In a chain, the driver owns tests, scope, readiness, and recovery decisions. `@committer` stages
+  the agreed fileset and returns success or a refusal; it does not repair, retry past a hook
+  failure, or rewrite history.
 - Branch naming: `<user>/<project>-XXXX/descriptive-slug`. If no ticket, eliminate
   `<project>-XXXX/`.
 - Commit title: `<project>-XXXX Concise description`.
@@ -157,11 +176,19 @@ decorator/dataclass/Pydantic guidance; test philosophy).
   purpose of the commit. Keep details out of the commit message. They should be evident from the
   commit body.
 - Commit message width (single authority): title aims for ≤72 characters, no trailing period; body
-  wraps at 72 characters. `/commit` and `@committer` defer here. Pass a hard-wrapped message to git
+  wraps at 72 characters. `@committer` defers here. Pass a hard-wrapped message to git
   with `-F` (stdin heredoc); a body given through `-m` has come back unwrapped.
-- **Agent attribution**: commits where an agent produced the diff carry a `Co-authored-by:` trailer
-  crediting the content agent(s). Attribution is default ON. Full convention (who gets credited,
-  identity string format, suppression conditions) lives in `AGENTS-ROSTER.md` under "Agent
-  attribution convention".
+- **Agent attribution**: commits where an agent produced the diff carry one `Co-authored-by:`
+  trailer per content agent, crediting the agent that did the intellectual work of the diff (design,
+  strategy, code). Attribution is default ON.
+  - Credit the actual content agents only. Mechanical agents (`@committer`) and orchestration
+    (`@plan-admin`) are not authors, like the CI system that ran `git commit`. Same-model stages
+    dedupe to one trailer.
+  - Identity format: `Co-authored-by: <model name and version> <noreply+<model-family>@<vendor
+    domain>>` — the human-readable name of the model that actually ran, with a role-only email
+    that survives version bumps. Never invent an identity: when the author is unknown, ask.
+  - Suppress only when the human wrote the diff and the agent merely committed it, or the repo's
+    contribution policy prohibits agent trailers. Suppression is explicit (the user says so, or
+    `CO_AUTHOR: none` to `@committer`), never inferred.
 - Keep commits separated by focus; squash fixup commits before finishing.
 - NEVER push branches to a remote; NEVER commit `.env` / credential files.

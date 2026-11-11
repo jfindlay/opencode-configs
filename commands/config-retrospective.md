@@ -1,11 +1,15 @@
 ---
 description: "[jf] Single-session @architect audit of the OpenCode user-level infrastructure against the session store, scored against a relentless-simplicity lens. On-demand only."
+agent: architect
 ---
 
 Audit the OpenCode user-level infrastructure (permissions, agents, commands, docs) against actual
-session-store usage; action approved changes. One `@architect` session, no cross-session hand-off.
-Source of truth and live config are the same files: `~/.config/opencode/` is a symlink to
-`opencode-config/`, so every edit there takes effect immediately.
+session-store usage; action approved changes. This command runs the session as `@architect`; the
+switch persists after it finishes. One session, no cross-session hand-off. Source of truth and live
+config are the same files: `~/.config/opencode/` is a symlink to `opencode-config/`, so edits there
+take effect on reload (the symlinked directory is not watched; see the reload note in `IDEAS.md`).
+The architect never edits source or config itself: approved changes go to a forked `@build`
+(step 4).
 
 ## The lens: relentless simplicity
 
@@ -101,8 +105,7 @@ carried `permissions`, so a fork's session-level override cannot be discovered o
 
 ## Steps
 
-1. Confirm T0/`@architect`. If not, tell the user and stop.
-2. Fork `@explore` for Threads 1+2 with a self-contained prompt: working directory, the schema crib,
+1. Fork `@explore` for Threads 1+2 with a self-contained prompt: working directory, the schema crib,
    the thread questions, and the output format. Validate crib first; surface any drift immediately.
    `@explore` is read-only by contract (its prompt, not its shell rules) and reads history through
    `opencode api session.list` and `opencode api session.message.list`: small pages, no mutating
@@ -111,11 +114,15 @@ carried `permissions`, so a fork's session-level override cannot be discovered o
    grants reads of sensitive session history, not API mutations. Never write
    `.db`/`.db-wal`/`.db-shm`. Edit through the `opencode-config/` path; the symlinked config
    directory is the same files.
-3. Run Thread 3 yourself. Produce a ranked candidate list (deletes, merges, cuts, permission edits)
+2. Run Thread 3 yourself. Produce a ranked candidate list (deletes, merges, cuts, permission edits)
    ranked by (simplicity impact) × (ease/safety).
-4. Gate via Question tool (accept / defer / reject). Do not action before this step.
-5. Dispatch `@build` to action accepted changes. It leaves the tree dirty; do NOT commit.
-6. Commit: draft message, gate on user approval, delegate to `@committer`. One commit per coherent
-   change. Never push.
-7. Put the rationale (what changed, why, alternatives weighed) in the commit bodies; add deferred or
+3. Gate via Question tool (accept / defer / reject). Do not action before this step.
+4. Dispatch `@build` to action accepted changes. It leaves the tree dirty; do NOT commit.
+5. Commit: draft the full message, gate on user approval, then delegate to `@committer` with the
+   approved text as `COMMIT MESSAGE (verbatim)`, the exact changed paths as `EXPECTED FILES`, the
+   matching `STAGING MODE` (`strict` only when they are every dirty path, else `exact`), and
+   `CO_AUTHOR` for the agents that actually produced the content (you for the approach, the forked
+   `@build` for the edits; identity format in `AGENTS.md`; ask rather than invent). One commit per
+   coherent change. Never push.
+6. Put the rationale (what changed, why, alternatives weighed) in the commit bodies; add deferred or
    rejected-but-revisitable candidates to `IDEAS.md`. No separate changelog.

@@ -1,6 +1,6 @@
 # Planning: model, ROADMAP construction, sharding
 
-Procedures for `/roadmap-construct` and `/plan-shard`, both run from `@architect` (T0). Shapes and
+Procedures for `/roadmap/construct` and `/plan/shard`, both run from `@architect` (T0). Shapes and
 markers: `plan-format.md`. Derivations: `rationale.md` (optional).
 
 ## Planning model
@@ -13,7 +13,7 @@ markers: `plan-format.md`. Derivations: `rationale.md` (optional).
 - **Two frames, two documents.** ROADMAP is the static frame (project-lifetime DAG of sub-tracks);
   PLAN is the rolling frame for the current sub-track. Execution learns in the action frame and
   carries it in PLAN's digest; junctures adjudicate and the driver records findings in PLAN.
-  Learning reaches the ROADMAP only when `/plan-shard` reconciles at the next boundary. ROADMAP is
+  Learning reaches the ROADMAP only when `/plan/shard` reconciles at the next boundary. ROADMAP is
   reviewed at sub-track boundaries, PLAN at session boundaries; do not co-maintain them.
 - **Sub-tracks** are the composition unit above sessions: substrate + algorithms + optimizations +
   integrative writeup for one conceptually tight area, and the smallest unit that ships coherently.
@@ -43,7 +43,7 @@ markers: `plan-format.md`. Derivations: `rationale.md` (optional).
   reorder proposed future PLANs, so neither horizon is fixed. A standalone PLAN needs no one-node
   ROADMAP file.
 - **Participation is a policy.** The default is that the user reviews and approves each new PLAN
-  (the `/plan-shard` confirm-and-pause). The user may instead intend to delegate a wider bounded
+  (the `/plan/shard` confirm-and-pause). The user may instead intend to delegate a wider bounded
   scope, up to a whole ROADMAP, when the result matters more than participation at every boundary.
 - **Delegation envelope.** Authority and planning depth are independent. Describe a delegation by
   its intent and non-goals; deliverables and acceptance evidence; revision authority; resource and
@@ -58,8 +58,8 @@ markers: `plan-format.md`. Derivations: `rationale.md` (optional).
   permission to misstate results or skip owed validation: report demonstrated results, residual
   uncertainty, and deferred production work separately.
 - **Current limits.** The delegation model above is guidance, not runtime support.
-  - `/plan-run` executes an already-sharded PLAN; it does not construct successive PLANs.
-  - `/plan-shard` confirms its PLAN and ROADMAP writes and pauses for review; the final ROADMAP
+  - `/plan/run` executes an already-sharded PLAN; it does not construct successive PLANs.
+  - `/plan/shard` confirms its PLAN and ROADMAP writes and pauses for review; the final ROADMAP
     reconciliation has no automatic owner (see Sharding).
   - The execution driver gets no ROADMAP-write or sharding authority from this skill; agent roles,
     approval gates, tool permissions, and stop conditions apply unchanged.
@@ -126,21 +126,21 @@ for a merely expensive row, or for an unfinished, intricately coupled design tha
 faithfully written down: that stays single-stage. Marking, appendix, and `## Completion handoffs`
 requirements are in `paired-units.md`; load it when a row is selected.
 
-## ROADMAP construction (`/roadmap-construct`)
+## ROADMAP construction (`/roadmap/construct`)
 
 Construction is a dialogue, not a procedure: the project's constraint surface is discovered and
-articulated here, not applied, so it resists templating. Read any named source first (`$ARGUMENTS`
-as supplied by the command may be empty, a one-line intent, or a path to a design doc, an `IDEAS.md`
-entry, or an exploration note). Hold the downstream loop in view, since the ROADMAP must give it
-something to slice, execute against, and reconcile back into: `/plan-shard` slices a sub-track;
-`/plan-run` executes it; junctures adjudicate what execution learns; `/plan-shard` folds it back.
+articulated here, not applied, so it resists templating. Read any named source first (the supplied
+input may be empty, a one-line intent, or a path to a design doc, an `IDEAS.md` entry, or an
+exploration note). Hold the downstream loop in view, since the ROADMAP must give it
+something to slice, execute against, and reconcile back into: `/plan/shard` slices a sub-track;
+`/plan/run` executes it; junctures adjudicate what execution learns; `/plan/shard` folds it back.
 
 Surface, roughly in this order and following the intent where it leads:
 
 1. **Design intent** in one prose paragraph, written to be re-read at every boundary as the
    anti-defocus anchor. The most load-bearing artifact: make it sharp.
 2. **Sub-track decomposition** as a DAG with named dependency edges. Do not decompose into sessions;
-   that is premature until each substrate is known and is `/plan-shard`'s job.
+   that is premature until each substrate is known and is `/plan/shard`'s job.
 3. **Substrate**: what exists, what must be built first, which sub-track is the irreducible
    foundation.
 4. **Coarse cross-track contracts**, frozen precisely later per sub-track.
@@ -152,7 +152,7 @@ Use the Question tool for load-bearing choices (sub-track boundaries, dependency
 substrate), not silent decisions.
 
 Output: show the proposed `docs/ROADMAP.md` (shape in `plan-format.md`) as a fenced block; confirm
-via the Question tool before writing; write it and pause for review; suggest the first `/plan-shard`
+via the Question tool before writing; write it and pause for review; suggest the first `/plan/shard`
 invocation. Writes are limited to `docs/ROADMAP.md` (and, on approval, an `IDEAS.md`/NOTES capture).
 Never shard, execute, or commit code.
 
@@ -162,18 +162,17 @@ become one mechanized control structure; reusable parameterized sub-track graph 
 juncture judgment inside the loop may alter the loop's future.
 
 Exit report: source used; sub-track count, DAG shape, substrate sub-track; contracts sketched and
-open questions seeded; capture candidates; the suggested first `/plan-shard` invocation.
+open questions seeded; capture candidates; the suggested first `/plan/shard` invocation.
 
-## Sharding (`/plan-shard`)
+## Sharding (`/plan/shard`)
 
 Turns a ROADMAP, prose plan, or design statement into the executable `docs/PLAN.md`, then pauses for
-review; it never runs `/plan-run`. Runs from `@architect`; from another agent, note that the
-judgment register expects T0 and proceed only on user confirmation. Never executes a session, never
-runs the VERIFY gate beyond discovery, never commits code.
+review; it never runs `/plan/run`. The command selects `@architect`; the judgment register expects
+T0. Never executes a session, never runs the VERIFY gate beyond discovery, never commits code.
 
 **Entry mode.** State which applies before proceeding:
 
-1. *From a roadmap/prose file*: `$ARGUMENTS` (as supplied) names a path; a second token names the
+1. *From a roadmap/prose file*: the supplied input names a path; a second token names the
    sub-track to shard, defaulting to the next un-started one.
 2. *Re-shard/edit an existing structured PLAN* that is stale, mis-sized, or pre-dates the current
    sizing: read it and the ROADMAP; revise in place.
@@ -181,7 +180,7 @@ runs the VERIFY gate beyond discovery, never commits code.
    it sits on, and rough scope interactively, as a dialogue; build the PLAN from the conversation.
    Surface a `CAPTURE-CANDIDATE` if the design statement itself belongs in a ROADMAP.
 
-**Reconcile the ROADMAP first.** Sharding a sub-track is a sub-track boundary, and `/plan-shard` is
+**Reconcile the ROADMAP first.** Sharding a sub-track is a sub-track boundary, and `/plan/shard` is
 the one point that folds the action frame into the ROADMAP (execution and junctures write only to
 PLAN). Skip in greenfield mode or when no ROADMAP exists. Otherwise, when a prior sub-track's PLAN
 is present:
@@ -205,7 +204,7 @@ entries not `consumed`, deferred checks and their next checkpoints, discoveries 
 the ROADMAP, and unresolved boundary-note items. A PLAN or ROADMAP is retired only once it is
 executed and reconciled and no such item remains; a replacement never silently drops one.
 
-**Limit.** Nothing guarantees a later `/plan-shard` after the final sub-track, so the final ROADMAP
+**Limit.** Nothing guarantees a later `/plan/shard` after the final sub-track, so the final ROADMAP
 reconciliation has no dedicated automatic owner, and the execution driver may not write the ROADMAP.
 Say so when a PLAN is the last; never claim the reconciliation happened by itself.
 
@@ -236,7 +235,7 @@ one dialogue: elicit intent → propose sub-track decomposition → confirm → 
    re-shard mode) as fenced blocks.
 2. Confirm via the Question tool before writing either; the write is a checkpoint, not a unilateral
    act.
-3. Write the ROADMAP (if reconciled), then the PLAN. Pause for review. Do not run `/plan-run`.
+3. Write the ROADMAP (if reconciled), then the PLAN. Pause for review. Do not run `/plan/run`.
 4. Seed the project's `AGENTS.md` with the register rule per `artifact-hygiene.md`, behind the same
    confirm gate (a prompted write outside `@architect`'s auto-allowed docs).
 5. Surface any durable roadmap-level fact not already folded in as a `CAPTURE-CANDIDATE` for the
@@ -250,4 +249,4 @@ plus any roadmap/NOTES capture), and the `AGENTS.md` seed. All other writes are 
 sub-track marked in progress, or "none (greenfield / no roadmap / no prior PLAN)"); session count,
 sub-track(s) sharded, `◆` and inflection markers placed; each `(F/C)` row with its reason; each
 split/merge with its lever; any retained prior-PLAN items; capture candidates; the suggested
-`/plan-run` invocation (`halt-at-boundaries` for an unproven shard pattern).
+`/plan/run` invocation (`halt-at-boundaries` for an unproven shard pattern).

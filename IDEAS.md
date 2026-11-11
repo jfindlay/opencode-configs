@@ -16,9 +16,10 @@ reality, delete it.
 
 ## Open follow-ups and decisions
 
-Items with an owner or gate. Version labels (2.0.32, 2.2.5) name the runtime the observation was
-made on. The harness for the unmeasured permission items is `~/Source/opencode-permtest` (frozen,
-kept for this purpose; its history exists only there).
+Open items; an owner or gate is named where one exists. Version labels (2.0.32, 2.2.5) name the
+runtime the observation was made on. The measurement harness is `~/Source/opencode-permtest`
+(frozen, kept for this purpose; its history exists only there); its `docs/FINDINGS.md` records what
+is already measured.
 
 - **`build` edit policy for the config directory (owner: user).** `opencode.json` (`agents.build`)
   has `edit ask` on `~/.config/opencode/**` and `~/Source/opencode-config/**` after `edit * allow`;
@@ -28,8 +29,8 @@ kept for this purpose; its history exists only there).
     as project-relative paths, and project-layer rules did not reach `build`.
   - `ask` is undone by a saved `edit *` allow in a project; a config `deny` is not. Switching to
     `deny` makes the restriction durable but blocks `build` there outright.
-- **Shell policy follow-ups (none measured).** The shell policy is default-allow with a few
-  consent gates; shell is not a containment boundary.
+- **Shell policy follow-ups (none measured on the current rules).** The shell policy is
+  default-allow with a few consent gates; shell is not a containment boundary.
   - Check per-agent rule evaluation (`permission.create`, no model call) for `explore`,
     `committer`, `git-editor`: expected `git push` deny everywhere, `git commit` allowed only in
     `committer` and `git-editor`, ask elsewhere.
@@ -48,21 +49,28 @@ kept for this purpose; its history exists only there).
   - After a config-only reload the plugins logged `loading plugin` but no new `initialized` line;
     whether the economics hooks were re-registered is unestablished (a file reload did
     re-initialize).
-  - A symlinked config directory is not watched (the server logs `inotify_add_watch ... Not a
-    directory`), so edits through it do not reload plugins or agents; confirm `plugin.list` shows
-    `active` and the new behavior after edits, and reload or restart the service if not.
+  - Whether edits made through the symlinked config directory reload plugins was never exercised
+    (the live probe edited a real directory); after a plugin edit, `plugin.list` showing `active`
+    proves only that the module loaded, so confirm the new behavior as well (reload procedure:
+    `AGENTS.md`, "OpenCode config files").
   - Notices print sub-cent costs as `$0.00`.
   - Not exercised: foreground-moved-to-background, production-threshold crossings, other-location
     isolation, worker roles other than `general`, long or nested workloads, savings. A private V2
     server needs a credential connected through its API (an `auth.json` copy gave
     `provider.no-route`).
-- **Unmeasured permission questions (harness above).** A configured `deny` versus a saved allow;
-  shell writes past an `edit` deny; `top_p`, `tools`, `permission` and `name` keys; whether
-  `request.body` reaches the provider. `top_p` and `temperature` in an agent file are ignored with
-  a warning on 2.2.5.
+- **Unmeasured permission questions (harness above).** Measured on 2.2.5 and not open: a config
+  `deny` held against a saved `edit *` allow (evaluation API, `build` and `committer`; no live
+  tool call), and an `edit` deny does not cover shell writes (live probes of the resource string).
+  Still open:
+  - Whether the V1-only agent keys `tools`, `permission` and `name` disable an agent's
+    `permissions` the way `temperature` did on 2.0.32 (`top_p` and `temperature` load with an
+    ignored-field warning on 2.2.5; `top_p`'s effect on permissions is untested).
+  - Whether `request.body` reaches the provider (a `request.body.top_p` is accepted into the
+    agent's request).
+  - A live-tool confirmation that a config `deny` beats a saved allow.
 - **Optional upstream reports (owner: user; file through the `report` skill only if wanted).**
   - 2.0.32: `temperature` beside `permissions:` disabled the agent's rules (4 of 4); not
-    reproduced on 2.2.5.
+    reproduced on 2.2.5, so worth filing only if that version is pinned again.
   - The edit tool's validation error does not name an unrecognized argument key (a misspelled
     `newString` looked like a missing argument).
 - **Projects seeded with the old `## Notes for executors` pointer.** Older `/plan/shard` runs put
@@ -88,45 +96,55 @@ Open shape questions (do not need to be answered now):
 - When does a pattern in this theme get promoted into `AGENTS.md` (operational rule) vs.
   the `multisession` skill (durable reference) vs. stay here (exploration)?
 
-### Idea: formalize the runtime-enforced contract between orchestrators and subagents
+### Idea: formalize the handoff contract between orchestrators and subagents
 
 **Status**: noted; no concrete work scheduled.
 
-**Lineage**. The `multisession` skill names three flavours of cross-session contract:
-compiler-enforced (traits, type signatures), test-enforced (KATs), and prose-enforced
-(invariants stated in docs). Each catches a different class of cross-session drift. The
-`@committer` subagent introduced a new pattern that doesn't fit any of the three cleanly: the
-orchestrator passes a `SESSION CONTRACT` blob and an `EXPECTED FILES` list to the committer,
-and the committer enforces them at commit time (refusing on scope drift, empty diff, etc.).
+**Lineage**. The `multisession` skill (`references/planning.md`) names three flavours of
+cross-session design contract: compiler-enforced (traits, type signatures), test-enforced (KATs),
+and prose-enforced (invariants stated in docs). Invocation-time handoffs between agents are a
+different axis: the orchestrator passes a structured prompt and the receiving agent checks it. The
+`@committer` subagent is the most developed case: the orchestrator passes `Working directory`,
+`SESSION CONTRACT`, `EXPECTED FILES` and `CO_AUTHOR` (`agents/committer.md`, "Expected input from
+the caller"), and the committer refuses on a missing field, scope drift, an empty diff and similar,
+with a greppable refusal taxonomy.
 
-This is a **fourth flavour**: *runtime-enforced contracts between agent invocations*. The
-contract isn't checked by a compiler, isn't checked by a test suite, isn't a prose invariant —
-it's enforced by the receiving agent reading the input and refusing if it doesn't meet shape
-expectations. The committer is the first concrete instance, but the pattern generalizes.
+The enforcement is **agent-checked, not runtime-enforced**: a model follows a prompt procedure.
+Only the `permissions:` frontmatter is enforced by the runtime, and that is a command tripwire, not
+an input-shape check. So this is prose-enforced in the sense of the three flavours, with a
+mechanical-looking refusal vocabulary on top. Whether the pattern earns a flavour of its own
+depends on whether a validator ever makes the check non-model.
 
-**Where the pattern already shows up implicitly**:
+**Where handoff contracts already exist**:
 
-- `@verify` takes a list of review-finding claims; refuses or stalls if the list isn't parseable.
-- `@explore` takes a `GOAL` + `INVESTIGATION TASKS` + `OUTPUT FORMAT` template per
-  `commands/explore.md`. The receiving agent currently parses these as natural-language prose;
-  nothing structural enforces the shape.
-- `/plan/rebase` produces a plan that `@git-editor` later consumes in a fresh session; the
-  plan's shape is documented in prose but not validated at handoff.
+- `@committer`: the input block above plus refusal taxonomy. The multisession skill's
+  `references/execution.md` restates the orchestrator side and defines the
+  `BLOCKED: committer refusal` state, so the contract already lives in two prose places.
+- `@plan-juncture`: explicit return vocabularies (`agents/plan-juncture.md`).
+- `@explore`: a template per `commands/explore.md` (`Goal`, investigation tasks, output format,
+  `Thoroughness:` and `Read-only:` header lines) parsed as natural-language prose. Its only
+  refusal clause is for write requests (`agents/explore.md`).
+- `@verify`: input is finding text plus an optional `file:line`; no input validation or refusal
+  path (`agents/verify.md`, `commands/address-review.md`). The output format is fixed, the input
+  shape is not.
+- `/plan/rebase` produces a plan that `@git-editor` consumes in a fresh session. The playbook has
+  prose preflight checks and stop conditions (clean tree, backup ref, base shape, `edit`-only
+  directives; `commands/plan/rebase.md`), but nothing validates the plan's structure.
 
-In every case, the contract is real — the receiving agent breaks or improvises if the input is
-malformed — but its enforcement lives in natural-language prompt instructions, which is the
-weakest possible enforcement mechanism.
+In every case the receiving agent breaks or improvises if the input is malformed, and enforcement
+lives in natural-language prompt instructions, the weakest mechanism available.
 
-**Sketch of repo-level work** (not committing to any of this; just naming the space):
+**Sketch of repo-level work** (proposals, not descriptions of existing behaviour; not committing
+to any of this):
 
-1. **A `schema/` directory** holding YAML or JSON-Schema definitions for each runtime-enforced
-   contract. Initial entries:
-   - `schema/committer-handoff.yaml` — `SESSION CONTRACT`, `EXPECTED FILES`, `CO_AUTHOR`, optional
-     `STAGING MODE`, `COMMIT MESSAGE`, `TICKET ID`, `COMMIT TITLE HINT`.
-   - `schema/verify-handoff.yaml` — claim list with per-claim `description`, `evidence-hint`,
-     `priority`.
-   - `schema/explore-handoff.yaml` — `GOAL`, `INVESTIGATION TASKS`, `OUTPUT FORMAT`,
-     `THOROUGHNESS`, `READ_ONLY` flag.
+1. **A `schema/` directory** holding YAML or JSON-Schema definitions for each handoff contract.
+   Initial entries:
+   - `schema/committer-handoff.yaml` — `Working directory`, `SESSION CONTRACT`, `EXPECTED FILES`,
+     `CO_AUTHOR`, optional `STAGING MODE`, `COMMIT MESSAGE`, `TICKET ID`, `COMMIT TITLE HINT`.
+   - `schema/verify-handoff.yaml` — a claim list; per-claim fields (description, optional
+     location) would be new, as the current input is free text.
+   - `schema/explore-handoff.yaml` — `GOAL`, `INVESTIGATION TASKS`, `OUTPUT FORMAT`, and the
+     existing thoroughness and read-only lines.
 2. **Agent prompts reference their schema.** Each subagent's prompt would start with a
    "Expected input shape: see `schema/<name>.yaml`" line, and the prompt body would teach the
    subagent to refuse cleanly on schema violations rather than improvising.
@@ -141,24 +159,25 @@ weakest possible enforcement mechanism.
 **Open questions** (not blocking; just naming them so they're visible):
 
 - Does formalizing this hurt more than it helps? Natural-language handoffs are flexible; a
-  schema is rigid. The committer case argued for rigidity because mis-parsed input there means
-  a bad commit lands in history. The same calculus may not apply to `@explore` or `@verify`,
-  where mis-parsed input means a wasted subagent fork — costly but not corrupting.
+  schema is rigid. The committer case argues for rigidity because mis-parsed input there means
+  a bad commit lands in history; its prompt-level refusals (missing field, verbatim-message and
+  staged-set checks) have already narrowed that failure surface. The same calculus may not apply
+  to `@explore` or `@verify`, where mis-parsed input means a wasted subagent fork — costly but not
+  corrupting.
 - What's the right grain? Per-subagent schemas (current sketch) vs. one general "handoff"
   schema with optional fields. The former is more honest; the latter is easier to maintain.
 - How do schema changes propagate? If `schema/committer-handoff.yaml` changes, do existing
   orchestrators break? Versioning the schemas vs. growing them monotonically is a real choice.
-- Does this want to be a salt-managed schema in `opencode-config/schema/`, or an upstream
-  opencode feature (a built-in `Handoff` primitive in the runtime)? **Decision for now**:
+- Does this want to be a schema in this repository (`schema/`), or an upstream opencode feature
+  (a built-in `Handoff` primitive in the runtime)? **Decision for now**:
   repo-level only. Upstream-feature speculation is out of scope for this entry. If a clean
   abstraction emerges from repo-level work it can be proposed upstream later as a separate
   conversation.
 
-**Concrete next steps** (none scheduled — listed so the path is visible):
+**Possible next steps** (none scheduled — listed so the path is visible):
 
-1. Run `@committer` in a real autonomous chain a few times. Collect the mis-parses, drift
-   refusals, ambiguities that show up in practice. Without that data, formalization is
-   speculative.
+1. Collect the mis-parses, drift refusals and ambiguities that real `@committer` chains produce.
+   No collection log exists yet, so without that data formalization is speculative.
 2. If problems accumulate, draft `schema/committer-handoff.yaml` as a first artifact.
 3. If that lands cleanly, expand to `@verify` and `@explore`.
 4. Re-evaluate whether the pattern wants its own document or can stay in this entry.
@@ -167,38 +186,41 @@ weakest possible enforcement mechanism.
 
 ## Idea: context-fill plugin hook for @plan-admin
 
-**Status**: deferred — gate not yet fired. **Separated from session economics** (see below): this
-entry is specifically about exposing per-subagent context-fill to `@plan-admin` so it can decide
-warm-resumption-vs-commit-and-close mid-session. The lightweight cost/capacity/integrity monitor
-(`plugins/session-economics.js`) is a different, ungated piece of work — it observes and advises,
-it does not drive a resumption decision — and has been promoted out of this idea list; it lives
-in `plugins/session-economics.js`. Do not conflate the two: a session economics warning firing is
-not evidence this gate has fired.
+**Status**: deferred — gate not yet fired. **Separate from the implemented session-economics
+monitor**: this entry is about exposing per-subagent context-fill to `@plan-admin` so it can decide
+warm-resumption-vs-commit-and-close mid-session. The monitor (`plugins/session-economics.js`) is
+ungated and already implemented; it records primary-step cost and completed-step counts, reports
+capacity as unavailable, and advises without driving a resumption decision. Context integrity is
+qualitative guidance, not a measured score. Do not conflate the two: a monitor notice firing is not
+evidence this gate has fired. (The monitor's metadata-only report, below, is a further separate
+idea.)
 
-**Gate**: do NOT start until small-commit discipline (see
-the `multisession` skill) has been tried on real chains and shown insufficient —
+**Gate**: do NOT start until small-commit discipline (`skills/multisession/references/
+rationale.md`, "Warm resumption is deferred") has been tried on real chains and shown insufficient —
 i.e., a conceptual unit genuinely overflowed a healthy window despite small-commit tuning. For
-garden codebases this may never fire. (This is the same gate as the Thread 3 warm-resumption work;
-Thread 4 only earns its keep if Thread 3 is needed.)
+well-kept codebases this may never fire. Warm resumption is the machinery; the context-fill signal
+only earns its keep if warm resumption is needed.
 
-**Value**: a model cannot reliably measure its own context fill; it confabulates. OpenCode *does*
-know the exact token count (it computes it to decide auto-compaction). A plugin hook exposing
-per-subagent context-fill ("at 47% / 81% / 94% of window") converts a judgment `@plan-admin` does
-badly into a measurement code does perfectly — the same push-mechanical-measurement-to-the-cheapest-layer
-principle as the rest of the system.
+**Value (hypothesis)**: a model cannot reliably measure its own context fill. OpenCode computes
+token usage to decide auto-compaction, so a plugin-exposed fill figure could convert a judgment
+`@plan-admin` makes badly into a measurement — the same push-mechanical-measurement-to-the-cheapest-
+layer principle as the rest of the system. Whether such a figure would be trustworthy is open:
+cumulative tokens are not context occupancy, and usage from the last completed request is an
+estimate of the next request's size, not a measurement of it.
 
-**Unverified assumption**: that OpenCode's plugin hook surface exposes a readable per-session /
-per-subagent context token count mid-session. The `customize-opencode` skill lists hooks
-(`tool.execute.before/after`, session events, `experimental.session.compacting`,
-`experimental.compaction.autocontinue`) but does not confirm a readable live token-fill figure.
+**Unverified assumption**: that the V2 server plugin API (`@opencode/plugin`; guide
+<https://opencode.ai/v2/docs/build/plugins>) exposes, or can derive, a readable per-session fill
+figure mid-run. The economics monitor already receives `session.step.ended` events carrying
+`tokens`, but converting them into a usable-context percentage needs the V2 usable-context formula,
+which is the same unverified item that keeps the monitor's capacity reading unavailable.
 
 **Safe-to-do-early step (when the gate fires)**: fork `@explore` read-only against the OpenCode
-source / plugin SDK (`@opencode-ai/plugin`) and the published config schema to answer: *can a
-plugin read the current context token count for a given (sub)session mid-run, and surface it to
-the orchestrating agent?*
+source / `@opencode/plugin` SDK and the V2 plugin docs to answer: *can a plugin read or derive the
+current context token count for a given (sub)session mid-run, and surface it to the orchestrating
+agent?*
 - If YES → spec the hook.
 - If NO → `@plan-admin` must estimate fill from turn count / cumulative tool-output volume
-  (coarser); note this fallback in the Thread 3 spec when writing it.
+  (coarser); note this fallback in the warm-resumption spec when writing it.
 
 ---
 

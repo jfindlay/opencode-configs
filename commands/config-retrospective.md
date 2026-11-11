@@ -7,7 +7,7 @@ Audit the OpenCode user-level infrastructure (permissions, agents, commands, doc
 session-store usage; action approved changes. This command runs the session as `@architect`; the
 switch persists after it finishes. One session, no cross-session hand-off. Source of truth and live
 config are the same files: `~/.config/opencode/` is a symlink to `opencode-config/`, so edits there
-take effect on reload (the symlinked directory is not watched; see the reload note in `IDEAS.md`).
+take effect on reload (the symlinked directory is not watched; see `AGENTS.md`, "OpenCode config files").
 The architect never edits source or config itself: approved changes go to a forked `@build`
 (step 4).
 

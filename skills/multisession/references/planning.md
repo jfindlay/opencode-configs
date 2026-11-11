@@ -5,10 +5,11 @@ markers: `plan-format.md`. Derivations: `rationale.md` (optional).
 
 ## Planning model
 
-- **Delivery unit.** One commit-shaped session: one conceptual unit, ending green, landing as one
-  feature commit plus one separate PLAN ledger commit. It carries at least one KAT, benchmarks where
-  the work makes a quantitative claim, and a narrative section where the project keeps one. One row
-  is one unit; an `(F/C)` row is still one unit with two execution contexts (`paired-units.md`).
+- **Delivery unit (code delivery, which is what execution currently implements).** One
+  commit-shaped session: one conceptual unit, ending green, landing as one feature commit plus one
+  separate PLAN ledger commit. It carries at least one KAT, benchmarks where the work makes a
+  quantitative claim, and a narrative section where the project keeps one. One row is one unit; an
+  `(F/C)` row is still one unit with two execution contexts (`paired-units.md`).
 - **Two frames, two documents.** ROADMAP is the static frame (project-lifetime DAG of sub-tracks);
   PLAN is the rolling frame for the current sub-track. Execution learns in the action frame and
   carries it in PLAN's digest; junctures adjudicate and the driver records findings in PLAN.
@@ -34,6 +35,39 @@ markers: `plan-format.md`. Derivations: `rationale.md` (optional).
   interchangeable. Each row freezes at least one. Substrate rows over-specify the interface: a
   method likely to be needed later goes in now. A prose contract must be named in the project's
   narrative document with its dependent sessions, or it will be violated.
+
+## Horizons, participation, and delegation
+
+- **Two horizons, one framework.** A PLAN is a bounded delivery commitment; a ROADMAP is an adaptive
+  account of how such commitments serve a larger intent. Discoveries may add, remove, split, or
+  reorder proposed future PLANs, so neither horizon is fixed. A standalone PLAN needs no one-node
+  ROADMAP file.
+- **Participation is a policy.** The default is that the user reviews and approves each new PLAN
+  (the `/plan-shard` confirm-and-pause). The user may instead intend to delegate a wider bounded
+  scope, up to a whole ROADMAP, when the result matters more than participation at every boundary.
+- **Delegation envelope.** Authority and planning depth are independent. Describe a delegation by
+  its intent and non-goals; deliverables and acceptance evidence; revision authority; resource and
+  workspace limits; and return conditions. Approval belongs at the boundary of the delegated
+  authority, not inherently at every session or document boundary. Record the intent and any
+  proposed envelope in the PLAN's purpose, session detail, or `## Notes for executors`; no field is
+  machine-interpreted, so a declaration expresses intent and binds no execution mode.
+- **Evidence follows the deliverable.** Production code, a PoC, research, and diagnostic work carry
+  different acceptance contracts. State each row's contract in its Session detail. A properly
+  evidenced negative result can fulfil an experiment; unverified work is never a successful
+  demonstration. A PoC may omit production requirements if it says so explicitly. No autonomy grants
+  permission to misstate results or skip owed validation: report demonstrated results, residual
+  uncertainty, and deferred production work separately.
+- **Current limits.** The delegation model above is guidance, not runtime support.
+  - `/plan-run` executes an already-sharded PLAN; it does not construct successive PLANs.
+  - `/plan-shard` confirms its PLAN and ROADMAP writes and pauses for review; the final ROADMAP
+    reconciliation has no automatic owner (see Sharding).
+  - The execution driver gets no ROADMAP-write or sharding authority from this skill; agent roles,
+    approval gates, tool permissions, and stop conditions apply unchanged.
+  - `may-reshard` authorizes only its additive path (`execution.md`), not whole-ROADMAP delegation.
+  - Execution's KAT, test, type, and commit requirements are code-oriented; a non-code row is not
+    executable until those obligations are addressed for it.
+  - If an intended envelope needs unsupported orchestration or an incompatible acceptance path,
+    surface the mismatch. Do not skip a check, infer a permission, or claim the mode works.
 
 ## Sizing
 
@@ -168,7 +202,8 @@ same confirm-before-write gate as the PLAN write: show the proposed ROADMAP diff
 **Retain before replacing.** The prior PLAN is replaced at a boundary. Before that, every item that
 is not yet reconciled must be resolved or carried into the new PLAN: pending ledger rows, handoff
 entries not `consumed`, deferred checks and their next checkpoints, discoveries not yet folded into
-the ROADMAP, and unresolved boundary-note items.
+the ROADMAP, and unresolved boundary-note items. A PLAN or ROADMAP is retired only once it is
+executed and reconciled and no such item remains; a replacement never silently drops one.
 
 **Limit.** Nothing guarantees a later `/plan-shard` after the final sub-track, so the final ROADMAP
 reconciliation has no dedicated automatic owner, and the execution driver may not write the ROADMAP.

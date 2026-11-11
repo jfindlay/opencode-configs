@@ -1,8 +1,7 @@
 # Personal Working Style
 
 This file holds universal, transactional conventions — mechanical rules that apply to every agent
-regardless of tier. Tool discipline, subagent mechanics, model tiering, session discipline,
-formatting, and git conventions all live here.
+regardless of tier. Tool discipline, model tiering, formatting, and git conventions all live here.
 
 **Reasoning-register rules live elsewhere.** Capability allocation, option space, and response scale
 are rules for primary agents (T-1/T0/T1) and judgment-bearing subagents (T1); modes of inference and
@@ -55,12 +54,8 @@ the judgment register for. T0/T1 agents follow the trigger directly.
 | AGENTS-ROSTER.md                       | When selecting an agent or command to dispatch; when      | T0/T1 |
 |                                        | pinning a subagent's `model:` field; when in an           |       |
 |                                        | autonomous chain (committer dispatch pattern)             |       |
-| AGENTS-SUBAGENT-STRATEGY.md            | When deciding whether to fork a subagent; when writing    | T0/T1 |
-|                                        | a subagent fork prompt                                    |       |
 | AGENTS-CAPTURE.md                      | When producing or encountering a CAPTURE-CANDIDATE-shaped | T0/T1 |
 |                                        | finding                                                   |       |
-| AGENTS-SESSION.md                      | At session start; when splitting a session; when writing  | T0/T1 |
-|                                        | or managing rolling-context docs (PLAN.md, NOTES.md)      |       |
 | STYLE-CODE.md                          | Before writing or modifying any code; before reviewing    | T0/T1 |
 |                                        | code; when planning a refactor. Routes to the matching    |       |
 |                                        | per-language sibling (STYLE-CODE-PYTHON/RUST/GO.md).      |       |

@@ -53,6 +53,14 @@ Relentlessly transactional. Agents read them to get oriented to the project or c
   (i) effect a change in the code, or (ii) land in `AGENTS.md` / `README.md`. Content that does
   neither is dead weight and should be removed at merge time. A `ROADMAP.md` lives for the project,
   not for one phase, and is still not permanent shipped documentation.
+  - `PLAN.md` holds the current phase (or sub-track): what is decided, open, and next. Keep it
+    concise, sized to the work and the context that will hold it.
+  - `NOTES.md` is append-mostly: decisions, framings, mental models, and learnings captured
+    mid-project ("If X, Y happens because Z."). At merge time, absorb the durable ones into
+    `AGENTS.md` or the user-level `AGENTS-HINTS.md`, then delete.
+  - Content still needed for unresolved work, a handoff, or reconciliation is never discarded to
+    shorten a file. Retain it until that need is met; delete the file once the work is executed
+    and reconciled.
 - **Agent docs refer liberally to inline and human docs.** Keep structural description in the code
   and all other exposition in the human docs.
 - **Inline and human docs never refer to agent docs.** This direction is one-way.

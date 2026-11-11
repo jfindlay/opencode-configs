@@ -3,7 +3,7 @@ description: "[jf] Fork a well-structured @explore subagent with a parameterized
 ---
 
 Spawn an `@explore` subagent for the investigation described below, using the
-canonical template from `AGENTS-SUBAGENT-STRATEGY.md`.
+template in this command.
 
 User input: $ARGUMENTS
 

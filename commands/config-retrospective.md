@@ -102,8 +102,8 @@ carried `permissions`, so a fork's session-level override cannot be discovered o
 ## Steps
 
 1. Confirm T0/`@architect`. If not, tell the user and stop.
-2. Fork `@explore` for Threads 1+2 with the schema crib + thread questions (template per
-   `AGENTS-SUBAGENT-STRATEGY.md`). Validate crib first; surface any drift immediately.
+2. Fork `@explore` for Threads 1+2 with a self-contained prompt: working directory, the schema crib,
+   the thread questions, and the output format. Validate crib first; surface any drift immediately.
    `@explore` is read-only by contract (its prompt, not its shell rules) and reads history through
    `opencode api session.list` and `opencode api session.message.list`: small pages, no mutating
    API operation. Have it report any access gap (the response too large to read, a denied command)

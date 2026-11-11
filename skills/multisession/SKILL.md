@@ -28,11 +28,16 @@ templates are filled in by the driver, not by the skill loader.
   boundary junctures.
 - `/plan-anneal` (`@build`) removes leaked plan coordinates from durable files on demand.
 
+One framework, two horizons: a PLAN is a bounded delivery commitment; a ROADMAP is the adaptive,
+longer-horizon account of how such commitments serve a larger intent. A standalone PLAN uses the
+same machinery and needs no ROADMAP file. Participation, delegation envelopes, evidence by
+deliverable, and the limits of current execution: `planning.md`.
+
 ## Resources
 
 | Resource (`references/`) | Owns | Load when |
 |---|---|---|
-| `planning.md` | planning model, ROADMAP construction, sharding and reconciliation, sizing, F/C selection | constructing a ROADMAP; sharding |
+| `planning.md` | planning model, horizons and delegation, ROADMAP construction, sharding and reconciliation, sizing, F/C selection | constructing a ROADMAP; sharding |
 | `plan-format.md` | ROADMAP/PLAN shapes, statuses, markers, ledger schema, juncture vocabulary | constructing, sharding, executing |
 | `execution.md` | preflight, loop, stops, retry budget, common dispatch and juncture templates, exit report | executing (including direct `@plan-admin`) |
 | `paired-units.md` | F/C stages, capsule, checkpoint validation and recovery, stage prompts, defect routing | a row marked `(F/C)` is selected for inclusion or execution; before refusing a dirty tree that may hold a recorded checkpoint |

@@ -16,7 +16,7 @@ Capture text (optional): $ARGUMENTS
      you found and ask: "Use this? (yes / paste different text)"
 
 2. **Classify the target file.** See `AGENTS-CAPTURE.md` for the two-stage criteria and
-   `AGENTS-SESSION.md` §Rolling context for the target-file taxonomy. The four options are:
+   `STYLE-DOC.md` §3 for the rolling-context lifecycle. The four target options are:
    `~/.config/opencode/AGENTS.md` (stable universal conventions), `docs/PLAN.md` (current-phase
    state), `docs/NOTES.md` (decisions, framings, surprises), `~/.config/opencode/AGENTS-HINTS.md`
    (global framings).

@@ -49,10 +49,9 @@ to steelman objections to the T0 plan. Different families catch different failur
 
 ## Subagent prompt anatomy
 
-The canonical template is in `AGENTS-SUBAGENT-STRATEGY.md`. One anti-pattern to avoid:
-forking a subagent whose prompt body starts with "Read file X and return…" — that's pure overhead;
-the parent can Read directly. Rule: if the subagent does a single file read or a narrow grep, don't
-fork.
+One anti-pattern to avoid: forking a subagent whose prompt body starts with "Read file X and
+return…" — that's pure overhead; the parent can Read directly. Rule: if the subagent does a single
+file read or a narrow grep, don't fork.
 
 ## Capture-candidate collaboration shape
 
@@ -72,8 +71,8 @@ durable-AND-unusual-AND-not-bland three-axis gate).
 
 ## Fork-vs-stay: derivation table
 
-`AGENTS.md` states the three-axis rule. The derivation that justifies it over the retired ≥20-calls
-heuristic is preserved here for future restructuring decisions:
+`agents/architect.md` states the three-axis rule. The derivation that justifies it over the retired
+≥20-calls heuristic is preserved here for future restructuring decisions:
 
 | Case | ≥20 calls said | Three-axis rule says | Correct |
 |---|---|---|---|

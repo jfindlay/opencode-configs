@@ -81,6 +81,16 @@ weeks or the PLAN loses long-term scope). Review the ROADMAP at sub-track bounda
 session boundaries; the cadences do not mix. When a question feels stuck, name the frame: "what
 should this session do?" is action-frame, "should we still be on this track?" is static-frame.
 
+## Horizons and participation
+
+A PLAN and a ROADMAP are two horizons of one commitment structure, not two systems: the PLAN is
+what is being delivered now, the ROADMAP is how that delivery is expected to serve the larger
+intent, and what execution learns can reshape the proposed remainder. Human participation at each
+new PLAN is a default policy, chosen because a boundary is where intent drift is cheapest to catch.
+It is not a limit of the structure; a user who cares more about the result than about each boundary
+may delegate more, provided the envelope and its evidence are stated and the machinery actually
+supports it.
+
 ## Control loops
 
 A multisession is a cascade, not one slow human-gated loop. The **inner loop** is the test suite
@@ -145,8 +155,7 @@ conversation but warm with respect to its intent. The distinguishing question: i
 separable with written intent, or non-separable feature reasoning still in flux? Unfinished,
 intricately coupled design stays with the feature agent; F/C must not become a cost-driven excuse to
 cold-transfer an unresolved design, and warm resumption must not be used to avoid writing the
-capsule when the tail really is separable. The operative boundary is also summarized in
-`AGENTS-SUBAGENT-STRATEGY.md`.
+capsule when the tail really is separable. The operative boundary is stated in `paired-units.md`.
 
 **Warm resumption is deferred** machinery (a measured context-fill signal driving a commit-or-resume
 decision). Small-commit discipline is the primary windowing mechanism and, for a well-kept codebase

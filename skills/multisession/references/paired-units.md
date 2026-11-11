@@ -4,6 +4,12 @@ A row marked `(F/C)` runs as two execution contexts, a feature stage (F) then a 
 (C), sharing one intent and producing one delivery unit: one feature commit and one ledger row.
 Selection criteria are in `planning.md`. An unmarked row runs single-stage and ignores this file.
 
+F/C is the one planned exception to one session per commit and green at every session. The boundary:
+the handoff is planned at shard time, driver-owned, and crossed only after F reaches `handoff-ready`
+and the driver has written a complete intent capsule. It is never a way to escape an unresolved
+reasoning loop, and an uncontrolled cold fork of an in-progress session, with no capsule to carry
+its intent, is not permitted. Each stage still owns its own steering within its work.
+
 ## Terms
 
 - **F-stage / C-stage:** two `@build` dispatches in sequence for the same row; same agent, same

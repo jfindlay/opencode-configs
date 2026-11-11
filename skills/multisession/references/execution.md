@@ -21,6 +21,11 @@ no `(F/C)` row and no declared cadence never need either.
   iterations. Each iteration ends with a session commit and a ledger commit (6b), so the tree is
   clean and the committed ledger exactly matches the last committed session. The one exception is
   the F/C in-flight checkpoint (`paired-units.md`).
+- **Scope.** The driver runs an already-sharded PLAN: it constructs no successive PLAN, writes no
+  ROADMAP, and acquires no sharding authority from prose. `may-reshard` covers only the additive
+  path in step 4e. Its gates are code-oriented (KAT, tests, types, commit), so a row whose
+  deliverable cannot meet them is surfaced, never waived or reported as passed (`planning.md`,
+  "Horizons, participation, and delegation").
 - **Fiduciary latitude.** Invoking `/plan-run` accepts the implementation path-space the agents
   judge best, not a literal line-item contract. Medium deviation that a fork reconciles against the
   PLAN rides through, reported in the digest; halts are reserved for the irreconcilable (see Stops).

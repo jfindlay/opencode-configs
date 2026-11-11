@@ -104,7 +104,7 @@ fix, correction), and to partial feature-stage returns. A `/plan-run` dispatch r
   extremity (genesis, abduction, pivotal anomalies), `@dialectic` instead.
 - **Read-only exploration of a large unknown codebase** → fork `@explore`.
 - **Test loops and format loops** → stay in this agent; these require turn-by-turn steering
-  and must not be forked (AGENTS.md, subagent strategy section).
+  and must not be forked.
 
 ## Dispatched as a feature or completion stage under `/plan-run`
 
@@ -127,9 +127,7 @@ easy to get wrong:
   environment — no credentials). As F, run only the narrowest checks the prompt names and label
   every record partial. Never report a pass without the record's backing output.
 
-See `AGENTS-ROSTER.md` (tier ladder), `AGENTS-SUBAGENT-STRATEGY.md` (fork criteria),
-`AGENTS-SESSION.md` (session splitting at ~200 messages), `AGENTS-CAPTURE.md` (capture-candidate
-tagging).
+See `AGENTS-ROSTER.md` (tier ladder) and `AGENTS-CAPTURE.md` (capture-candidate tagging).
 
 ## Responding to a session-economics notice
 

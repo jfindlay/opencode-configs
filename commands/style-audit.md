@@ -23,7 +23,7 @@ User input: $ARGUMENTS
 
 3. **Fork one `@explore` per applicable surface in parallel.**
 
-   Each fork uses the template from `AGENTS-SUBAGENT-STRATEGY.md`:
+   Each fork uses this template:
 
    ```
    Working directory: <cwd>

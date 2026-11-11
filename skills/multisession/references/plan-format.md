@@ -8,7 +8,8 @@ procedures: `execution.md`.
 The project-lifetime static-frame document: it persists for the life of the project and is
 reconciled at sub-track boundaries, but it is rolling context, not permanent shipped documentation.
 `/roadmap-construct` creates it; `/plan-shard` reconciles it before each next shard. Execution never
-writes it. Suggested shape (adapt to the project):
+writes it. A standalone PLAN does not require one. Retain it until its reconciliation and any
+unresolved handoff are satisfied. Suggested shape (adapt to the project):
 
 - `## Design intent` — prose anchor, re-read at every boundary.
 - `## Sub-track DAG` — sub-tracks as nodes, dependencies as edges, one-line charge and category mix
@@ -22,9 +23,12 @@ writes it. Suggested shape (adapt to the project):
 ## PLAN (`docs/PLAN.md` unless named otherwise)
 
 Starred sections are required by execution; their absence is a refusal or initialization path
-(`execution.md` preflight).
+(`execution.md` preflight). Retain a PLAN until it is executed and reconciled and no pending row,
+unconsumed handoff, deferred check, or unfolded discovery remains.
 
-- `## Purpose (design intent)` — re-read at every ◆ boundary.
+- `## Purpose (design intent)` — re-read at every ◆ boundary. May also record non-goals and the
+  proposed delegation envelope and per-deliverable acceptance evidence (`planning.md`); these are
+  prose, not a machine-interpreted policy.
 - `## Verify gate` — bound VERIFY_TEST / VERIFY_TYPES (discovered, never assumed) and, only if the
   project declares one, a reference to its verification cadence. Absent a declaration: state none.
 - **`## Session list`** ★ — table columns `#` | `Session` | `Cat` | `Tier` | `Consumes` |

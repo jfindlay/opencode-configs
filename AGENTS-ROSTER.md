@@ -8,8 +8,8 @@ field; when in an autonomous chain and orchestrating a committer dispatch.
 **Single authority.** This section is the only prose place that names models, versions, cost
 ratios, and usage shares. The `model:` frontmatter fields and `opencode.json` carry the concrete
 pins; everything else uses tier notation. A model bump edits this section, those pins, and the
-co-author identity examples below — nothing else. (`AGENTS-LOG.md` and `NOTES.md` are historical
-records and keep the names that were true when written.)
+co-author identity examples below — nothing else. (Git history keeps the names that were true when
+written.)
 
 - **T-1 — GPT-6 Astra**: interactive dialectic at the generative extremity — genesis of framings
   that don't yet exist, abduction, pivotal anomalies that resist all canonical options. Use only

@@ -76,8 +76,6 @@ the judgment register for. T0/T1 agents follow the trigger directly.
 | `python-lenses` skill                  | When doing a Python code-analysis investigation; when the | T0/T1 |
 |                                        | user names a lens explicitly; when choosing among AST,    |       |
 |                                        | import-graph, call-graph, coverage, or test analysis      |       |
-| AGENTS-LOG.md                          | During meta-restructuring sessions only (config audits,   | T0    |
-|                                        | doc reorganisations)                                      |       |
 | `multisession` skill                   | When constructing a ROADMAP, sharding a PLAN, running or  | T0/T1 |
 |                                        | annealing a /plan-run chain, or acting as @plan-admin.    |       |
 |                                        | Its commands and agents load the resources they need; a   |       |

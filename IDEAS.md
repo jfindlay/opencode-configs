@@ -1,8 +1,9 @@
 # Ideas — opencode-config
 
-Append-mostly catch-all for opencode-config-relevant exploration items not yet promoted to
-active work. Entries here are deliberately fuzzy; the bar for adding is low, the bar for
-removing is "this is now real work tracked elsewhere."
+The single collection for this repository's future work, ideas, unfinished items and undecided
+decisions. Completed work, decisions taken and investigation records do not live here: they live in
+the git history (`git log`, `git show <commit>:<path>`). When an entry is finished or decided,
+delete it in the same commit that lands the result.
 
 Promotion path: when an entry has 3+ concrete sub-tasks and starts feeling like a real arc,
 split it into its own `ROADMAP.md`-style document (mirroring the rGNFS pattern of
@@ -12,6 +13,62 @@ Demotion path: when an entry has been quiet for 6+ months and the framing no lon
 reality, delete it.
 
 ---
+
+## Open follow-ups and decisions
+
+Items with an owner or gate. Version labels (2.0.32, 2.2.5) name the runtime the observation was
+made on. The harness for the unmeasured permission items is `~/Source/opencode-permtest` (frozen,
+kept for this purpose; its history exists only there).
+
+- **`build` edit policy for the config directory (owner: user).** `opencode.json` (`agents.build`)
+  has `edit ask` on `~/.config/opencode/**` and `~/Source/opencode-config/**` after `edit * allow`;
+  a path rule matches only the spelling it names (no symlink resolution), so both are listed.
+  Limits still open:
+  - Editing this repository while it is the project is not covered: in-project files are matched
+    as project-relative paths, and project-layer rules did not reach `build`.
+  - `ask` is undone by a saved `edit *` allow in a project; a config `deny` is not. Switching to
+    `deny` makes the restriction durable but blocks `build` there outright.
+- **Shell policy follow-ups (none measured).** The shell policy is default-allow with a few
+  consent gates; shell is not a containment boundary.
+  - Check per-agent rule evaluation (`permission.create`, no model call) for `explore`,
+    `committer`, `git-editor`: expected `git push` deny everywhere, `git commit` allowed only in
+    `committer` and `git-editor`, ask elsewhere.
+  - Scanner behavior for `$(...)`, backticks, subshells and heredocs is unmeasured; scanner errors
+    are not fixable by rules.
+  - `external_directory * ask` still applies to shell paths outside the project (e.g. `/tmp`).
+  - If prompt-layer drift (`cat`/`grep` for file reads) returns, measure it before restoring any
+    deny.
+- **Env-file rule for `grep`/`glob` (owner: user).** `read` has the env-file rules; the `grep` and
+  `glob` tools were never given one.
+- **Plugin delivery residual risks (owner: `@build`; gate: fresh user authorization and spend
+  bound for any further paid run).** Observed on 2.2.5 with managed `@opencode/plugin` 2.0.32:
+  - The task-boundary report omits the child's final step (its `step.ended` arrives milliseconds
+    after the hook), so a consumer comparing it to a finalized total sees a deficit of about the
+    last step.
+  - After a config-only reload the plugins logged `loading plugin` but no new `initialized` line;
+    whether the economics hooks were re-registered is unestablished (a file reload did
+    re-initialize).
+  - A symlinked config directory is not watched (the server logs `inotify_add_watch ... Not a
+    directory`), so edits through it do not reload plugins or agents; confirm `plugin.list` shows
+    `active` and the new behavior after edits, and reload or restart the service if not.
+  - Notices print sub-cent costs as `$0.00`.
+  - Not exercised: foreground-moved-to-background, production-threshold crossings, other-location
+    isolation, worker roles other than `general`, long or nested workloads, savings. A private V2
+    server needs a credential connected through its API (an `auth.json` copy gave
+    `provider.no-route`).
+- **Unmeasured permission questions (harness above).** A configured `deny` versus a saved allow;
+  shell writes past an `edit` deny; `top_p`, `tools`, `permission` and `name` keys; whether
+  `request.body` reaches the provider. `top_p` and `temperature` in an agent file are ignored with
+  a warning on 2.2.5.
+- **Optional upstream reports (owner: user; file through the `report` skill only if wanted).**
+  - 2.0.32: `temperature` beside `permissions:` disabled the agent's rules (4 of 4); not
+    reproduced on 2.2.5.
+  - The edit tool's validation error does not name an unrecognized argument key (a misspelled
+    `newString` looked like a missing argument).
+- **Projects seeded with the old `## Notes for executors` pointer.** Older `/plan-shard` runs put
+  a pointer to PLAN into the project's `AGENTS.md`; it dangles after the arc. The current seed is a
+  self-contained `## Register in durable files` block. Replace the old pointer by hand when a
+  seeded project is next touched (decide whether this is worth tracking).
 
 ## Theme: Agent hierarchy (TBN — needs a name)
 
@@ -30,13 +87,6 @@ Open shape questions (do not need to be answered now):
   Probably orthogonal axes, but the overlap deserves articulation.
 - When does a pattern in this theme get promoted into `AGENTS.md` (operational rule) vs.
   the `multisession` skill (durable reference) vs. stay here (exploration)?
-
-### Idea: the multiplan lifecycle has unowned phases — and the deeper ceiling is OpenCode itself
-
-*Migrated to the agent-graph / harness repo on 2026-06-17.* The substrate/ceiling analysis
-(LangGraph/Temporal/CementOS scouting, namespace-allocated permissions, durable-graph-with-admin-judgment
-design) is the seed material for that repo's ROADMAP. The theme header above (opencode's own agent
-roster composition) stays here; only this sub-entry has left.
 
 ### Idea: formalize the runtime-enforced contract between orchestrators and subagents
 
@@ -123,9 +173,9 @@ weakest possible enforcement mechanism.
 entry is specifically about exposing per-subagent context-fill to `@plan-admin` so it can decide
 warm-resumption-vs-commit-and-close mid-session. The lightweight cost/capacity/integrity monitor
 (`plugins/session-economics.js`) is a different, ungated piece of work — it observes and advises,
-it does not drive a resumption decision — and has been promoted out of this idea list; see
-`AGENTS-LOG.md` / `NOTES.md` for its implementation record. Do not conflate the two: a session
-economics warning firing is not evidence this gate has fired.
+it does not drive a resumption decision — and has been promoted out of this idea list; it lives
+in `plugins/session-economics.js`. Do not conflate the two: a session economics warning firing is
+not evidence this gate has fired.
 
 **Gate**: do NOT start until small-commit discipline (see
 the `multisession` skill) has been tried on real chains and shown insufficient —
@@ -209,3 +259,12 @@ notices, budget enforcement.
   withdrawn: at the V1 source tag (1.18.31; not rechecked on V2) CWD commands are excluded before
   permission matching. Verify hook failure behavior and false positives; preserve approval gates.
   This would enforce a convention, not a shell security boundary.
+- **Large-write requests and long tool spans.** In the combined ALIGN cohort above, 71 of 902
+  completed requests had cache writes ≥30,000 tokens with cache reads <5,000; they accounted for
+  $19.72 of $44.67 recorded cost, and 66 followed an assistant turn containing a tool span of at
+  least five minutes (grouping method: `git show 2f95079:PLAN.md` → "Pilot results"). Cache expiry
+  plausibly makes large-context sessions sensitive to waits, but neither historical TTL settings nor
+  provider eviction were verified; tool spans mix approval latency, execution and other blocking;
+  whole-request cost is not cache-write cost, avoidable waste or a savings estimate. Before
+  prescribing shorter driver sessions or a longer TTL, compare equivalent workloads, measure context
+  size and cache behavior alongside request count, and keep required checks and human approval.

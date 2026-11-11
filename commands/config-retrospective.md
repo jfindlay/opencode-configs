@@ -117,4 +117,5 @@ carried `permissions`, so a fork's session-level override cannot be discovered o
 5. Dispatch `@build` to action accepted changes. It leaves the tree dirty; do NOT commit.
 6. Commit: draft message, gate on user approval, delegate to `@committer`. One commit per coherent
    change. Never push.
-7. Append a dated entry to `AGENTS-LOG.md`: what changed, why, alternatives weighed.
+7. Put the rationale (what changed, why, alternatives weighed) in the commit bodies; add deferred or
+   rejected-but-revisitable candidates to `IDEAS.md`. No separate changelog.

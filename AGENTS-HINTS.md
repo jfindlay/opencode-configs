@@ -1,8 +1,8 @@
 # User-level agent hints
 
 Framings and mental models consulted during normal work. Not rules in force — those are in
-`AGENTS.md` and `AGENTS-REASONING.md`. Not changelog — that's in `AGENTS-LOG.md`. Not deep companion
-to `AGENTS-REASONING.md` — that's in `AGENTS-REASONING-HINTS.md`. Treat entries here as "consult if
+`AGENTS.md` and `AGENTS-REASONING.md`. Not changelog — history lives in git. Not deep companion to
+`AGENTS-REASONING.md` — that's in `AGENTS-REASONING-HINTS.md`. Treat entries here as "consult if
 useful" navigational hints: they reduce friction and explain the derivation behind rules that are
 stated elsewhere, but they do not themselves impose obligations. Load the section that is relevant
 to the work at hand; you do not need to read this file front-to-back.

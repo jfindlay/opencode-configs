@@ -1,7 +1,7 @@
-# Advanced reasoning (activational, T-1/T0 only)
+# Advanced reasoning (activational, T-1 only)
 
-Rules in force for T-1 and T0 agents, in addition to `AGENTS-REASONING.md` (which owns tier gating).
-T1 agents do not load this file.
+Rules in force for T-1 agents, in addition to `AGENTS-REASONING.md` (which owns tier gating). T0
+agents and below do not load this file.
 
 ## Modes of inference (selection before spending)
 
@@ -45,42 +45,3 @@ names for). Four steps an agent can execute deliberately:
 
 The leap is step 2; the work is steps 3–4. Fails when the locus is unfalsifiable or reverse-
 engineering proceeds without hard tests.
-
-## Judgment discipline
-
-- **Load-bearing assumption check.** Before a design or architecture answer or a verdict, identify
-  any premise that would change it if wrong. If the evidence on it is mixed or absent, name it
-  briefly ("assuming X, then…" or "this assumes X — confirm?"). Skip premises that are obviously
-  correct or don't affect the conclusion.
-- **Make disagreement visible.** Technical accuracy over validating the user's stated beliefs; say
-  so plainly and give the evidence.
-- **Separate facts from judgments.** Label conclusions *confirmed* (direct evidence), *inferred*
-  (reasoning from confirmed facts), or *speculation*; never blur them.
-- **Name the tradeoffs.** Every proposed approach names at least one thing it is worse at than the
-  alternative.
-
-## Interactive decision points (@architect, @dialectic)
-
-Applies only to interactive `@architect` and `@dialectic` sessions; one-shot subagents that load
-this file (`@plan-juncture`) return per their dispatch contract and never ask. When a response would
-end in a recommendation among two or more options (design decisions, handoff plans, any case where
-the user's choice determines what happens next), surface the choice as a Question tool call rather
-than prose. Not for narrow factual questions with one answer.
-
-## Rolling-context writes (@architect, @dialectic)
-
-Narrow, trigger-based write access to rolling-context files (`docs/PLAN.md`, `docs/NOTES.md`, or
-project equivalents). All other writes — source, tests, configs, build files — are outside the
-remit: the permission layer prompts rather than blocks, and that prompt is not a route to
-implementation; recommend `@build`. Confirm each write with the Question tool. Triggers:
-
-1. **Costly-to-lose derivation.** A finding that meets the `AGENTS-CAPTURE.md` criteria → `NOTES.md`;
-   afterwards: "Wrote <summary> to <file>. Review?"
-2. **Action plan for handoff.** A detailed plan for `@build` → `docs/PLAN.md`; pause for review
-   before ending the session. The write is a handoff checkpoint, not a unilateral action.
-3. **`/note` capture.** The exact text `/note` previewed and the user approved, appended to the
-   target `/note` classified. A prompted write (the `edit *` ask applies) covering only the approved
-   text; `/note` is not a permission elevation.
-
-Any other write (casual notes, speculative documentation, "while I'm here" edits) is not permitted;
-if unsure, ask.

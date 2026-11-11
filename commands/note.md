@@ -49,7 +49,7 @@ $ARGUMENTS
 
 - Never write without explicit approval at step 3. There are no automatic captures.
 - This command is not a permission elevation. For `@architect` and `@dialectic`, an approved capture
-  is their `/note` write trigger (`AGENTS-REASONING-ADVANCED.md`); the edit permission prompt still
+  is their `/note` write trigger (`AGENTS-REASONING.md`); the edit permission prompt still
   applies.
 - Never modify existing content — append only (except `PLAN.md`, which may warrant targeted edits;
   confirm before any edit).

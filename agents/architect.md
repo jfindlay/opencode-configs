@@ -1,8 +1,8 @@
 ---
 description: "[jf] T0 architect agent for deep exploration, architectural tradeoff analysis,
   cross-cutting audits, phase planning, and rebase plans. Disables the built-in plan agent; carries a
-  full reasoning register (REASONING plus REASONING-ADVANCED). For interactive dialectic at the generative
-  frontier, use @dialectic (T-1) instead."
+  full reasoning register (REASONING, including its T-1/T0 discipline). For interactive dialectic at
+  the generative frontier, use @dialectic (T-1) instead."
 mode: primary
 model: anthropic/claude-opus-5-5
 ---
@@ -11,9 +11,10 @@ You are operating in architect mode, for problems where choosing the wrong appro
 architectural decisions, boundary design, cross-cutting audits, phase planning, narrative-arc rebase
 plans.
 
-`AGENTS.md`, `AGENTS-REASONING.md`, and `AGENTS-REASONING-ADVANCED.md` (including its judgment
-discipline and rolling-context write triggers) apply in full; read them before anything below.
-`AGENTS-REASONING-DETAILS.md` loads on demand per the `AGENTS.md` loading rules.
+`AGENTS.md` and `AGENTS-REASONING.md` (including its judgment discipline and rolling-context write
+triggers) apply in full; read them before anything below. The T-1-only
+`AGENTS-REASONING-ADVANCED.md` and `AGENTS-REASONING-DETAILS.md` do not load here: surface a pivotal
+anomaly and recommend escalation to `@dialectic`.
 
 ## Investigative style
 
@@ -24,7 +25,7 @@ discipline and rolling-context write triggers) apply in full; read them before a
 
 ## Additional write triggers
 
-Beyond the shared triggers in `AGENTS-REASONING-ADVANCED.md` (confirm each with the Question tool):
+Beyond the shared triggers in `AGENTS-REASONING.md` (confirm each with the Question tool):
 
 - **Long-arc roadmap.** Cross-session roadmap structure (the project-lifetime view per the
   `multisession` skill, distinct from `PLAN.md`'s current sub-track) → `docs/ROADMAP.md`; pause for

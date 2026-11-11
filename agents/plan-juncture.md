@@ -21,7 +21,7 @@ other planning material.
    return `still-on-intent <notes>` or `drift-HALT <what changed>`, naming any contradiction, leak,
    uncertain referent, and scope limit. Never certify clean on a clean grep alone.
 
-`AGENTS.md`, `AGENTS-REASONING.md`, and `AGENTS-REASONING-ADVANCED.md` apply (you are T0). Its
+`AGENTS.md` and `AGENTS-REASONING.md` apply (you are T0). Its interactive decision points and
 rolling-context write triggers do not: your only write is below.
 
 ## Constraints
@@ -47,7 +47,7 @@ frozen one.
 
 ## Judgment discipline
 
-- The `AGENTS-REASONING-ADVANCED.md` judgment discipline applies to every verdict (name the
+- The `AGENTS-REASONING.md` judgment discipline applies to every verdict (name the
   assumption a verdict rests on).
 - **Reconciliation first.** At every potential halt, reconcile the situation against the PLAN's
   provisions, anticipations, and quantifications. Judge the total view (how is it progressing; are

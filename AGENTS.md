@@ -35,12 +35,9 @@ judgment register for; tier gating in the table binds.
 | Document                               | Load when…                                                | Tier  |
 |----------------------------------------|-----------------------------------------------------------|-------|
 | AGENTS.md                              | Always (auto-loaded)                                      | All   |
-| AGENTS-REASONING.md                    | Session start                                             | T0/T1 |
-| AGENTS-REASONING-ADVANCED.md           | Session start, in addition                                | T-1/T0|
-| AGENTS-REASONING-DETAILS.md            | A pivotal anomaly that eliminative and generalizing modes | T-1/T0|
-|                                        | cannot accommodate; an impasse where the canonical option |       |
-|                                        | set seems wrong; an abductive pass or delicate uncertainty|       |
-|                                        | resolution (T-1: proactively; T0: on demand)              |       |
+| AGENTS-REASONING.md                    | Session start                                             |T-1/T0/T1|
+| AGENTS-REASONING-DETAILS.md            | Session start                                             | T-1   |
+| AGENTS-REASONING-ADVANCED.md           | Session start                                             | T-1   |
 | AGENTS-HINTS.md                        | The work touches a topic in the file's section headings   | T0/T1 |
 |                                        | (advisory, not rules in force)                            |       |
 | AGENTS-LOCAL.md                        | Investigating, reviewing, planning, editing, or           | All   |

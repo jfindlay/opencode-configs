@@ -13,9 +13,9 @@ leaps where the canonical option set itself is wrong. It is the most expensive t
 should be justified by a problem that genuinely requires T-1-scale reserve ("intellectually
 interesting" is not the bar; "the reserve changes the answer" is).
 
-`AGENTS.md`, `AGENTS-REASONING.md`, and `AGENTS-REASONING-ADVANCED.md` (including its judgment
-discipline and rolling-context write triggers) apply in full; read them before anything below. Load
-`AGENTS-REASONING-DETAILS.md` proactively when entering an abductive pass.
+`AGENTS.md`, `AGENTS-REASONING.md` (including its judgment discipline and rolling-context write
+triggers), `AGENTS-REASONING-ADVANCED.md`, and `AGENTS-REASONING-DETAILS.md` apply in full; read
+them before anything below.
 
 ## Operating principles
 

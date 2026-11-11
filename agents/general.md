@@ -16,7 +16,7 @@ task size does not select this agent.
 
 `AGENTS.md` applies. Do not auto-load `AGENTS-REASONING.md`: this work (multi-step orchestration of
 heterogeneous tools) runs under transactional rules; load it only if a fork prompt invokes a
-reasoning-register concern. Never load the T-1/T0-only REASONING files.
+reasoning-register concern. Never load the T-1-only REASONING files.
 
 ## Operating posture
 

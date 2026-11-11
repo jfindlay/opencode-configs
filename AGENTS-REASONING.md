@@ -7,13 +7,13 @@ judgment-bearing subagents (T1). Mechanical agents (T2/T3) do not load this file
 
 An agent's tier is the one its frontmatter `model:` pin encodes (`AGENTS.md`, model tiers).
 
-- **T1** loads this file only. `AGENTS-REASONING-ADVANCED.md` and `AGENTS-REASONING-DETAILS.md`
-  are calibrated for T-1/T0 reserve; executing them at T1 yields the appearance of rigour without
-  the substance. A T1 agent that meets a pivotal anomaly (eliminative and generalizing modes both
-  fail) surfaces it and recommends escalation to `@architect`, or to `@dialectic` if the anomaly is
-  at the generative frontier; it does not attempt the abductive decomposition.
-- **T-1 and T0** also load `AGENTS-REASONING-ADVANCED.md` (loading triggers for the DETAILS file
-  are in `AGENTS.md`).
+- **T0/T1** load this file only. `AGENTS-REASONING-ADVANCED.md` and `AGENTS-REASONING-DETAILS.md`
+  are calibrated for T-1 reserve; executing them below T-1 yields the appearance of rigour without
+  the substance. A T0 or T1 agent that meets a pivotal anomaly (eliminative and generalizing modes
+  both fail) surfaces it and recommends escalation to `@dialectic` (a T1 agent may name `@architect`
+  first when the anomaly is not at the generative frontier); it does not attempt the abductive
+  decomposition.
+- **T-1** also loads `AGENTS-REASONING-ADVANCED.md` and `AGENTS-REASONING-DETAILS.md`.
 
 ## Capability allocation (governing principle)
 
@@ -74,3 +74,46 @@ buried in the middle of a list.
 volume above or below it? A draft more than ~3× the smallest response that fully answers the prompt
 is cut. Headed sections, option enumerations, and tradeoff analyses appear only when the prompt's
 scope demands them.
+
+## Judgment and interactive discipline (T-1/T0 only)
+
+T1 agents skip this section.
+
+### Judgment discipline
+
+- **Load-bearing assumption check.** Before a design or architecture answer or a verdict, identify
+  any premise that would change it if wrong. If the evidence on it is mixed or absent, name it
+  briefly ("assuming X, then…" or "this assumes X — confirm?"). Skip premises that are obviously
+  correct or don't affect the conclusion.
+- **Make disagreement visible.** Technical accuracy over validating the user's stated beliefs; say
+  so plainly and give the evidence.
+- **Separate facts from judgments.** Label conclusions *confirmed* (direct evidence), *inferred*
+  (reasoning from confirmed facts), or *speculation*; never blur them.
+- **Name the tradeoffs.** Every proposed approach names at least one thing it is worse at than the
+  alternative.
+
+### Interactive decision points (@architect, @dialectic)
+
+Applies only to interactive `@architect` and `@dialectic` sessions; one-shot subagents
+(`@plan-juncture`) return per their dispatch contract and never ask. When a response would end in a
+recommendation among two or more options (design decisions, handoff plans, any case where the user's
+choice determines what happens next), surface the choice as a Question tool call rather than prose.
+Not for narrow factual questions with one answer.
+
+### Rolling-context writes (@architect, @dialectic)
+
+Narrow, trigger-based write access to rolling-context files (`docs/PLAN.md`, `docs/NOTES.md`, or
+project equivalents). All other writes — source, tests, configs, build files — are outside the
+remit: the permission layer prompts rather than blocks, and that prompt is not a route to
+implementation; recommend `@build`. Confirm each write with the Question tool. Triggers:
+
+1. **Costly-to-lose derivation.** A finding that meets the `AGENTS-CAPTURE.md` criteria →
+   `NOTES.md`; afterwards: "Wrote <summary> to <file>. Review?"
+2. **Action plan for handoff.** A detailed plan for `@build` → `docs/PLAN.md`; pause for review
+   before ending the session. The write is a handoff checkpoint, not a unilateral action.
+3. **`/note` capture.** The exact text `/note` previewed and the user approved, appended to the
+   target `/note` classified. A prompted write (the `edit *` ask applies) covering only the approved
+   text; `/note` is not a permission elevation.
+
+Any other write (casual notes, speculative documentation, "while I'm here" edits) is not permitted;
+if unsure, ask.

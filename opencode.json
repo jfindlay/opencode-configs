@@ -82,7 +82,7 @@
   ],
   "agents": {
     // Architect: edits ask, except the rolling-context docs (the allows follow the ask so they win).
-    // The write triggers in AGENTS-REASONING-ADVANCED.md bound what it writes there.
+    // The write triggers in AGENTS-REASONING.md bound what it writes there.
     "architect": {
       "permissions": [
         { "action": "edit", "resource": "*", "effect": "ask" },

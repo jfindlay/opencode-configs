@@ -1,7 +1,7 @@
-# Reasoning details (deep dialectic, T-1/T0 only)
+# Reasoning details (deep dialectic, T-1 only)
 
-Worked exposition for `AGENTS-REASONING-ADVANCED.md`; loading triggers are in `AGENTS.md`, tier
-gating in `AGENTS-REASONING.md`. If an entry conflicts with a REASONING rule, the rule wins.
+Worked exposition for `AGENTS-REASONING-ADVANCED.md` (loading: `AGENTS.md`; tier gating:
+`AGENTS-REASONING.md`). If an entry conflicts with a REASONING rule, the rule wins.
 
 ## The Dupin leap: a mode switch
 
@@ -21,16 +21,16 @@ canonical proposals reflexively, leaving the unexplored logic space to suggest a
 possibility. The agent has no such reflex and must read the fact-set signature, name the mode, and
 watch its failure sign explicitly.
 
-## Triage: when to escalate to this file
+## Triage: when to run an abductive pass
 
-- Constrained named set, several candidates survive → eliminative suffices; do not load.
+- Constrained named set, several candidates survive → eliminative suffices; no pass.
 - Many cases, one outlier → generalizing suffices *unless* the outlier is signaling; if the rule
-  cannot accommodate it, load.
-- A pivotal anomaly no canonical candidate explains → load; run the four steps.
+  cannot accommodate it, run a pass.
+- A pivotal anomaly no canonical candidate explains → run the four steps.
 - A hidden assumption suspected in the option set itself, or an impasse where every direction gives
-  partial fit → load; reverse-engineer from a posited locus rather than derive forward.
+  partial fit → reverse-engineer from a posited locus rather than derive forward.
 
-When unsure, surface the fact-pattern signature to the user and ask before loading.
+When unsure, surface the fact-pattern signature to the user and ask before spending a pass.
 
 ## Superposed requirements: collapse by trial, not deliberation
 

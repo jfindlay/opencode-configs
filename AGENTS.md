@@ -70,12 +70,12 @@ the judgment register for. T0/T1 agents follow the trigger directly.
 |                                        | restructuring any documentation (inline docstrings, human |       |
 |                                        | docs, agent docs); for /style/audit. Its SKILL.md routes  |       |
 |                                        | to the per-language and per-surface guides                |       |
-| AGENTS-LENSES.md                       | When reaching for a code-reasoning lens at the prompt     | T0/T1 |
-|                                        | level; for design rules and per-lens reference, see       |       |
-|                                        | composable-code-lenses/docs/                              |       |
-| `python-lenses` skill                  | When doing a Python code-analysis investigation; when the | T0/T1 |
-|                                        | user names a lens explicitly; when choosing among AST,    |       |
-|                                        | import-graph, call-graph, coverage, or test analysis      |       |
+| `code-lenses` skill                    | When reaching for a code-reasoning lens; when doing a     | T0/T1 |
+|                                        | code-analysis investigation; when the user names a lens   |       |
+|                                        | explicitly; when choosing among AST, import-graph,        |       |
+|                                        | call-graph, coverage, or test analysis. Its SKILL.md      |       |
+|                                        | routes to the doctrine and per-language references; for   |       |
+|                                        | design rules, see composable-code-lenses/docs/            |       |
 | `lean` skill                           | When auditing the fidelity of Lean statements or proofs,  | T0/T1 |
 |                                        | or translating Lean declarations into classical           |       |
 |                                        | exposition; Lean projects only                            |       |

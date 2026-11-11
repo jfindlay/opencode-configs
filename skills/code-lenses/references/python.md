@@ -1,15 +1,12 @@
----
-name: python-lenses
-description: Select and invoke Python code-reasoning lenses (semgrep, grimp, callgraph, coverage, test inventory, fixture graph, salt loader, lens_query). Load when planning a code-analysis investigation or when the user names a lens explicitly.
----
+# Python lenses
 
 Python code-reasoning lenses expose static-analysis tools as MCP tools. Each lens runs a
 structured pass over source and returns a JSON `LensOutput` envelope with a stable
 `composable_keys` contract so outputs from different lenses can be joined.
 
-**When to load this skill:** when planning a code-analysis investigation, when the user names
-a lens explicitly, or when choosing among AST, import-graph, call-graph, coverage, or
-test-analysis approaches. See also `AGENTS-LENSES.md` for the generative framing.
+Load when doing a Python code-analysis investigation, when the user names a lens explicitly, or
+when choosing among AST, import-graph, call-graph, coverage, or test-analysis approaches. See
+`doctrine.md` for the language-agnostic framing.
 
 ---
 

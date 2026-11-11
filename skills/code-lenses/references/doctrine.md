@@ -6,8 +6,8 @@ design pattern, and per-lens catalog live in the `composable-code-lenses` repo (
 
 A *lens* is a structured representation of a codebase that answers a specific class of questions
 more cheaply or more correctly than raw text + grep. The available lenses are exposed by the
-`composable-code-lenses` MCP server; selection vocabulary and named compositions live in the
-`python-lenses` skill.
+`composable-code-lenses` MCP server; per-language selection vocabulary and named compositions live
+in the sibling references (`python.md`).
 
 ## Why a catalog, not a flowchart
 
@@ -19,7 +19,7 @@ shape × codebase size × frequency × cost × accuracy), so it should be a hint
 a flowchart.
 
 The operative pattern is **hybrid routing**: human supplies routing intuition by naming the lens
-explicitly in the prompt; the catalog (and skill, when built) supplies vocabulary, cost
+explicitly in the prompt; the catalog (and this skill) supplies vocabulary, cost
 calibration, and agent fallback when no lens is named. Strictly better than either pure-agent
 routing (which pays meta-cost every time) or pure-human routing (which leaves the agent without
 fallback and the human without vocabulary). The catalog is a contract — named lenses must do
@@ -43,7 +43,8 @@ wrap is made. The wrapping is the opportunity to fix the calling convention, not
 
 - **Available lenses and how to call them**: the `composable-code-lenses` MCP server's tool
   catalog.
-- **Selection vocabulary and named compositions**: the `python-lenses` skill (when built).
+- **Selection vocabulary and named compositions**: the per-language references of this skill
+  (`python.md`).
 - **Why lenses exist as a category, design rules for new lenses, output schema discipline,
   language-agnostic patterns**.
 - **Per-lens reference, composition matrix (including informal-spec cross-checks like

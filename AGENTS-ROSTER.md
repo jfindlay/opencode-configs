@@ -94,7 +94,9 @@ rely on prose guidance alone — encode tier in each subagent's `model:` frontma
 **Multisession subsystem** — the long-arc planning and execution roster:
 `@architect`, `@plan-admin`, `@plan-juncture`, and `@committer`. Lifecycle commands:
 `/roadmap-construct` (Phase 0, build the ROADMAP) → `/plan-shard` (slice a sub-track into a PLAN)
-→ `/plan-run` (execute the PLAN). Reference doc: `multisession/multi-session-planning.md`.
+→ `/plan-run` (execute the PLAN); `/plan-anneal` trims plan coordinates from durable files.
+Procedures, schemas, and templates live in the `multisession` skill (`skills/multisession/`); the
+commands and agents above load the resources they need.
 
 ## Command roster
 
@@ -108,8 +110,9 @@ rely on prose guidance alone — encode tier in each subagent's `model:` frontma
   user approval before committing.
 - `/roadmap-construct` — prime `@architect` to co-construct a long-arc `docs/ROADMAP.md` (the
   project-lifetime static-frame view) from free-form intent. Phase 0 of the multiplan lifecycle,
-  upstream of `/plan-shard`; a design dialogue, not a procedure. Orients on the full
-  construct → {shard → apply → reconcile}* loop but deliberately does not mechanize it.
+  upstream of `/plan-shard` (which owns later ROADMAP reconciliation); a design dialogue, not a
+  procedure. Orients on the full construct → {shard → apply → reconcile}* loop but deliberately does
+  not mechanize it.
 - `/config-retrospective` — single-session `@architect` audit of the OpenCode user-level infrastructure
   against the session store, scored against a relentless-simplicity lens. Forks `@explore` for
   permission-flow + usage-pattern data; the cohesion review is the orchestrator's own spine;

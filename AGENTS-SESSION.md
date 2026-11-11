@@ -24,11 +24,18 @@ docs (PLAN.md, NOTES.md).
 ## Rolling context files (project-level)
 
 Current-phase context, decisions, and surprises live in separate append-mostly files in the
-project's docs tree. All are transient — their content has two intended exits: effect a change in
-the code, or land in `AGENTS.md` / `README.md`. At session start, skim the ones that exist.
+project's docs tree. All are rolling context, not shipped documentation — their content has two
+intended exits: effect a change in the code, or land in `AGENTS.md` / `README.md`. At session start,
+skim the ones that exist.
 
-- `docs/PLAN.md` — current phase: what we're working on, what's decided, what's open, what's next.
-  Rewritten at phase boundaries. Concise (1–2 pages). Delete when the plan is executed.
+- `docs/PLAN.md` — current phase (or current sub-track): what we're working on, what's decided,
+  what's open, what's next. Rewritten at phase boundaries. Keep it concise, sized to the work's
+  scope and the capacity of the context that will hold it; never drop a required contract or
+  recovery record to shorten it. Retain prior content until its reconciliation and any outstanding
+  handoff obligations are satisfied; delete once the plan is executed and reconciled.
+- `docs/ROADMAP.md` — long-arc projects only: the project-lifetime view of sub-tracks, reconciled at
+  sub-track boundaries. It outlives any one PLAN but is rolling context, not shipped documentation;
+  keep what reconciliation and unresolved handoffs still need.
 - `docs/NOTES.md` — decisions, framings, mental models, and learnings (If X, Y happens because Z.)
   captured mid-project. Append-mostly. Absorb durable decisions/framings/models/learnings into
   `AGENTS.md` or the user-level `~/.config/opencode/AGENTS-HINTS.md` at merge time, then delete.

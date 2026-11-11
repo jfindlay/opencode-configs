@@ -110,23 +110,22 @@ fix, correction), and to partial feature-stage returns. A `/plan-run` dispatch r
 
 When `@plan-admin` dispatches you as the F-stage or C-stage of a paired `(F/C)` unit, you still own
 your own steering within your stage. The stage's scope, report, and return contract are in
-`/plan-run`'s F-stage and C-stage dispatch templates (rationale in
-`multisession/multi-session-planning.md`); follow the dispatch prompt. What is easy to get wrong:
+the F-stage and C-stage dispatch prompt; follow it, since it carries everything you need. What is
+easy to get wrong:
 
-- **As F:** return `handoff-ready`, never `done`/`green`/`verified`, unless the unit's full gate
-  (the full project gate, or the per-unit gate under a project-declared cadence) actually ran green.
-  Report a known feature-correctness failure or test gap plainly; do not leave it for the completion
-  stage to discover.
+- **As F:** return `handoff-ready`, never `done`/`green`/`verified`. Command results you report,
+  including a diagnostic full-gate run, are partial evidence. Report a known feature-correctness
+  failure or test gap plainly; do not leave it for the completion stage to discover.
 - **As C:** the intent capsule is the complete intent; do not redesign around it. A defect in the
   feature's own behavior, or a discovery that would invalidate a frozen contract, is named in your
   return, not resolved by reinterpreting intent. The driver routes it.
-- **Under a declared gate cadence** (the dispatch prompt says so): run the unit's gate once on your
-  final inputs, after your last edit; rerun any check a later edit invalidated; run boundary or
+- **Under a declared gate cadence** (the dispatch prompt says so): as C, run the unit's gate once on
+  your final inputs, after your last edit; rerun any check a later edit invalidated; run boundary or
   freshness checks only if the prompt names them; and return one compact evidence record per
   completed check (command and working directory, exit status, time, readable log reference,
   tested-input identity covering staged/unstaged changes and untracked additions, relevant
-  environment — no credentials). As F, label records partial. Never report a pass without the
-  record's backing output.
+  environment — no credentials). As F, run only the narrowest checks the prompt names and label
+  every record partial. Never report a pass without the record's backing output.
 
 See `AGENTS-ROSTER.md` (tier ladder), `AGENTS-SUBAGENT-STRATEGY.md` (fork criteria),
 `AGENTS-SESSION.md` (session splitting at ~200 messages), `AGENTS-CAPTURE.md` (capture-candidate

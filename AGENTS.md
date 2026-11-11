@@ -78,9 +78,12 @@ the judgment register for. T0/T1 agents follow the trigger directly.
 |                                        | import-graph, call-graph, coverage, or test analysis      |       |
 | AGENTS-LOG.md                          | During meta-restructuring sessions only (config audits,   | T0    |
 |                                        | doc reorganisations)                                      |       |
-| multisession/multi-session-planning.md | When planning or executing long-arc multi-session work    | T0    |
-|                                        | (the two-frame model, commit-shaped session, contract     |       |
-|                                        | taxonomy); before/during a /plan-run chain                |       |
+| `multisession` skill                   | When constructing a ROADMAP, sharding a PLAN, running or  | T0/T1 |
+|                                        | annealing a /plan-run chain, or acting as @plan-admin.    |       |
+|                                        | Its commands and agents load the resources they need; a   |       |
+|                                        | dispatched worker gets its scope in the prompt and does   |       |
+|                                        | not load the skill; load its rationale reference only to  |       |
+|                                        | explain the workflow                                      |       |
 
 ## Tool discipline
 

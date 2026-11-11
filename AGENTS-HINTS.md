@@ -325,8 +325,8 @@ two frames meet — re-reading it at sub-track boundaries is the practice that c
 and rigidity. "The plan was wrong about X" is a successful outcome of a session, not a failure.
 
 Full treatment of the two-frame relativity (static roadmap-view vs. action riding-the-wave-view)
-lives in `multisession/multi-session-planning.md` in the opencode-config repo; this hint is the
-operational handle.
+lives in the `multisession` skill's `references/rationale.md` in the opencode-config repo; this hint
+is the operational handle.
 
 ## Refactor ordering: doc, code, tests
 
@@ -359,5 +359,5 @@ hold fiduciary latitude under fidelity to the PLAN, so deviation (even medium de
 commensurate evidence) rides through and is reported at the step-3 review; halts are reserved for the
 irreconcilable — something incredibly wrong that the agent cannot reconcile against the PLAN's
 provisions, anticipations, or quantifications. This is the premise that motivates the whole
-discovery-and-adjustment apparatus and the juncture adjudication. See
-`multisession/multi-session-planning.md` and `commands/plan-run.md` for the mechanics.
+discovery-and-adjustment apparatus and the juncture adjudication. See the `multisession` skill
+(`references/execution.md`) for the mechanics.

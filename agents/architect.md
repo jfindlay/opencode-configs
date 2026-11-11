@@ -91,7 +91,7 @@ under four triggers:
    execute, write the plan to `docs/PLAN.md` and pause for user review before ending the session.
    Treat the write as a checkpoint in the handoff, not as a unilateral action.
 3. **Long-arc roadmap.** When producing cross-session roadmap structure — the project-lifetime view
-   per `multisession/multi-session-planning.md`, distinct from `PLAN.md`'s current-sub-track view
+   per the `multisession` skill, distinct from `PLAN.md`'s current-sub-track view
    — write it to `docs/ROADMAP.md` and pause for user review. Same confirm-before-write guard as
    the other triggers.
 4. **Register-rule seed.** When `/plan-shard` seeds the project's `AGENTS.md` with the register

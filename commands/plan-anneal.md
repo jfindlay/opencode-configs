@@ -5,152 +5,21 @@ agent: build
 
 # /plan-anneal
 
-Remove leaked **plan coordinates** from a project's durable artifacts and resolve each into a
-standalone statement of the property it stands for. This is the whole-project, on-demand form of the
-per-sub-track anneal gate `/plan-run` runs automatically at each ◆ sub-track boundary (step 7). Use
-it when a chain ran without the gate, when the gate's per-sub-track scope missed cross-cutting
-leaks, or as a final pass before a PLAN is archived and its coordinates become dangling pointers.
+Remove leaked plan coordinates from a project's durable artifacts and resolve each into a standalone
+statement of the property it stands for, then absorb deferred line-length overruns. This is the
+whole-project, on-demand form of the anneal gate `/plan-run` runs at each ◆ boundary.
 
-Runs from `@build` (T1). The sweep is mechanical — grep against a denylist, then translate each hit
-— with one thin judgment layer: distinguishing a genuine plan-coordinate leak from legitimate domain
-vocabulary (see step 4). If invoked from another agent, proceed; nothing here needs a higher tier.
+Runs from `@build` (T1). If invoked from another agent, proceed; nothing here needs a higher tier.
+No fork: the translate-verify cycle needs turn-by-turn steering.
 
-Scope (optional): $ARGUMENTS
+Scope (expanded arguments; optional path or glob): $ARGUMENTS
 
-# No fork: this command steers turn-by-turn — each Edit reacts to the grep state, and the verify
-# gate reacts to the edits. Forking would lose the iterative translate-verify cycle (same reason
-# format-loop and test-loop stay in-agent).
+## Procedure
 
-## The distinction this command enforces
+Load the `multisession` skill and read `references/artifact-hygiene.md` from its base directory
+(`~/.config/opencode/skills/multisession/`). Follow its "Standalone annealing" procedure with the
+scope above. Read `references/verification.md` only if the enclosing dispatch supplies a declared
+gate cadence; do not load the execution procedure. If a required resource cannot be read, stop and
+report the blocker; do not work from memory.
 
-Two vocabularies, from `multisession/multi-session-planning.md` ("Register discipline: plan
-coordinates stay in the margin"):
-
-- **Domain invariants** — content. The actual property, reason, or invariant (e.g. the walk-state
-  invariant `W = a·G + b·Q`; "known-answer test"). These *belong* in code, tests, and human docs.
-  Never touch them.
-- **Plan coordinates** — registration marks. Session ids, category letters, ◆, "frozen contract",
-  sub-track names, PLAN/ROADMAP references. Load-bearing in the rolling docs (PLAN, ledger, digest,
-  commit messages) while the defining PLAN is co-present; dangling pointers in the shipped artifact
-  once the PLAN is archived. These must be **trimmed** from durable files — translated into the
-  standalone property they point at, not merely deleted.
-
-The printer's-marks analogy: registration and cut marks live outside the trim line; this command is
-the trim. A leaked coordinate is replaced by the thing it referenced ("known-answer test for the
-walk-state invariant `W = a·G + b·Q`"), not by nothing ("KAT for S4" → delete leaves a hole).
-
-## Steps
-
-1. **Resolve scope.** `$ARGUMENTS`, if present, is a path or glob narrowing the sweep (a directory,
-   a crate, a `src/**` glob). Empty → the whole project tree. Use `workdir` set to the project root
-   rather than `cd <root> && <cmd>`.
-
-2. **Resolve the denylist.** Check for a per-project denylist in `docs/PLAN.md`'s
-   `## Notes for executors` (the tunable list `/plan-shard` seeds and the ◆ gate greps). If present,
-   use it. If absent, **read the `## Anneal candidate seed (canonical)` section of
-   `~/.config/opencode/commands/plan-run.md`** and use its patterns; there is no copy here, so do not
-   work from memory. Its patterns are candidate detectors, not bans: they cover alphanumeric contract
-   labels, category labels, numbered principles, plan possessives and Greek phase/session labels as
-   well as the older session-id and file-name patterns, so expect more false positives than a plain
-   coordinate list produces, and triage them in step 4.
-
-   The denylist targets plan coordinates, **not** domain terms. "KAT"/"known-answer test" is
-   legitimate crypto-library vocabulary and is not on the list; if a project's denylist has drifted
-   to include a domain term, stop and tell the user to tune it in PLAN rather than annealing away
-   real content.
-
-3. **Scan.** Grep each denylist pattern over the in-scope **durable** files only:
-   - **Include:** source, tests, human docs (`docs/**` narrative prose, `PEDAGOGY.md`, inline
-     docstrings and comments).
-   - **Exclude:** the rolling/static docs, the project's `AGENTS.md`, and git metadata —
-     `docs/PLAN.md`, `docs/ROADMAP.md`, `docs/NOTES.md`, `AGENTS.md`, `.git/**`, and any file whose
-     whole job is to hold coordinates. Plan coordinates are *supposed* to live in the rolling docs,
-     and the register rule `/plan-shard` seeds into `AGENTS.md` names the very vocabulary it
-     prohibits; annealing either is wrong. This list is the same one `/plan-run` step 7 uses.
-
-   Collect every hit with its file, line, and the matched coordinate.
-
-4. **Triage each hit (the one judgment step), then read for what grep cannot see.** For each match
-   decide:
-   - **Genuine leak** — the token is a plan coordinate standing in for a property (`"KAT for S4"`,
-     `"see the frozen contract from the substrate sub-track"`, `"this is the Cat B algorithm"`).
-     → translate (step 5).
-   - **False positive / legitimate domain use** — the pattern matched a real domain symbol, not a
-     coordinate (a variable literally named `S4`; a sentence about a "sub-track" of a railway in a
-     docstring's example; a Greek letter used as a mathematical symbol; an algorithm's own "phase";
-     a domain "principle"; a historical quotation). → leave it, and note it in the exit report so
-     the user can tighten the denylist. Never treat all Greek letters or every "phase" as leaks.
-
-   When genuinely unsure whether a hit is a leak or content, do **not** guess-edit: list it under
-   "needs-human" in the exit report and leave the file unchanged.
-
-   **Contextual read (independent of the grep).** A clean grep proves only that these patterns
-   found nothing. Within the requested scope, also read the durable prose — changed files first if
-   a diff range is available, and including source and test comments and docstrings, not only
-   Markdown — with its surrounding context, looking for planning references the patterns cannot
-   name (paraphrases of plan structure, milestone or phase names, "as agreed earlier"). Treat finds
-   exactly like grep hits: genuine leak → step 5; legitimate or uncertain → note or "needs-human".
-   For a very large scope, read the changed files and the surrounding files they touch rather than
-   the whole tree, and state that limit in the exit report; never report the scope as clean on the
-   strength of the grep alone.
-
-5. **Translate genuine leaks via `Edit`.** Replace each leaked coordinate with the standalone
-   property it points at — the actual invariant, reason, or interface name. Recover the referent
-   from the surrounding code/test/doc, from the contract the coordinate named, or (read-only) from
-   PLAN's `## Cross-session contracts` if the coordinate is a contract id. Make the narrowest correct
-   edit. Never use `sed -i` or any bash in-place edit — use the `Edit` tool for diff preview and undo.
-   - If the referent cannot be recovered with confidence, do not invent one: flag the hit as
-     "needs-human" and move on.
-
-6. **Verify green.** After the edits, run the project's test + type gate (discover it, don't assume
-   `make`: `Makefile` test/typecheck targets → `make test` / `make typecheck`; `tox` → the analyze
-   invocation; `package.json` scripts → `npm test`; else ask). Translations touch comments/docstrings
-   and occasionally test names, so a green gate confirms nothing behavioural moved. Red → fix the
-   narrowest cause and re-run (this is part of the loop budget below). Under a `/plan-run`-declared
-   gate cadence, run the per-unit gate once on the final inputs (after the last edit, i.e. after
-   step 8) and return evidence records as that dispatch's prompt specifies; comment and doc-comment
-   edits are classified by `/plan-run`'s rules, and an uncertain edit takes the code path.
-
-7. **Re-scan.** Re-grep the denylist over the in-scope durable files and re-read the prose you
-   edited or flagged, not only the pattern matches. Loop steps 4–7 until:
-   - **Clean** — no genuine leaks remain (only noted false positives / needs-human items), OR
-   - 2 consecutive iterations with no reduction in genuine-leak count (not converging), OR
-   - a hard cap of 4 iterations.
-
-   In any non-clean stop: summarize what remains and ask for direction. Do not grind.
-
-8. **Line-length pass.** This command is also the general cleanup home for line-length overruns that
-   multi-session chains deliberately deferred (see `multisession/multi-session-planning.md`, "Line
-   length is deferred to the anneal sweep"). Find durable in-scope lines over the `AGENTS.md` line
-   width — use the project's formatter/linter if it reports them (never a local formatter outside
-   the project's dev/CI environment), else grep for lines longer than that width (`.{101,}` at the
-   current 100-character limit). Rewrap them with `Edit` per the formatting conventions; do not
-   rewrap lines already within the width, and skip lines that cannot wrap (URLs, long literals,
-   tables). Re-run the verify gate from step 6.
-
-## Constraints
-
-- **Never edit the rolling/static docs or `AGENTS.md`.** `docs/PLAN.md`, `docs/ROADMAP.md`,
-  `docs/NOTES.md`, and commit messages legitimately hold plan coordinates — that is the whole point
-  of the two-vocabulary split — and `AGENTS.md` carries the seeded register rule that names them.
-  This command reads PLAN (to recover referents) but writes only durable source/test/doc files.
-- **Translate, never merely delete.** A trimmed coordinate is replaced by its referent. Deleting a
-  coordinate and leaving a hole loses the content the coordinate was standing in for.
-- **Domain vocabulary is off-limits.** If a denylist pattern matches real domain content, the
-  denylist is wrong — surface it, do not anneal the content away.
-- **Does not commit.** Leaves the tree dirty with green tests and the translations applied. Commit
-  separately (`/commit`) or let the surrounding chain commit. This mirrors the in-loop anneal-fix,
-  which leaves the commit to the driver.
-- **Does not push, does not rewrite history.**
-
-## Exit report
-
-- Scope swept (path/glob or "whole project") and the denylist source (PLAN override / canonical
-  seed), plus the contextual-read coverage and any scope limit.
-- Genuine leaks translated: count, with a short before→after list.
-- False positives left in place: count, with the patterns that produced them (denylist-tuning hint).
-- Needs-human items: leaks whose referent could not be recovered — file, line, and the coordinate.
-- Line-length pass: lines rewrapped (count) and unwrappable lines left in place.
-- Final status: **clean** / **stuck** (non-converging, with remaining leaks) / **needs-human**.
-- Verify gate result (green / the failure, if the loop stopped red).
-- Files modified (from `git diff --stat`).
+Does not commit, push, or rewrite history; never edits PLAN, ROADMAP, NOTES, or `AGENTS.md`.

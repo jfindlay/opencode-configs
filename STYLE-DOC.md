@@ -48,10 +48,11 @@ Relentlessly transactional. Agents read them to get oriented to the project or c
   and agent).
 - **User-level agent infrastructure** lives at `~/.config/opencode/`. Loading rules for each file
   are documented in AGENTS.md `## Document loading rules`.
-- **All other agent-facing markdown is transient rolling context** (`PLAN.md`, `NOTES.md`).
-  Rolling-context content has exactly two intended exits: (i) effect a change in the code, or (ii)
-  land in `AGENTS.md` / `README.md`. Content that does neither is dead weight and should be removed
-  at merge time.
+- **All other agent-facing markdown is rolling context** (`PLAN.md`, `NOTES.md`, and in long-arc
+  projects a project-lifetime `ROADMAP.md`). Rolling-context content has exactly two intended exits:
+  (i) effect a change in the code, or (ii) land in `AGENTS.md` / `README.md`. Content that does
+  neither is dead weight and should be removed at merge time. A `ROADMAP.md` lives for the project,
+  not for one phase, and is still not permanent shipped documentation.
 - **Agent docs refer liberally to inline and human docs.** Keep structural description in the code
   and all other exposition in the human docs.
 - **Inline and human docs never refer to agent docs.** This direction is one-way.

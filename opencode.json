@@ -51,10 +51,7 @@
   },
   // Global: shell allowed with a few checkpoints (push, commit, destructive git); edits ask.
   // Applies to every agent as the base; agent rules append after it.
-  // V2 ordered permissions array. Rules resolve the same way as the old per-action maps
-  // did (last matching rule wins); this just flattens each action's map into
-  // {action, resource, effect} tuples in the same order, and renames bash->shell,
-  // write->edit (edit already covers write/patch in V2), task->subagent.
+  // Ordered rules; the last matching rule wins. `edit` covers edit/write/patch.
   "permissions": [
     { "action": "*", "resource": "*", "effect": "ask" },
     { "action": "read", "resource": "*", "effect": "allow" },
@@ -63,22 +60,17 @@
     { "action": "read", "resource": "*.env", "effect": "ask" },
     { "action": "read", "resource": "*.env.*", "effect": "ask" },
     { "action": "read", "resource": "*.env.example", "effect": "allow" },
-    // Shell is allowed by default. These rules are consent checkpoints, not containment: they
-    // match command text, so they cannot see effects (redirects, interpreters, `env`, `git -C`).
-    // Preferences such as Read/Grep/Glob over cat/grep/find live in AGENTS.md as guidance, not
-    // as denies. Rules are checked per extracted subcommand; one deny or ask decides the line.
-    // Real isolation (sandbox, credentials, network) belongs outside this file.
+    // Shell is allowed by default; the rules below are consent checkpoints, not containment
+    // (AGENTS-HINTS.md, "Shell permission rules are tripwires").
     { "action": "shell", "resource": "*", "effect": "allow" },
     { "action": "shell", "resource": "git push *", "effect": "deny" },
     { "action": "shell", "resource": "git commit *", "effect": "ask" },
     { "action": "shell", "resource": "git reset --hard *", "effect": "ask" },
     { "action": "shell", "resource": "git clean *", "effect": "ask" },
     { "action": "shell", "resource": "sudo *", "effect": "ask" },
-    // `edit` covers edit/write/patch in V2, so the old separate edit+write maps (which were
-    // identical) collapse into one action without changing behavior.
     { "action": "edit", "resource": "*", "effect": "ask" },
-    // Allow read-only access to the user-level OpenCode config dir so agents can load
-    // AGENTS-*.md, skills/*/references/*.md, etc. on-demand without an external_directory prompt per file.
+    // The user-level config dir is allowed so on-demand AGENTS-*.md and skill references load
+    // without an external_directory prompt per file.
     { "action": "external_directory", "resource": "*", "effect": "ask" },
     { "action": "external_directory", "resource": "~/.config/opencode/**", "effect": "allow" },
     { "action": "glob", "resource": "*", "effect": "allow" },
@@ -89,9 +81,8 @@
     { "action": "webfetch", "resource": "*", "effect": "allow" }
   ],
   "agents": {
-    // Architect mode: edits ask (as globally), except the rolling-context docs, which are allowed
-    // without prompting. The ask comes before the docs allows so the docs allows win
-    // (last-match-wins). The agent's own contract (agents/architect.md) bounds what it writes there.
+    // Architect: edits ask, except the rolling-context docs (the allows follow the ask so they win).
+    // The write triggers in AGENTS-REASONING-ADVANCED.md bound what it writes there.
     "architect": {
       "permissions": [
         { "action": "edit", "resource": "*", "effect": "ask" },
@@ -115,9 +106,8 @@
         { "action": "edit", "resource": "docs/PLAN.md", "effect": "allow" }
       ]
     },
-    // Disable the built-in plan agent — replaced by @architect (T0).
-    // The reserved name "plan" injects a read-only system reminder that cannot be
-    // overridden by permission JSON or agent prose (OpenCode 1.17.0).
+    // Disable the built-in plan agent (replaced by @architect): the reserved name "plan" injects a
+    // read-only system reminder that permission JSON and agent prose cannot override.
     "plan": {
       "disabled": true
     },

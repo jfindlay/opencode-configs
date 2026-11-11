@@ -22,7 +22,6 @@ $ARGUMENTS
 Load the `multisession` skill and read `references/artifact-hygiene.md` from its base directory
 (`~/.config/opencode/skills/multisession/`). Follow its "Standalone annealing" procedure with the
 scope above. Read `references/verification.md` only if the enclosing dispatch supplies a declared
-gate cadence; do not load the execution procedure. If a required resource cannot be read, stop and
-report the blocker; do not work from memory.
+gate cadence; do not load the execution procedure.
 
 Does not commit, push, or rewrite history; never edits PLAN, ROADMAP, NOTES, or `AGENTS.md`.

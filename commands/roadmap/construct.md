@@ -22,8 +22,7 @@ $ARGUMENTS
 Load the `multisession` skill. Then read `references/planning.md` and `references/plan-format.md`
 from the skill's base directory (`~/.config/opencode/skills/multisession/`). Follow the "ROADMAP
 construction" procedure in `planning.md` with the intent seed above, writing to the shape in
-`plan-format.md`. If a required resource cannot be read, stop and report the blocker; do not
-reconstruct the procedure from memory.
+`plan-format.md`.
 
 Construction only: never shard, execute, or commit code. Writes are limited to `docs/ROADMAP.md`
 (and, on approval, an `IDEAS.md`/NOTES capture), behind the Question-tool confirmation. Do not

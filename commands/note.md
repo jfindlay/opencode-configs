@@ -27,7 +27,8 @@ $ARGUMENTS
    - **`docs/PLAN.md`** — current-phase state: what is decided, open, and next.
    - **`docs/NOTES.md`** — a decision, framing, mental model, or learning ("If X, Y happens because
      Z"). Rolling context: it exits into code or `AGENTS.md`.
-   - **User-level `~/.config/opencode/AGENTS-HINTS.md`** — a framing useful across projects.
+   - **User-level `~/.config/opencode/AGENTS-HINTS.md`** — a framing or fact useful across
+     projects.
 
    State your classification choice and one-sentence reason. Ask: "Target correct? (yes / pick
    different)"
@@ -35,9 +36,9 @@ $ARGUMENTS
 3. **Draft the exact text to append.** Apply the format for the target file:
    - `AGENTS.md` (either level): concise rule or convention, no date prefix.
    - `PLAN.md`: integrate into the appropriate section or append a new one.
-   - `NOTES.md`: `YYYY-MM-DD: <content>` (today's date). For surprises use
-     `YYYY-MM-DD: If you try X, Y happens because Z.`
-   - `AGENTS-HINTS.md`: dated entry with heading, 2–4 sentences max.
+   - `NOTES.md`: `YYYY-MM-DD: <content>` (today's date); surprises as `If you try X, Y happens
+     because Z.`
+   - `AGENTS-HINTS.md`: a headed section of 2–4 sentences, no date.
 
    Show the proposed text as a fenced block. Ask: "Append this? (yes / edit / abort)"
 
@@ -48,8 +49,8 @@ $ARGUMENTS
 
 - Never write without explicit approval at step 3. There are no automatic captures.
 - This command is not a permission elevation. For `@architect` and `@dialectic`, an approved capture
-  is their narrow `/note` write trigger; any other edit stays outside their remit, and the edit
-  permission prompt still applies.
+  is their `/note` write trigger (`AGENTS-REASONING-ADVANCED.md`); the edit permission prompt still
+  applies.
 - Never modify existing content — append only (except `PLAN.md`, which may warrant targeted edits;
   confirm before any edit).
 - If the capture references a file path or symbol, include it in the appended text so it remains

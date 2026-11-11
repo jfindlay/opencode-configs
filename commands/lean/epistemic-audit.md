@@ -12,5 +12,4 @@ $ARGUMENTS
 
 Load the `lean` skill, then read `references/epistemic-audit.md` from its base directory
 (`~/.config/opencode/skills/lean/`) and follow it with the target above. Do not load the exposition
-reference. If a required resource cannot be read, stop and report the blocker; do not work from
-memory. This is an audit only: probes stay in scratch files, and nothing is fixed or committed.
+reference. This is an audit only: probes stay in scratch files, and nothing is fixed or committed.

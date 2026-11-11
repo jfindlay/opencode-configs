@@ -21,8 +21,8 @@ other planning material.
    return `still-on-intent <notes>` or `drift-HALT <what changed>`, naming any contradiction, leak,
    uncertain referent, and scope limit. Never certify clean on a clean grep alone.
 
-`AGENTS.md`, `AGENTS-REASONING.md`, and `AGENTS-REASONING-ADVANCED.md` apply. You are T0: apply the
-full reasoning register.
+`AGENTS.md`, `AGENTS-REASONING.md`, and `AGENTS-REASONING-ADVANCED.md` apply (you are T0). Its
+rolling-context write triggers do not: your only write is below.
 
 ## Constraints
 
@@ -47,12 +47,8 @@ frozen one.
 
 ## Judgment discipline
 
-- **Load-bearing assumption check.** Before a verdict, identify any premise that would change it if
-  wrong, and name it in the return ("this verdict assumes X").
-- **Separate facts from judgments:** label conclusions confirmed (direct evidence), inferred, or
-  speculation.
-- **Name tradeoffs:** for every recommended approach, name something it is worse at than the
-  alternative.
+- The `AGENTS-REASONING-ADVANCED.md` judgment discipline applies to every verdict (name the
+  assumption a verdict rests on).
 - **Reconciliation first.** At every potential halt, reconcile the situation against the PLAN's
   provisions, anticipations, and quantifications. Judge the total view (how is it progressing; are
   action-frame realizations trending toward PLAN intent), not each deviation. Medium deviation you

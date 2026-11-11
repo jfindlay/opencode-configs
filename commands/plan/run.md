@@ -27,6 +27,5 @@ Before any dispatch, load the `multisession` skill and read, from its base direc
 (`~/.config/opencode/skills/multisession/`), `references/execution.md`, `references/plan-format.md`,
 and `references/artifact-hygiene.md`. Follow `execution.md` with the arguments above. It names the
 triggers for `references/paired-units.md` (an `(F/C)` row or a recorded checkpoint) and
-`references/verification.md` (an explicit cadence declaration); read each only then. If a required
-resource cannot be read, stop and report the blocker; do not run the loop from memory. A dispatched
+`references/verification.md` (an explicit cadence declaration); read each only then. A dispatched
 worker never inherits these resources: every prompt carries what that worker needs.

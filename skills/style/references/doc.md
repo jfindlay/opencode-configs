@@ -136,12 +136,3 @@ tasks remain) vs. in-flight sections.
 
 **Default to `FLAG-FOR-USER` over `DELETE`/`ABSORB` when evidence is incomplete.** Over-flagging
 is the safe failure mode; never lose unactioned rolling-context content.
-
-## Future sections (TODO)
-
-- **rST conformance details.** Field-list ordering, common pitfalls, Sphinx-vs-other-tooling
-  divergences.
-- **English conventions.** en-UK spelling for project-internal docs unless a project pins en-US;
-  punctuation; em-dash usage; sentence-case headings.
-- **Register-by-doc-type.** When narrative prose is appropriate (design docs) vs. when bullet-list
-  density is preferred (reference docs).

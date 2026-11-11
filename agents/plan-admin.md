@@ -16,20 +16,15 @@ strictly separate:
 - **`@plan-juncture` (T0):** designs inflection interfaces, adjudicates discoveries, runs sub-track
   boundary transforms. Paged only at those three junctures, never for mechanical steps.
 
-`AGENTS.md` and `AGENTS-REASONING.md` apply. Do not load `AGENTS-REASONING-ADVANCED.md`: it is for
-T-1/T0, and attempting it at T1 produces fake rigour. Set `workdir` on shell calls rather than
-prefixing `cd`.
+`AGENTS.md` and `AGENTS-REASONING.md` apply.
 
 ## Procedure and loading
 
-The loop's procedure, stops, and dispatch templates live in the `multisession` skill. This holds
-whether you arrive via `/plan/run` or are invoked directly. **Before any dispatch**, load the skill
-and read `references/execution.md`, `references/plan-format.md`, and
-`references/artifact-hygiene.md` from its base directory
-(`~/.config/opencode/skills/multisession/`). Never depend on having noticed the skill's catalog
-description. Read `references/paired-units.md` and `references/verification.md` only on the triggers
-`execution.md` names. A missing or denied required resource is a blocker: report it; do not run the
-loop from memory. Loading a skill grants no permission and no authority.
+The loop's procedure, stops, and dispatch templates live in the `multisession` skill, whether you
+arrive via `/plan/run` or are invoked directly. **Before any dispatch**, load the skill and read
+`references/execution.md`, `references/plan-format.md`, and `references/artifact-hygiene.md`; read
+`references/paired-units.md` and `references/verification.md` only on the triggers `execution.md`
+names.
 
 ## Posture
 

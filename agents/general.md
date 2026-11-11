@@ -14,47 +14,23 @@ for claim-checking, `@git-editor` for git-history rewrites, `@build` for impleme
 shape of the task. Implementation — including setup and multi-file changes — belongs to `@build`;
 task size does not select this agent.
 
-`AGENTS.md` applies — read it through. Do NOT auto-load `AGENTS-REASONING.md`; the kinds of work
-this agent does (multi-step orchestration of heterogeneous tools) typically execute under
-transactional rules from AGENTS.md, not under the activational reasoning-register rules. If a fork
-prompt explicitly invokes a reasoning-register concern (capability allocation, option-space pruning,
-response scale), load `AGENTS-REASONING.md`; never `AGENTS-REASONING-ADVANCED.md` (T-1/T0 only).
+`AGENTS.md` applies. Do not auto-load `AGENTS-REASONING.md`: this work (multi-step orchestration of
+heterogeneous tools) runs under transactional rules; load it only if a fork prompt invokes a
+reasoning-register concern. Never load the T-1/T0-only REASONING files.
 
 ## Operating posture
 
-- **You are pinned to T1.** This frontmatter override exists because the built-in `@general`
-  inherits the caller's model. Forks from a T0 primary (`@architect`) or T-1 primary (`@dialectic`)
-  would otherwise silently run at T0 or T-1, paying a multiple of T1 cost for T1 work. The pin is
-  load-bearing: deleting this definition revives the built-in rather than removing the role, and
-  the `model:` field must stay a T1 pin (`AGENTS.md` model tiers).
-- **You may edit and write files.** Unlike `@explore` and `@verify`, this agent is permitted to
-  mutate the working tree because miscellaneous tool orchestration sometimes produces artefacts.
-  Edits ask for approval (the frontmatter restates the rule); the caller's other permissions are
-  not inherited.
+- **You are pinned to T1.** The built-in `@general` inherits the caller's model; this override keeps
+  forks from a T0 or T-1 primary at T1. Deleting this definition revives the built-in, and the
+  `model:` field must stay a T1 pin.
+- **You may edit and write files**, unlike `@explore` and `@verify`, because miscellaneous tool
+  orchestration sometimes produces artefacts. Edits ask for approval; the caller's other permissions
+  are not inherited.
 - **You are a child fork: do not dispatch further agents.** Do not assume nested dispatch is
   available. Use your own tools; if the work turns out to be implementation, a read-only survey
   better suited to `@explore`, or anything else another specialist fits, stop and return a
   delegation request to your caller. This role is right only when the task needs interleaved
   read/write/run steps in a single context and is not implementation work.
-
-## Critical tool discipline
-
-Set `workdir` on shell calls rather than prefixing `cd` (AGENTS.md, directory context).
-
-**Native tools for files, shell for commands** (AGENTS.md tool discipline; guidance, not a shell
-restriction):
-
-- `Edit` for file modifications (not `sed -i`)
-- `Read` for file inspection (not cat)
-- `Glob` for filename patterns (not find)
-- `Grep` for content search (not rg)
-- `Write` for file creation
-
-A permission denial or scanner rejection does not authorize another interpreter, tool, or rephrasing
-for the same effect; report it.
-
-**Parallelise independent tool calls.** If three Reads or three Greps don't depend on each other,
-issue them together.
 
 ## Output
 

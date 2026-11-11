@@ -18,16 +18,14 @@ The cost of session size is U-shaped. Too small and the fixed warm-up of loading
 amortised; too large and the session pays quadratic cache-read accumulation, a compaction event, and
 loss of exactly the design context it most needs. Trimming always-injected base context lowers the
 warm-up term and moves the optimum toward smaller sessions, so context-trimming and commit-shrinking
-compound. *Calibration:* an earlier rho-crate arc ran about 400–1000 LOC over 4–7 files per session,
-near the top of what a coherent context holds without compaction; the 150–400 LOC default is
-deliberately smaller.
+compound. The 150–400 LOC default sits deliberately below the top of what a coherent context holds
+without compaction.
 
 **The five inputs.** Four push smaller and one pushes larger, so tuning is a tension between the
 irreducible floor and four downward pressures. Inputs 3 and 4 (cost of being wrong) are the same
 lens that routes tier, so commit-size tuning and tier routing are one decision at two levels: high
 cost-of-wrong pulls toward smaller commits and higher-tier review for the same reason. Input 5 (test
-quality) was missing from the first calibration and is load-bearing: tests are the inner control
-loop, so a weak suite cannot safely carry dense small commits however much the other inputs want
+quality) is load-bearing: tests are the inner control loop, so a weak suite cannot safely carry dense small commits however much the other inputs want
 them.
 
 **Comparability.** Measurement-shaped work has a second floor: the measured environment can drift
@@ -189,10 +187,8 @@ names the vocabulary it prohibits. The denylist aims at coordinates, not domain 
 legitimate in a crypto library, `\bS4\b` as a session id is not.
 
 **Claim verification is not annealing.** A coordinate denylist catches leaked planning vocabulary,
-not obsolete assertions in ordinary domain language. Motivating case: a claim about a norm map
-survived in unchanged prose after a claims-correction sub-track although the new tests refuted it;
-nothing the grep looks for would have caught it, and no changed line contained it. The cost is
-semantic review, so it is limited to claims the sub-track affected and adds no verdict, phase, or
+not obsolete assertions in ordinary domain language: a claim that new tests refute can survive in
+unchanged prose that no grep pattern or changed line touches. The cost is semantic review, so it is limited to claims the sub-track affected and adds no verdict, phase, or
 loop.
 
 **Line length** is deferred because re-engaging a spent session to rewrap a few lines re-reads and
@@ -203,9 +199,9 @@ safety net, since the cleanup row is skippable.
 
 It is abductive: it articulates the problem's actual shape rather than applying a known one, and a
 declarative config for "discover what the config should contain" would be circular. Whether the
-iterate loop should become one control structure, whether sub-track graph patterns are reusable
-(n=1 so far), and how juncture judgment may alter the loop's future are left uncaptured pending more
-observed arcs.
+iterate loop should become one control structure, whether sub-track graph patterns are reusable,
+and how juncture judgment may alter the loop's future are left uncaptured pending more observed
+arcs.
 
 ## Pacing and project shape (*calibration*)
 

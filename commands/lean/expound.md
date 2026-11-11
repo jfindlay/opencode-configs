@@ -12,5 +12,4 @@ $ARGUMENTS
 
 Load the `lean` skill, then read `references/expound.md` from its base directory
 (`~/.config/opencode/skills/lean/`) and follow it with the input above. Do not load the audit
-reference. If a required resource cannot be read, stop and report the blocker; do not work from
-memory. The command only reads source and answers with the LaTeX document; it edits nothing.
+reference. The command only reads source and answers with the LaTeX document; it edits nothing.

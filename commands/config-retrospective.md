@@ -5,11 +5,9 @@ agent: architect
 
 Audit the OpenCode user-level infrastructure (permissions, agents, commands, docs) against actual
 session-store usage; action approved changes. This command runs the session as `@architect`; the
-switch persists after it finishes. One session, no cross-session hand-off. Source of truth and live
-config are the same files: `~/.config/opencode/` is a symlink to `opencode-config/`, so edits there
-take effect on reload (the symlinked directory is not watched; see `AGENTS.md`, "OpenCode config files").
-The architect never edits source or config itself: approved changes go to a forked `@build`
-(step 4).
+switch persists after it finishes. One session, no cross-session hand-off. Config edits follow
+`AGENTS-LOCAL.md` ("Config files"). The architect never edits source or config itself: approved
+changes go to a forked `@build` (step 4).
 
 ## The lens: relentless simplicity
 
@@ -25,20 +23,17 @@ never run, a permission rule that never fires) is the signal; simplicity is the 
 
 ## Data-access crib
 
-Verified against OpenCode 2.2.5 by comparing the read API with direct store queries (identical
-agent, parent, model, cost, timestamps and per-status tool counts for 100 recent sessions). The
-store layout changed between the V1 and V2 runtimes; re-check after an engine upgrade.
+Current for OpenCode 2.2.5, where the read API and the store agree. The store layout differs between
+V1 and V2 runtimes; re-check after an engine upgrade.
 
 **Prefer the read API.** `opencode api <operationId> --param key=value` talks to the background
-service. Keep pages small and do not pipe a large response into another process: on 2.2.5 such a
-response (piped into `jq`) arrived truncated, as invalid JSON, while small pages parsed and a full
-response the shell tool retained itself (it saves large output to a file) was also parseable. A
-message `limit` bounds the item count, not the response bytes: tool output sits inline in the
-messages. Read retained output with `Read` (`offset`/`limit`); no export file or redirect is needed.
-Pagination: `cursor.next` is an opaque value; pass it back as `--param cursor=<value>` (not with
-`order`; repeat the `type` filter for messages). Stop on an empty page: a page shorter than `limit`
-can still carry a non-null `cursor.next` (a 14-item result at `limit=200` did). Location-scoped
-operations take `location[directory]=<path>` in a raw `GET` path.
+service. Keep pages small and do not pipe a large response into another process (it can arrive
+truncated); read the file the shell tool retains with `Read` (`offset`/`limit`). A message `limit`
+bounds the item count, not the response bytes: tool output sits inline in the messages.
+Pagination: `cursor.next` is opaque; pass it back as `--param cursor=<value>` (not with `order`;
+repeat the `type` filter for messages). Stop on an empty page: a page shorter than `limit` can still
+carry a non-null `cursor.next`. Location-scoped operations take `location[directory]=<path>` in a
+raw `GET` path.
 - `session.list` (`limit`, `order`, `parentID`, `directory`, `project`, `search`, `archived`): per
   session `id`, `parentID` (absent for top-level), `agent`, `model.id`, `cost`, `tokens`
   (`input`, `output`, `reasoning`, `cache.read`, `cache.write`), `outcome` (finished sessions only),
@@ -53,15 +48,13 @@ operations take `location[directory]=<path>` in a raw `GET` path.
   `state.metadata.sessionID`. The child's `parentID` is the calling session's id, not its own.
 
 **Cost.** `session.cost` is the session's own spend, never rolled up from children. For forked
-children it equals the sum of its assistant messages' `cost`. A top-level session's `cost` exceeds
-that sum by a small amount ($0.00002–$0.002 in the sample) not attributable to any listed message;
-the cause is unverified. These are OpenCode-recorded costs, not invoices.
+children it equals the sum of its assistant messages' `cost`; a top-level session's `cost` exceeds
+that sum by a small unattributed amount. These are recorded costs, not invoices.
 
 **Direct store queries (explicit bulk-aggregate fallback; the orchestrator's, not `@explore`'s).**
-`~/.local/share/opencode/opencode.db` is a live WAL database (about 19 GB on this machine). The
-OpenCode skill requires a backup before inspecting persistent data with external tools: take one
-with SQLite's `.backup` into a directory with enough free space (`/tmp` may be too small; never copy
-`.db`, `-wal` and `-shm` as separate files). If no space exists, say so and get the user's decision
+`~/.local/share/opencode/opencode.db` is a large live WAL database. Back it up before inspecting it
+with external tools: SQLite's `.backup` into a directory with enough free space (`/tmp` may be too
+small; never copy `.db`, `-wal` and `-shm` as separate files). If no space exists, say so and get the user's decision
 before querying the live file. Query only as `sqlite3 -readonly <db> '<query>'` with predicates on
 indexed columns (`session_id`, `parent_id`); never write it.
 - `session_v2` (current sessions): `id`, `parent_id`, `agent`, `model` (JSON; `json_extract(model,
@@ -76,24 +69,20 @@ indexed columns (`session_id`, `parent_id`); never write it.
 - `session_part` holds no rows for recent sessions (content is inline in `session_message`).
 - Day binning: `date(time_created/1000, 'unixepoch')`; last 14 days:
   `time_created >= (strftime('%s', 'now', '-14 days') * 1000)`.
-- Legacy tables `session`, `message`, `part` (V1 layout, `part.data` JSON with `step-finish`
-  rows) stop at sessions created 2026-10-17. `session_v2` also holds those older sessions and their
-  messages, so the V2 tables are the single surface; use the legacy tables only to inspect V1-era
-  fields. Whether V1-era `aborted` tool outcomes map to a V2 status was not checked.
+- Legacy tables `session`, `message`, `part` (V1 layout, `part.data` JSON with `step-finish` rows)
+  stop at sessions created 2026-10-17. `session_v2` also holds those older sessions, so the V2
+  tables are the single surface; use the legacy tables only for V1-era fields.
 
 **Permission decisions are not recorded as history.** The `permission` table holds project-scoped
-saved approvals (`action`, `resource`), not decisions; the `event` table was empty and
-`experimental.session.log` returned only a sync marker; `permission.request.list` and
-`session.permission.list` show only currently pending requests. Residue only, in the tool call's
-`state.error`: type `permission.rejected` for both a configured deny and a rejected ask; the message
-text separates them (`Permission denied: <tool>` for a configured deny; `This non-interactive run
-cannot ask the user for permission…` for an ask nobody could answer). The text of a human Reject in
-an interactive client was not observed. An approved ask is `completed`, indistinguishable from a
-pre-allowed call. Calls that fail otherwise carry type `tool.execution`.
+saved approvals, not decisions; `permission.request.list` and `session.permission.list` show only
+pending requests. Residue only, in the tool call's `state.error`: type `permission.rejected` for both
+a configured deny and a rejected ask, separated by message text (`Permission denied: <tool>` for a
+configured deny; `This non-interactive run cannot ask the user for permission…` for an unanswerable
+ask). An approved ask is `completed`, indistinguishable from a pre-allowed call. Other failures
+carry type `tool.execution`.
 
-**Session-level overrides.** `session_v2.permission` is NULL in every row and no sampled API session
-carried `permissions`, so a fork's session-level override cannot be discovered on V2. Legacy
-`session.permission` still holds V1-era overrides for sessions before 2026-10-17.
+**Session-level overrides** cannot be discovered on V2 (`session_v2.permission` is NULL); legacy
+`session.permission` holds V1-era overrides for sessions before 2026-10-17.
 
 ## Threads
 1. **Permission-flow.** Which tool invocations triggered prompts most often, which fire despite a
@@ -112,8 +101,7 @@ carried `permissions`, so a fork's session-level override cannot be discovered o
    API operation. Have it report any access gap (the response too large to read, a denied command)
    rather than work around it; bulk SQLite queries are yours, under the store rules above. This
    grants reads of sensitive session history, not API mutations. Never write
-   `.db`/`.db-wal`/`.db-shm`. Edit through the `opencode-config/` path; the symlinked config
-   directory is the same files.
+   `.db`/`.db-wal`/`.db-shm`.
 2. Run Thread 3 yourself. Produce a ranked candidate list (deletes, merges, cuts, permission edits)
    ranked by (simplicity impact) × (ease/safety).
 3. Gate via Question tool (accept / defer / reject). Do not action before this step.

@@ -5,15 +5,9 @@ description: Procedures for long-arc multi-session projects. Planning (ROADMAP c
 
 # Multisession
 
-Index for the long-arc workflow. Loading this skill does not switch agents or grant permissions;
-command routing, direct-agent prerequisites, and approval gates still apply. A missing or denied
-required resource is a blocker: report it, do not improvise its procedure.
-
-Resource paths below resolve from this skill's base directory (the directory holding this file;
-`~/.config/opencode/skills/multisession/`), never from the target project's working directory. Read
-them with the Read tool. Command input is expanded only in the command body, so a command passes it
-explicitly; resources consume that input and are not command templates, so they never interpolate
-placeholders. Dispatch templates are filled in by the driver, not by the skill loader.
+Index for the long-arc workflow (skill loading rules: `AGENTS.md`). Command routing, direct-agent
+prerequisites, and approval gates still apply. Dispatch templates are filled in by the driver, not by
+the skill loader.
 
 ## Lifecycle and roles
 

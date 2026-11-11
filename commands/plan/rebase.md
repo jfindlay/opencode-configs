@@ -7,19 +7,13 @@ it via step 0 below):
 
 $ARGUMENTS
 
-This command does PLANNING. The "Execution playbook" section near the end carries the procedure
-`@git-editor` follows when the user pastes an approved plan into a fresh session; the executor reads
-that section directly from this file and never runs the planner. Keep both halves together so a
-planner can see what the executor will actually do.
+This command does PLANNING. The "Execution playbook" section carries the procedure `@git-editor`
+follows when the user pastes an approved plan into a fresh session; the executor reads that section
+directly and never runs the planner.
 
-**Never assume `origin`.** This user does not use `origin` as a remote name. Always run `git remote`
-to discover the actual remote name(s); never hardcode `origin/...` in any command, prompt, or
-example.
-
-**Never fall back to local `main`/`master`.** The user does not mirror primary branches locally —
-only topic branches are kept local. Primary branches live exclusively as remote-tracking refs
-(`<remote>/main`, `<remote>/master`). Resolving to a bare local `main` will fail or, worse, silently
-use a stale ref.
+**Base refs.** Follow the base-ref rule in `agents/git-editor.md` ("Sanity-check base refs"): never
+assume or hardcode `origin`, never fall back to a bare local `main`/`master`; discover remotes with
+`git remote`.
 
 ## Steps
 
@@ -71,9 +65,8 @@ use a stale ref.
    | 1 | ... | abc123, def456 | combine (edit directive) |
    | 2 | ... | ... | split required (edit directive) |
 
-4. Emit the plan as an interactive-rebase script compatible with the `@git-editor` agent's execution
-   strategy (see "Execution playbook" below; background and rationale in AGENTS-HINTS.md §`Addendum:
-   agent-driven rebase execution strategy`).
+4. Emit the plan as an interactive-rebase script compatible with `@git-editor`'s execution (see
+   "Execution playbook" below).
 
    **Directive rules** — use only `pick` and `edit`; never `squash`, `fixup`, or `reword`. Those
    directives open `$GIT_EDITOR`, which the agent cannot drive. All message changes are handled at
@@ -126,15 +119,9 @@ Before touching history, verify:
 3. A backup ref exists. If not, create one: `git branch <current-branch>-prerebase-<timestamp>`.
    Tell the user the backup name so they can recover if needed.
 4. The base ref in the plan is reachable (`git rev-parse --verify <base>`).
-5. **Sanity-check the base shape.** This user does not keep primary branches (`main`, `master`)
-   locally — only topic branches. Primary branches live exclusively as remote-tracking refs
-   (`<remote>/main`, `<remote>/master`). Also: never assume the remote is named `origin`; this user
-   does not use that name.
-   - If the base is a bare name with no `/` (e.g. `main`, `master`, `develop`), STOP. Almost
-     certainly the plan should have used `<remote>/<branch>`. Run `git remote` to show the actual
-     remote name(s) and ask the user to confirm or correct the base before proceeding.
-   - If the base is `origin/<anything>` and `git remote` does not list `origin`, STOP and surface
-     the mismatch — the plan was generated against a wrong assumption.
+5. **Sanity-check the base shape** (the git-editor base-ref rule): if the base is a bare name with no
+   `/` (`main`, `master`, `develop`), or `origin/<x>` while `git remote` does not list `origin`,
+   STOP, show `git remote`, and ask the user to confirm or correct the base.
 
 If any pre-flight check fails, STOP and report. Do not proceed until the user explicitly clears the
 failure.
@@ -147,13 +134,12 @@ failure.
 
    The approved plan uses only `pick` and `edit` directives — never `squash`, `fixup`, or `reword`
    (those would open `$GIT_EDITOR`; all message changes are handled via explicit `--amend -F -` at
-   `edit` stops instead). Pass each approved message hard-wrapped on stdin through a quoted heredoc,
-   per the `AGENTS.md` git conventions; bodies given through `-m` have come back unwrapped.
+   `edit` stops instead). Pass each approved message on stdin per the `AGENTS.md` git conventions.
 
-   Write the approved todo list to a tempfile using the `Write` tool (NOT `printf > file` or `echo >
-   file` — those violate AGENTS.md tool discipline and complicate permission matching).  Pick a
-   stable tempfile path like `/tmp/rebase-todo-<branch>.txt`. Then invoke rebase using `cp` as the
-   sequence editor so our list overwrites git's auto-generated template:
+   Write the approved todo list to a tempfile with the `Write` tool (stable path such as
+   `/tmp/rebase-todo-<branch>.txt`). Then invoke rebase with `cp` as the sequence editor, so our list
+   overwrites git's auto-generated template (this overrides the `no-interactive-editor.js` default
+   `GIT_SEQUENCE_EDITOR`):
 
    ```
    # Step 1: use the Write tool to create /tmp/rebase-todo-<branch>.txt
@@ -162,14 +148,8 @@ failure.
    GIT_SEQUENCE_EDITOR="cp /tmp/rebase-todo-<branch>.txt" git rebase -i <base>
    ```
 
-   Git invokes `$GIT_SEQUENCE_EDITOR <todo-path>`, so `cp <tempfile>` copies our file over git's
-   template. No editor opens.
-
-   Do NOT split the env-var assignment from the git invocation into separate shell calls — the env
-   var wouldn't persist across subprocesses.
-
-   If `$GIT_EDITOR` or `$VISUAL` is invoked at any point during execution, that is a bug — STOP and
-   report it rather than trying to work around it.
+   Keep the env-var assignment and the git invocation in one shell call. If `$GIT_EDITOR` or
+   `$VISUAL` is invoked at any point, that is a bug: STOP and report it rather than work around it.
 
 3. **Handle each rebase stop — first determine the stop-state, then dispatch by directive.**
 
@@ -183,10 +163,6 @@ failure.
    - **Conflict stop** — `git status` reports "interactive rebase in progress" plus "Unmerged
      paths". The commit named on the current line was *not* applied; `HEAD` is its predecessor.
      Conflicts are recorded in the index against `HEAD = predecessor`.
-
-   This distinction is load-bearing for the combine procedure (3b below). For the message-only and
-   pass-through cases, the clean-stop path is the only one that occurs (a conflict-stop on those
-   commits exits per step 4 below before reaching the dispatch).
 
    At a **clean stop**, dispatch by the directive in the approved plan:
 
@@ -235,14 +211,11 @@ failure.
    the next stop, so the user can verify state.
 
 4. If a conflict arises at any step, STOP. Show `git status`, the conflicting files, and the
-   relevant plan context. Ask the user how to resolve. Do not resolve conflicts autonomously.  After
-   the user provides resolution guidance, follow the conflict-stop branch in step 3 — never the
-   clean-stop combine procedure (`reset --soft HEAD~1` is wrong on the conflict path).
+   relevant plan context, and ask the user how to resolve; never resolve autonomously. Afterwards
+   follow the conflict-stop branch in step 3, never the clean-stop combine.
 
-5. Preserve trailer lines (Co-authored-by, Signed-off-by) across combines. When using `reset --soft`
-   + `--amend -F -` (clean-stop combine) or plain `--amend -F -` (conflict-stop combine) for
-   squash-equivalents, re-append trailers from the absorbed commit if the approved plan includes
-   them.
+5. Preserve trailer lines (Co-authored-by, Signed-off-by) across combines: re-append those of the
+   absorbed commit when the approved plan includes them.
 
 ### Finalization
 
@@ -259,10 +232,6 @@ When all stages are complete:
 
 - This command is PLANNING ONLY. Never run `git rebase`, `git commit --amend`, or any
   history-rewriting command from this flow.
-- Never push, force or otherwise. The finalization step only prints a suggested command as plain
-  text; the user runs it.
-- Preserve trailer lines (Co-authored-by, Signed-off-by) across squashes.
-- If the rebase base resolves to a trunk branch (`<remote>/main`, `<remote>/master`), double-check —
-  usually the base should be a feature-branch ancestor, not the trunk.
-- A bare base name without a remote prefix (e.g. `main`, `master`) is almost always wrong here; the
-  user does not keep local copies of primary branches.  Surface and confirm before proceeding.
+- Never push, force or otherwise. Finalization only prints a suggested command; the user runs it.
+- If the base resolves to a trunk branch (`<remote>/main`, `<remote>/master`), double-check: usually
+  the base should be a feature-branch ancestor.

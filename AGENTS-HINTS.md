@@ -1,360 +1,75 @@
-# User-level agent hints
+# Agent hints
 
-Framings and mental models consulted during normal work. Not rules in force — those are in
-`AGENTS.md` and `AGENTS-REASONING.md`. Not changelog — history lives in git. Not deep companion to
-`AGENTS-REASONING.md` — that's in `AGENTS-REASONING-HINTS.md`. Treat entries here as "consult if
-useful" navigational hints: they reduce friction and explain the derivation behind rules that are
-stated elsewhere, but they do not themselves impose obligations. Load the section that is relevant
-to the work at hand; you do not need to read this file front-to-back.
-
-## The hi-fi analogy (capability reserve as resolution)
-
-A serious listener doesn't spend amplifier reserve on extreme volume; the reserve resolves inner
-voices and microdynamics at conversational loudness. High capability reserve analogously cashes out
-as resolution at decision junctures — pruned options, load-bearing uncertainty named, right-scale
-rendering — not as volume of output, machinery, or ceremony at any juncture.
-
-The audit corollary: infrastructure itself obeys the analogy. Contracts that resolve decisions beat
-machinery that amplifies procedure. A command that merely transcribes what the contract layer
-already produces is negative-value — it duplicates, drifts, and drains salience. A contract that
-carries the non-derivable core (a schema crib, a hazard playbook, a loop-termination policy) earns
-its keep by resolving what the agent would otherwise re-derive at cost.
-
-The compressed handle lives in `AGENTS-REASONING.md` §Capability allocation; this entry is the
-fuller unpacking.
-
-## Model routing by cost-of-wrong
-
-Routing model reframes "what's the best model" as "what's the cost of this being wrong". The rule:
-
-- **Generative frontier, interactive dialectic → T-1.** Genesis of framings that don't yet exist,
-  abduction, pivotal anomalies that resist all canonical options. The bar is not "intellectually
-  interesting" — it is "the T-1-scale reserve changes the answer." Rare.
-- **Cost-of-wrong high, analytical → T0.** Architectural tradeoffs, boundary design, cross-cutting
-  audits, phase planning, commit-shape decisions. Occasional.
-- **Cost-of-wrong moderate → T1.** Implementation, refactors, test writing, review-address cycles.
-  The default.
-- **Cost-of-wrong low, judgment required → T2.** Classify these files, group these patterns,
-  summarize this output.
-- **Cost-of-wrong low, judgment mechanical → T3.** Count these items, extract this section,
-  regex-and-report.
-
-Upgrade or downgrade is not about task size. Large mechanical tasks stay at T3. Small architectural
-decisions stay at T0. The signal is "if this is wrong, how much work is downstream?"
-
-Cross-check T0 conclusions at phase boundaries with a T0-class model from a different family: ask
-it to steelman objections to the T0 plan. Different families catch different failure modes.
-
-## Subagent prompt anatomy
-
-One anti-pattern to avoid: forking a subagent whose prompt body starts with "Read file X and
-return…" — that's pure overhead; the parent can Read directly. Rule: if the subagent does a single
-file read or a narrow grep, don't fork.
-
-## Capture-candidate collaboration shape
-
-Why the tag-and-review shape rather than auto-preservation or silence:
-
-1. Auto-writing would silently change files the user hasn't consented to, and would push the agent
-   toward tag-inflation to appear productive — neither is aligned with the working relationship we
-   want.
-2. Silence (no flags) means insights die with the session. The tag is the minimal intervention that
-   preserves optionality.
-3. Keeping the preservation step deliberate means both parties contribute their distinct strengths:
-   the agent notices patterns across large context; the user knows which patterns will matter
-   downstream and in what wording they should survive.
-
-See `AGENTS-CAPTURE.md` for the operative two-stage criteria (shape-criteria pre-filter +
-durable-AND-unusual-AND-not-bland three-axis gate).
-
-## Fork-vs-stay: derivation table
-
-`agents/architect.md` states the three-axis rule. The derivation that justifies it over the retired
-≥20-calls heuristic is preserved here for future restructuring decisions:
-
-| Case | ≥20 calls said | Three-axis rule says | Correct |
-|---|---|---|---|
-| Long interactive test loop (50+ bash calls) | fork | stay (steering=YES) | stay |
-| Single 3000-line config parse → 2-line finding | stay (<20 calls) | fork (pollution=YES) | fork |
-| Architecture conversation spanning many turns | fork | stay (steering=YES) | stay |
-| 20 independent finding cross-checks | fork | fork (parallel=YES) | fork |
-
-The call-count rule correlated with pollution but lost on cases where steering should dominate. The
-three-axis rule produces correct answers on all four cases above without losing accuracy on the
-cases where they agreed.
-
-**Tier is not chosen at fork time.** Subagents inherit the caller's model unless their own
-frontmatter `model:` field overrides it. Forking an `@explore` subagent from a T0 primary runs
-the subagent at T0 unless `explore.md` pins T1. This makes prose tier guidance ("T1-subagent
-for explores") unenforceable unless encoded in each subagent's definition.
-
-## Commands can't scope permissions — only agents can
-
-OpenCode slash commands are prompt templates with frontmatter for `template`, `description`,
-`agent`, `subtask`, `model`. There is no `permission:` key on commands. Permission scopes live on
-the global `opencode.json` or on agent definitions — nowhere else.
-
-The instinct to create `/rebase` (or `/amend`, `/cherry-pick`, `/branch-cleanup`, etc.) "to attach
-elevated git permissions to it" is the wrong shape. The command file will execute under whatever
-agent is active, inheriting that agent's permissions. It cannot locally elevate.
-
-**Correct pattern for workflow-specific elevated authority**:
-
-1. Define a workflow-specific agent (`~/.config/opencode/agent/<workflow>.md`) with a scoped
-   `permission:` block in frontmatter.
-2. Define a command that sets `agent: <workflow>` to route into that agent.
-3. The permission scope belongs to the agent; the command is just the entry point.
-
-**Why this framing keeps recurring**: commands feel like the natural unit of workflow (they're what
-the user invokes), so the instinct is to attach workflow properties to them. But permissions are a
-safety boundary, and OpenCode designed that boundary at the agent layer so an agent's posture is
-consistent across every way it's invoked — direct chat, command, subagent task. Attaching
-permissions to commands would create invocation-path-dependent security, which is harder to reason
-about.
-
-**Related capture**: when designing any "elevated authority for one flow" pattern (rebase execution,
-amend-heavy refactor, force-push-with-lease, `rm` authority for cleanup flows), start from the
-agent, not the command. The command comes last, as the ergonomic entry point.
-
-Counter-case worth noting: if the elevation is truly momentary (one bash invocation, approved
-interactively), you don't need an agent — `"ask"` on the global config plus per-invocation approval
-is fine. Agents are for repeated elevated work within one posture, not one-shot escapes.
-
-### Addendum: agent-driven rebase execution strategy
-
-Concrete strategy for `@git-editor` when executing a `/plan/rebase`-approved rebase. Load-bearing
-for the rebase flow to work at all — without this, `git rebase -i` stalls on editor invocation.
-
-**Default editor safety**: the `no-interactive-editor.js` plugin sets `EDITOR`, `GIT_EDITOR`,
-`GIT_SEQUENCE_EDITOR`, `VISUAL`, and `PAGER` to `true`/`cat` for all shell invocations by default.
-This covers the general case — bare `git commit`, `git merge`, pager hangs, etc. — across every
-agent without any per-call setup.
-
-The scripted-rebase `cp`-as-editor pattern below is the canonical **opt-in override** of that
-default. When `@git-editor` sets `GIT_SEQUENCE_EDITOR="cp <tempfile>"` explicitly in a shell call,
-the plugin's `??`-fallback respects the caller override. One mechanism, two modes: plugin handles
-the 99% default case; `cp` override handles the scripted-rebase case.
-
-**The hazard**: `git rebase -i` invokes `$GIT_SEQUENCE_EDITOR` for the todo list, and `$GIT_EDITOR`
-for every `reword` and `squash` message. An agent driving rebase autonomously has no editor to
-    offer, so any directive that triggers `$GIT_EDITOR` stalls the flow.
-
-**The strategy — "edit-everywhere + --amend -F"**:
-
-1. The plan command (`/plan/rebase`) emits only `pick` and `edit` directives. Never `reword`,
-   `squash`, or `fixup`. Every directive that would open `$GIT_EDITOR` is replaced by `edit`.
-2. The agent writes the approved todo list to a tempfile, then invokes: `GIT_SEQUENCE_EDITOR="cp
-   <tempfile>" git rebase -i <base>`. The `cp` command acts as the "editor" — it overwrites git's
-   template todo with our approved list in one shot. This overrides the plugin's default
-   `GIT_SEQUENCE_EDITOR=true`.
-3. Each `edit` stop pauses rebase in one of two structurally different states. **Clean stop**:
-   commit applied, index clean, `HEAD` *is* the commit on the current `edit` line. **Conflict
-   stop**: commit not applied, index has unmerged paths, `HEAD` is the *predecessor* of the current
-   line. The agent must run `git status` to classify before dispatching — the combine procedure
-   differs by one commit between the two states, and getting it wrong silently drops a commit.
-4. On a clean stop, the agent applies the approved message explicitly via `git commit --amend -F -`
-   (message on stdin), then `git rebase --continue`. For squash-equivalents (combine into
-   predecessor), the plan emits `edit` on the *second* commit; at that clean stop the agent runs
-   `git reset --soft HEAD~1` to move `HEAD` back to the predecessor with the second commit's changes
-   staged, then `git commit --amend -F -` (combined message on stdin), then `--continue`.
-5. On a conflict stop, the agent stops and surfaces for user guidance — conflict resolution is not
-   autonomous. After the user resolves, the procedure is `git add <files>` then either `git rebase
-   --continue` (preserves the conflicting commit's identity) or `git commit --amend -F -` (combined
-   message on stdin) followed by `git rebase --skip` (combines the conflicting commit into `HEAD =
-   predecessor`). **Never run `reset --soft HEAD~1` on the conflict path** — `HEAD` is already the
-   predecessor; resetting further would drop a commit.
-6. `$GIT_EDITOR` is never set and never needed. Any editor invocation during execution is a bug to
-   surface, not to work around.
-
-**Why this over alternatives**:
-
-- `GIT_SEQUENCE_EDITOR=true` (the plugin default) exits 0 immediately and tells git "proceed with
-  the auto-generated todo unchanged." For a plain rebase that's fine. For a scripted rebase that's
-  wrong — the approved plan never gets installed. That's why the `cp` override is necessary.
-- `GIT_EDITOR="cp <message-file>"` per step works but requires per-step env plumbing and pre-writing
-  every message. Brittle coordination.
-- Cherry-pick sequence (no `rebase -i` at all) is the viable fallback if `cp`-as-editor turns out to
-  have a snag. Every commit via explicit cherry-pick plus `--amend -F -`. More commands,
-  better-localised failure modes.
-
-The `cp`-as-editor pattern has been verified in practice; cherry-pick sequence is the fallback if
-it snags.
-
-## Rebase autosquash `--ours` conflict resolution cross-contaminates commits
-
-When `git rebase --autosquash` hits conflicts and the agent resolves them with `--ours` (or
-`--theirs`) wholesale rather than file-by-file, the conflict resolution pulls content from the wrong
-side of the merge into the base commit. Symptom: content disappears from one commit and duplicates
-accumulate across subsequent commits. Three successive rebase attempts can fail the same way before
-the pattern is recognised.
-
-Recovery pattern: abandon autosquash, reset to the pre-rebase correct tip, and rebuild the basis
-commits from scratch by staging correct content in logical groups. Faster and more reliable than
-iterating on conflict resolution once cross-contamination has started.
-
-Preventive rule: never use `--ours`/`--theirs` blindly during an autosquash. Inspect each conflict;
-if the correct resolution isn't obvious, stop and ask. The `@build` prompt for fixup-heavy work
-should include this constraint explicitly.
+Facts and procedures that are not rules in force elsewhere, loaded by the section heading that
+matches the work (`AGENTS.md`, loading rules). Not read front to back.
 
 ## Shell permission rules are tripwires, not containment
 
-OpenCode (V2, measured on 2.2.5) extracts each subcommand of a compound line (`&&`, `;`, pipes) and
-checks every part against the rules; one `deny` denies the line, otherwise one `ask` asks. Redirect
-targets and flags stay part of the matched text, and syntax the scanner cannot analyze is rejected
-before any rule runs. Consequences worth internalising:
+OpenCode checks each subcommand of a compound line (`&&`, `;`, pipes) against the rules; one `deny`
+denies the line, otherwise one `ask` asks. Redirect targets and flags stay part of the matched text.
+Syntax the scanner cannot analyze is rejected before any rule runs.
 
 1. **A rule sees command text, not effects.** `git push *` does not match `git -C d push`,
    `env VAR=1 git push`, or a push inside a script; an allow for `git diff *` also matches
-   `git diff > f`. Rules therefore work as consent gates for recognizable forms, never as proof an
-   agent cannot do something. Isolation belongs in a sandbox, credentials, and network policy.
-2. **A restrictive allowlist makes every unlisted part a deny (or ask).** Allowlists of "read-only"
-   commands grew without bound and made ordinary pipelines, `2>&1`, and `cd dir && cmd` fail. The
-   config therefore allows shell by default with a few gates (push, commit, destructive git) and
-   states role limits such as "read-only" in the agent's prompt instead.
+   `git diff > f`. Rules are consent gates for recognizable forms; isolation belongs in a sandbox,
+   credentials, and network policy.
+2. **A restrictive allowlist makes every unlisted part a deny or ask**, breaking ordinary pipelines,
+   `2>&1`, and `cd dir && cmd`. The config therefore allows shell by default with a few gates (push,
+   commit, destructive git) and states role limits such as "read-only" in the agent's prompt.
 3. **Scanner errors are a separate class** from configured denials; widening rules does not fix
-   them. Report the failing expression rather than rephrasing it repeatedly.
+   them. Report the failing expression rather than rephrasing it.
 
-Earlier V1-era guidance here said compound commands match as one whole string and must be split
-into separate calls; that is not how V2 evaluates them, and splitting is no longer advised for
-permission reasons.
+## Commands cannot scope permissions; agents can
 
-## Agent prompt body as activation-time rule enforcement
+Slash commands are prompt templates (`template`, `description`, `agent`, `subtask`, `model`) with no
+`permission:` key; they run under the active agent's permissions. Workflow-specific elevated
+authority therefore means an agent with a scoped `permissions:` block plus a command whose `agent:`
+routes into it. A momentary one-shot elevation needs no agent: global `ask` plus per-invocation
+approval.
 
-AGENTS.md rules fire reliably for agents that have an explicit prompt body and do not fire reliably
-for agents that lack one. Evidence: @rebase (has body) showed zero `cd X && cmd` violations across
-the full session corpus; the default build agent (no body, only a permission override) showed
-249/249 violations of the same rules. Same ruleset, different compliance — the body is the mechanism
-that makes rules fire at activation time.
+A command's `agent:` means "run AS". If OpenCode treats that agent as `mode: subagent`, it appends
+an auto-dispatch directive ("call the task tool with subagent: <X>") to the rendered prompt; name a
+primary agent such as `architect` in the frontmatter to preempt it.
 
-Diagnostic use: if a new antipattern recurs despite being in AGENTS.md, the first question to ask is
-"does the relevant agent have an explicit prompt body?" If not, add one that restates the rule. This
-is cheaper and more targeted than editing AGENTS.md (which already has the rule).
+## Structural fixes beat prompt reminders for high-cost failures
 
-## The detective archetype: pointer to AGENTS-REASONING-HINTS.md
-
-Three modes of inference (eliminative, generalizing, abductive) match different fact-pattern
-signatures. The abductive mode — positing a candidate outside the canonical set — is the one agents
-execute worst by default and the one that demands deliberate decomposition rather than reflex. Full
-treatment lives in `AGENTS-REASONING-HINTS.md` including the Dupin/Purloined-Letter walkthrough and
-the four-step decomposition. Pull it when: every canonical candidate fails to explain a pivotal
-fact, or you suspect the option set itself is a vocabulary artifact rather than the problem's
-geometry.
-
-## Structural fixes beat prompt-level reminders for high-cost failure modes
-
-Two failure modes from the salt-project sessions:
-
-1. `cd X && cmd` antipattern — 249/249 bash calls; `workdir` never used.
-2. Interactive editor hangs — multiple occurrences in `@build` and `@general` over ~150h; zero
-   evidence in the stored session corpus (corpus is lossy; user observation wins).
-
-**The pattern**: AGENTS.md rules fired reliably for `@rebase` (which has an explicit prompt body)
-and did NOT fire reliably for the default build agent (which had no prompt body — only a permission
-override in `opencode.json`). Same rules, different compliance, because the rules were only
-activated at the agent level for one of the two.
-
-**The interventions and their layer**:
-
-| Failure mode | Layer | Intervention |
-|---|---|---|
-| `cd X && cmd` | Agent prompt | `agents/build.md` restates the `workdir` rule at activation time |
-| `sed -i` for edits | Agent prompt | `agents/build.md` restates the `Edit` tool rule |
-| Interactive editor hangs | Plugin hook | `no-interactive-editor.js` sets env defaults structurally |
-
-**The principle**: for a failure mode where (a) the cost of occurrence is high (kills the session,
-dirties the tree, loses context) AND (b) the LLM must remember something at every relevant call site
-to prevent it, use a structural fix — a plugin hook, a denylist, a permission rule — not a prompt
-reminder. Low-cost failures can live with prompt-level reminders; high-cost ones need a layer that
-doesn't rely on LLM memory.
-
-## Auditing prior sessions: storage is lossy, use SQLite
-
-When auditing user instructions or agent behaviour across prior sessions, the file-based storage
-tree is insufficient. `~/.local/share/opencode/storage/part/` ages out, prunes on version upgrades,
-and doesn't capture all tool-call shapes — a bash command that hung and was killed may have a
-different JSON shape from one that returned normally, causing `"command":"<pattern>"` greps to miss
-it. Project-scoped session dirs only cover work done in that project root; sessions started
-elsewhere live under `global/` with different retention.
-
-The TUI's SQLite DB at `~/.local/share/opencode/opencode.db` retains all sessions accessible via the
-TUI. V1 layout (sessions before 2026-10-16): join `part` + `message` + `session`, filter
-`json_extract(m.data,'$.role')='user'` and `json_extract(p.data,'$.type')='text'`, and select
-`json_extract(p.data,'$.text')` for the message content. For later sessions (V2 layout) user rows
-carry `$.text` and no `$.role`:
-`select json_extract(data,'$.text') from session_message where type='user' and session_id=?`.
-`commands/config-retrospective.md` holds the verified 2.2.5 recipe.
-
-The storage tree is sufficient for confirming **presence** of patterns; it is NOT sufficient for
-confirming **absence**. If the user reports a behaviour and the grep finds nothing, believe the
-user.
+`AGENTS.md` rules fire reliably for an agent with an explicit prompt body and unreliably for one
+without (a bare permission override). So: if an antipattern recurs despite being in `AGENTS.md`,
+first check whether the agent has a prompt body that restates it (`agents/build.md` does for `workdir` and
+the native file tools). For failures that are costly (kill the session, dirty the tree, lose
+context) and need the model to remember at every call site, use a structural layer instead: a plugin
+hook (`plugins/no-interactive-editor.js` for editor hangs), a denylist, or a permission rule.
 
 ## Nested subagent dispatches can hang on permission prompts
 
-When a subagent (forked via the `subagent` tool) raises a permission prompt for a tool call not
-covered by its frontmatter allowlist, the approval dialog may not route cleanly up through the nesting back to
-the user. The inner agent waits for approval; the outer agent waits for the inner agent; the user
-sees neither. Hypothesis unconfirmed — root cause may be nesting-specific or a broader permission
-routing issue.
+A permission prompt raised by a nested subagent for a tool outside its allowlist may not route back
+to the user: the inner agent waits for approval, the outer waits for the inner. Root cause is
+unconfirmed. In the inner prompt, include: *"IMPORTANT: if you encounter ANY permission prompt that
+would block execution, stop immediately and return what you have so far with a clear note describing
+the blocked tool call."* To verify an agent's behaviour, prefer a direct fork from a clean primary
+session over nested forking; if nesting is needed, make the allowlist cover every call and keep the
+clause.
 
-**Workaround**: in the inner subagent's prompt, explicitly instruct it to stop-and-report on any
-blocking approval rather than wait. Canonical clause: *"IMPORTANT: if you encounter ANY permission
-prompt that would block execution, stop immediately and return what you have so far with a clear
-note describing the blocked tool call."* This converts the hang into a visible partial-success with
-diagnostic.
+## Autosquash conflicts resolved wholesale cross-contaminate commits
 
-**Practical implication**: if you need to verify an agent's behaviour, prefer a direct fork from a
-clean primary session over nested forking. If nested forking is load-bearing, ensure the inner
-agent's allowlist covers every tool call it will make AND include the stop-and-report clause as a
-safety net.
+Resolving `git rebase --autosquash` conflicts with `--ours`/`--theirs` wholesale pulls content from
+the wrong side into the base commit: content disappears from one commit and duplicates in later
+ones. Never do this; inspect each conflict file by file and ask when the resolution is not obvious.
+Once contamination starts, abandon the autosquash, reset to the pre-rebase tip, and rebuild the base
+commits by staging correct content in logical groups. Include this constraint in any `@build` prompt
+for fixup-heavy work.
 
-Fact pattern is thin — two hangs in one day. Revise if the same failure appears in non-nested
-dispatches (rules out nesting as the cause) or a confirmed root cause lands in the opencode tracker.
+## Auditing prior sessions: the file storage tree is lossy
 
-## Discoveries log: the operational mechanism for two-frame relativity
+`~/.local/share/opencode/storage/` ages out, prunes on upgrades, and omits some tool-call shapes
+(a hung, killed command may not match a `"command":"<pattern>"` grep); project-scoped dirs omit
+sessions started elsewhere. It can confirm a pattern's **presence**, never its **absence**: if the
+user reports a behaviour and the grep finds nothing, believe the user. The SQLite store
+(`~/.local/share/opencode/opencode.db`) retains every session; `commands/config-retrospective.md`
+holds the access recipe.
 
-In long-arc projects, the discoveries log (a section in the roadmap for action-frame findings that
-affect the static frame) is the operational mechanism that prevents both defocus and rigidity.
-Discoveries internal to a sub-track (e.g., "we need a different algorithm variant") can wait until
-the sub-track boundary for evaluation. Discoveries that affect cross-track contracts (e.g., "the
-substrate session got the interface wrong") deserve immediate static-frame review via a small T0
-session. The discipline: the project's narrative document (PEDAGOGY.md or equivalent) is where the
-two frames meet — re-reading it at sub-track boundaries is the practice that catches both defocus
-and rigidity. "The plan was wrong about X" is a successful outcome of a session, not a failure.
+## Refactor ordering: docs, code, tests
 
-Full treatment of the two-frame relativity (static roadmap-view vs. action riding-the-wave-view)
-lives in the `multisession` skill's `references/rationale.md` in the opencode-config repo; this hint
-is the operational handle.
-
-## Refactor ordering: doc, code, tests
-
-When a multi-phase cleanup includes both deduplicating/improving docs and splitting long functions
-or refactoring code structure, do the doc pass first, the app code next, and finally the test code.
-Carrying duplicated or bloated docstrings into a refactor doubles the cleanup cost — the docs pass
-establishes the quality bar that the refactor maintains. Reverse order (refactor first, docs second)
-means re-writing docstrings twice: once to match the old structure, then again to match the new one.
-Finally, test code is downstream of both and can be refactored and rescoped once after the others
-are done.
-
-## Command `agent:` frontmatter means "run AS", not "dispatch TO"
-
-2026-06-01: If OpenCode decides (via an unknown mechanism), a command's `agent:` is a `mode:
-subagent`, OpenCode appends an auto-dispatch directive ("call the task tool with subagent: <X>") to
-the rendered prompt.  This must be preempted by defensively specifying the `agent: `, for example,
-`architect` in the frontmatter.
-
-## Engineering as the quantification of error; the fiduciary-latitude contract
-
-2026-06-06: User acceptance of a sharded PLAN — expressed mechanically by invoking `/plan/run
-docs/PLAN.md` — is acceptance of the entire implementation path-space the enrolled agents judge best,
-not a line-item contract to be executed literally. Each agent is empowered to make the best possible
-choice among a heterogeneous set of constraints (business demands, technical constraints, resource
-budget); this is the foundational work of engineering itself — to wright legibility, durability, and
-stability out of natural resources: a Chesterton fence here, a gauge on noise there, a map of the
-approximately-linear region within a fantastically contradictory reality. Engineering is
-epistemologically the quantification of error. The operational consequence for `/plan/run`: agents
-hold fiduciary latitude under fidelity to the PLAN, so deviation (even medium deviation, with
-commensurate evidence) rides through and is reported at the step-3 review; halts are reserved for the
-irreconcilable — something incredibly wrong that the agent cannot reconcile against the PLAN's
-provisions, anticipations, or quantifications. This is the premise that motivates the whole
-discovery-and-adjustment apparatus and the juncture adjudication. See the `multisession` skill
-(`references/execution.md`) for the mechanics.
+In a cleanup that covers both docs and code structure, do the doc pass first, application code next,
+and test code last. Refactoring first means rewriting docstrings twice; tests are downstream of both
+and are restructured once at the end.

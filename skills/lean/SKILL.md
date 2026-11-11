@@ -6,14 +6,7 @@ description: Audit the fidelity of Lean statements and proofs (axiom provenance,
 # Lean
 
 Two read-only procedures for Lean projects: a retrograde fidelity audit and a classical exposition.
-This skill does not teach general Lean implementation. Loading it does not switch agents or grant
-permissions; the session's own edit and shell permissions still apply. A missing or denied required
-resource is a blocker: report it, do not improvise the procedure from memory.
-
-Resource paths below resolve from this skill's base directory (the directory holding this file;
-`~/.config/opencode/skills/lean/`), never from the target project's working directory. Read them
-with the Read tool. A command expands its input in its own body and passes it explicitly; resources
-consume that input and are not command templates, so they never interpolate placeholders.
+This skill does not teach general Lean implementation (skill loading rules: `AGENTS.md`).
 
 ## Scope and guard
 

@@ -8,16 +8,9 @@ description: Select and invoke code-reasoning lenses (structured static-analysis
 A *lens* is a structured representation of a codebase that answers a specific class of questions
 more cheaply or more correctly than raw text plus grep. Lenses are exposed by the
 `composable-code-lenses` MCP server. This skill carries the judgment for when and how to reach for
-them; the MCP carries the capability. Loading it does not switch agents or grant permissions; the
-session's own tool permissions still apply. A missing or denied required resource is a blocker:
-report it, do not work from memory.
-
-Resource paths below resolve from this skill's base directory (the directory holding this file;
-`~/.config/opencode/skills/code-lenses/`), never from the target project's working directory. Read
-them with the Read tool.
-
-Load liberally: when a trigger is ambiguous, load the resource. Load only the language references
-that apply; when the target language is ambiguous (mixed repo), load every applicable one.
+them; the MCP carries the capability (skill loading rules: `AGENTS.md`). Load only the language
+references that apply; when the target language is ambiguous (mixed repo), load every applicable
+one.
 
 ## Resources
 

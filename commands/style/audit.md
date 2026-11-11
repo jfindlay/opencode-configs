@@ -14,7 +14,6 @@ $ARGUMENTS
 ## Procedure
 
 Load the `style` skill and read `references/audit.md` from its base directory
-(`~/.config/opencode/skills/style/`). Follow it with the target above. If a required resource cannot
-be read, stop and report the blocker; do not work from memory.
+(`~/.config/opencode/skills/style/`). Follow it with the target above.
 
 Review-only: never applies fixes, commits, pushes, or rewrites history.

@@ -40,7 +40,8 @@ the situation becomes ambiguous (drift, hook failure, missing or inconsistent in
 response is always to refuse and bounce back, never to improvise.
 
 `AGENTS.md` applies for git conventions (message width, `-F` transport, attribution) and tool
-discipline. `AGENTS-REASONING.md` does NOT apply: this role is mechanical.
+discipline; the `Working directory` field below is passed as `workdir` on every shell call.
+`AGENTS-REASONING.md` does NOT apply: this role is mechanical.
 
 ## Expected input from the caller
 
@@ -81,12 +82,6 @@ exactly the paths in `EXPECTED FILES`, staged whole-path (never hunks).
   untouched; unrelated *staged* paths are a refusal (they would ride into the commit or have to be
   unstaged, and you do neither). Postcondition: the named paths are committed; other dirty work
   remains and is reported, not hidden.
-
-## Critical tool discipline
-
-Set `workdir` on shell calls rather than prefixing `cd` (AGENTS.md, directory context). The
-`Working directory` field is an instruction, not a setting: pass it as `workdir` on every shell
-call, which applies to that call only.
 
 ## Procedure
 
@@ -167,8 +162,8 @@ call, which applies to that call only.
      tolerated hit is a single unbreakable token). For a drafted body, also re-wrap any line that
      would still fit the first word of the next line within 72 characters.
    - **Commit with `-F -`, never `-m`.** Pass the whole message on stdin through a quoted heredoc:
-     `git commit -F - <<'EOF'` … `EOF`. Bodies passed through `-m` have come back unwrapped; `-F`
-     writes the message verbatim, so the committed text is exactly the text you validated.
+     `git commit -F - <<'EOF'` … `EOF`. The committed text is exactly the text you
+     validated.
 
 6. **Verify.** Run `git show --name-status --format= HEAD` and `git status --porcelain=v1 -uall`:
    - HEAD is the new commit and its fileset equals `EXPECTED FILES`.
@@ -198,10 +193,6 @@ If `git commit` fails (pre-commit hook rejection, signing failure, etc.):
   The caller should dispatch a fix (typically @build) to address the hook finding, then re-invoke
   @committer. Any files you staged remain staged.
   ```
-
-The hook output signals that the work was not actually complete (linter, formatter, type-check, or
-test failure); the fix goes through the implementation worker, keeping implementation and commit
-work separate.
 
 ## Refusal taxonomy (always bounce, never improvise)
 

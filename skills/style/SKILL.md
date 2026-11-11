@@ -5,16 +5,7 @@ description: Code, test, and documentation style guides (Python, Rust, Go) and t
 
 # Style
 
-Index for the style guides. Loading this skill does not switch agents or grant permissions; the
-session's own edit and shell permissions still apply. A missing or denied required resource is a
-blocker: report it, do not work from memory.
-
-Resource paths below resolve from this skill's base directory (the directory holding this file;
-`~/.config/opencode/skills/style/`), never from the target project's working directory. Read them
-with the Read tool. A command expands its input in its own body and passes it explicitly; resources
-consume that input and are not command templates, so they never interpolate placeholders.
-
-Load liberally: when a trigger is ambiguous, load the resource. Load only the language guides that
+Index for the style guides (skill loading rules: `AGENTS.md`). Load only the language guides that
 apply; when the target language is ambiguous (mixed repo, polyglot file), load every applicable
 guide.
 

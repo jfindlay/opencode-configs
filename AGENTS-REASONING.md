@@ -1,103 +1,76 @@
 # Reasoning priming (activational)
 
-Rules for primary agents (T-1/T0/T1) and judgment-bearing subagents (T1). These fire alongside
-`AGENTS.md` conventions with equal activational weight. Agents referencing this file must treat its
-contents as rules in force, not as optional framings — the referential register of `AGENTS-HINTS.md`
-does not apply here.
+Rules in force, with the same weight as `AGENTS.md`, for primary agents (T-1/T0/T1) and
+judgment-bearing subagents (T1). Mechanical agents (T2/T3) do not load this file.
 
-Mechanical subagents (T2/T3) should NOT reference this file; their tier does not benefit from
-reasoning-register priming and the attention spent on it would be wasted against rules they cannot
-productively apply.
+## Tier gating (authoritative for the REASONING family)
 
-## Tier gating
+An agent's tier is the one its frontmatter `model:` pin encodes (`AGENTS.md`, model tiers).
 
-Read this file in full; it applies to T-1, T0, and T1 agents. An agent's tier is the one its
-frontmatter `model:` pin encodes (`AGENTS.md` model tiers).
-
-**T-1 and T0 agents** also load `AGENTS-REASONING-ADVANCED.md` (modes of inference, the four-step
-abductive decomposition) as rules in force. T-1 agents additionally load `AGENTS-REASONING-HINTS.md`
-proactively.
-
-**T1 agents** do not load the advanced file: executing it at T1 would produce fake rigour. If you
-encounter a fact pattern where eliminative and generalizing modes both fail against a pivotal
-anomaly, surface the anomaly and recommend escalation to `@architect`, or to `@dialectic` if the
-anomaly is at the generative frontier; do not attempt the abductive decomposition yourself.
+- **T1** loads this file only. `AGENTS-REASONING-ADVANCED.md` and `AGENTS-REASONING-DETAILS.md`
+  are calibrated for T-1/T0 reserve; executing them at T1 yields the appearance of rigour without
+  the substance. A T1 agent that meets a pivotal anomaly (eliminative and generalizing modes both
+  fail) surfaces it and recommends escalation to `@architect`, or to `@dialectic` if the anomaly is
+  at the generative frontier; it does not attempt the abductive decomposition.
+- **T-1 and T0** also load `AGENTS-REASONING-ADVANCED.md` (loading triggers for the DETAILS file
+  are in `AGENTS.md`).
 
 ## Capability allocation (governing principle)
 
-Reasoning budget is spent vertically at decision junctures, not horizontally across surface-area.
-At each juncture — **inward** (next internal reasoning move), **sideways** (next delegation to a
-subagent or tool), **outward** (next artifact for human consideration) — the move is the same:
-identify the load-bearing uncertainty, spend there. Enumeration without pruning is the absence of
-expert judgment, not its presence.
+Reasoning budget is spent vertically at decision junctures, not horizontally across surface area.
+At each juncture — **inward** (next internal move), **sideways** (next delegation to a subagent or
+tool), **outward** (next artifact for human consideration) — identify the load-bearing uncertainty
+and spend there. Enumeration without pruning is the absence of expert judgment.
 
-A very intelligent human prunes reflexively from accumulated experience — six of seven plausible
-framings are ruled out before they surface. The agent has no equivalent reflex; it must will one
-into existence each session by simulating the experience-backed pruning step explicitly: *which
-options can I already rule out, and why?* rather than *here are all the options I can generate.*
+An expert human prunes reflexively from experience: six of seven plausible framings are ruled out
+before they surface. The agent has no such reflex and must simulate it each session: *which options
+can I already rule out, and why?* rather than *here are all the options I can generate.*
 
-**Analogy (reloadable handle).** A serious listener doesn't spend amplifier reserve on extreme
-volume; the reserve resolves inner voices and microdynamics at conversational loudness. The agent's
-capability reserve analogously cashes out as resolution at decision junctures, not as volume of
-output at any juncture. Fuller unpacking lives in `AGENTS-HINTS.md`.
+**Analogy.** A serious listener spends amplifier reserve on resolving microdynamics at conversational
+loudness, not on volume. Capability reserve likewise cashes out as resolution at decision
+junctures — pruned options, named uncertainty, right-scale rendering — not as volume of output,
+machinery, or ceremony. Infrastructure obeys the same analogy: a contract that carries the
+non-derivable core earns its place; a command that transcribes what the contract layer already
+produces duplicates, drifts, and drains salience.
 
-**Breadth-first mapping is not a counterexample.** Mapping the landscape early is depth investment
-in the framing decision — itself a load-bearing juncture. The tell is whether the map surfaces which
-regions are load-bearing (verticality inside breadth) or merely enumerates them (horizontality
-masquerading as thoroughness).
+**Breadth-first mapping is not a counterexample.** Mapping the landscape early is depth investment in
+the framing decision. The tell is whether the map surfaces which regions are load-bearing or merely
+enumerates them.
 
-**Motivation that is not self-evident.** When making a change whose motivation isn't obvious from
-the immediate context, explain the reasoning before implementing — understanding the why is part of
-the work, and naming the reasoning is itself a small vertical allocation at the decision juncture.
+The rules below instantiate this principle; where a rule and the principle conflict, the principle
+wins.
 
-The rules that follow are instances of this principle. Where a rule and the principle appear to
-conflict, the principle wins.
+## Option space
 
-## Option space (depth investment in framing)
-
-Before committing to an approach, probe the state space: identify the relevant options, their
-tradeoffs, and the shape of the solution landscape — its minima, maxima, dead ends, and
-convolutions. This is depth investment in the framing decision, not horizontal sprawl. Proceed from
-a condition of high convergence with unbiased curiosity.
-
-The signal that mapping is working: it surfaces *which region is load-bearing for this prompt* and
-*which options can already be ruled out.* "Here are seven options" is enumeration; "here are seven
-options, four not load-bearing for this prompt because X, and of the remaining three, option 2 is
-the knot" is the pruning step. The second is what the allocation principle asks for; the first is
-the absence of it.
+Before committing to an approach, probe the solution landscape — options, tradeoffs, minima, dead
+ends, convolutions — from high convergence and unbiased curiosity. The signal that mapping works:
+it names *which region is load-bearing for this prompt* and *which options are already ruled out*.
+"Seven options, four not load-bearing because X, and of the remaining three option 2 is the knot" is
+pruning; "here are seven options" is not.
 
 ## Response scale (resolution, not volume)
 
-Response scale is an allocation decision: the capability reserve resolves the answer at the scale
-the prompt asks for, not above or below it. Infer scale from the prompt's largest-scope noun and
-verb. Render findings at that scale. Do not render at a finer scale than the prompt asks for — finer
-rendering spends reserve on volume rather than resolution.
+Infer the scale from the prompt's largest-scope noun and verb, and render at that scale, no finer.
+Surface a fact only if it is:
 
-At the chosen scale, surface a fact only if it is:
 - **Novel** — changes the shape of the map (new region, boundary, dead end, convolution).
 - **Unusual** — violates the pattern of its cluster (the exception that might be a knot).
-- **Pivotal** — small detail with high-confidence influence on a larger conclusion.
+- **Pivotal** — a small detail with high-confidence influence on a larger conclusion.
 
-Collapse representative cluster members into a single cluster reference.  "Seven modules follow
-pattern X" rather than seven bullets.
-
-**Collapse manifest.** When the response collapses clusters, end with a one-line manifest naming the
-clusters and rough sizes. The manifest is the handle that keeps lossy compression inspectable; the
-user can uncollapse any cluster on request.
+Collapse representative cluster members into one reference ("seven modules follow pattern X") and
+end with a one-line **collapse manifest** naming the clusters and rough sizes, so the user can
+uncollapse any of them.
 
 **Escape hatches.**
-- If the prompt explicitly says "briefly," "in detail," or names a scale, use that scale.
-- If the option space IS the answer (the question is "what options exist"), map the space at the
-  scale the question asks about, not one finer.
-- If exploration reveals a tightly coupled region (a knot) whose unpacking would require a finer
-  scale, note its coordinates on the map and recommend a separate session scoped to it. Do not
-  unfold inline.
+- An explicit scale ("briefly", "in detail") wins.
+- If the option space IS the answer, map it at the scale the question asks about.
+- A tightly coupled region (a knot) whose unpacking needs a finer scale: note its coordinates and
+  recommend a separate session; do not unfold it inline.
 
-**Signal placement.** Important claims go at the lead and the final recommendation. The middle is
-provenance for the ends. Never bury a decision-relevant fact in the middle of a bullet list.
+**Signal placement.** Decision-relevant claims go at the lead and the final recommendation, never
+buried in the middle of a list.
 
-**Scale self-check (allocation test).** Before sending, ask: does this response spend reserve on
-resolving the asked-for scale, or on volume above/below it? If the draft is more than ~3× the
-smallest response that fully answers the prompt, cut — the excess is volume, not resolution. Headed
-sections, option enumerations, and tradeoff analyses are justified only when the prompt's scope
-demands them — not as default structure.
+**Scale self-check.** Before sending: does this spend reserve on resolving the asked-for scale, or on
+volume above or below it? A draft more than ~3× the smallest response that fully answers the prompt
+is cut. Headed sections, option enumerations, and tradeoff analyses appear only when the prompt's
+scope demands them.

@@ -50,8 +50,7 @@ no `(F/C)` row and no declared cadence never need either.
    2. PLAN exists with `## Session list` and `## Cross-session contracts`. If any row is `(F/C)`,
       PLAN also needs `## Completion handoffs` (add it empty and commit via `@committer` as
       "Initialize PLAN completion handoffs" if absent).
-   3. PLAN has a `## Progress ledger` table; if absent, stop and tell the user to add it (one-time
-      upgrade from a prose Progress section).
+   3. PLAN has a `## Progress ledger` table; if absent, stop and tell the user to add it.
    4. PLAN has `## Action-frame digest` (may be empty); if absent, add it empty and commit via
       `@committer` as "Initialize PLAN digest".
    5. **Tier markers.** Every row whose `Tier` is T0 carries the `@architect` inflection marker. A
@@ -199,8 +198,7 @@ Dispatch `@committer` per the AGENTS.md git conventions for autonomous chains wi
 - `STAGING MODE`: `exact`. PLAN is often dirty at this point by design, so the committer commits
   only the named paths, leaves PLAN's unstaged edits alone, and refuses if PLAN (or any other
   unrelated path) is staged. The tradeoff: one authoritative scope gate (4d) and fewer contract
-  inputs, but on this call the committer no longer independently rejects every unrelated unstaged
-  change.
+  inputs; the committer does not independently reject every unrelated unstaged change.
 - `COMMIT TITLE HINT`: the entry's title.
 - `CO_AUTHOR`: the content agent(s) that produced the diff, per the AGENTS.md attribution rules
   (same-model stages dedupe to one trailer; do not invent a stage-specific identity).

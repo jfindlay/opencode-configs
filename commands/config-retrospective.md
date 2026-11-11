@@ -5,9 +5,9 @@ agent: architect
 
 Audit the OpenCode user-level infrastructure (permissions, agents, commands, docs) against actual
 session-store usage; action approved changes. This command runs the session as `@architect`; the
-switch persists after it finishes. One session, no cross-session hand-off. Config edits follow
-`AGENTS-LOCAL.md` ("Config files"). The architect never edits source or config itself: approved
-changes go to a forked `@build` (step 4).
+switch persists after it finishes. One session, no cross-session hand-off. Load `AGENTS-LOCAL.md`
+before any config work; it owns the symlink, reload, and artifact-exclusion rules. The architect
+never edits source or config itself: approved changes go to a forked `@build` (step 4).
 
 ## The lens: relentless simplicity
 
@@ -49,7 +49,8 @@ raw `GET` path.
 
 **Cost.** `session.cost` is the session's own spend, never rolled up from children. For forked
 children it equals the sum of its assistant messages' `cost`; a top-level session's `cost` exceeds
-that sum by a small unattributed amount. These are recorded costs, not invoices.
+that sum by a small amount not attributable to any listed message; the cause is unverified. These
+are recorded costs, not invoices.
 
 **Direct store queries (explicit bulk-aggregate fallback; the orchestrator's, not `@explore`'s).**
 `~/.local/share/opencode/opencode.db` is a large live WAL database. Back it up before inspecting it
@@ -71,18 +72,22 @@ indexed columns (`session_id`, `parent_id`); never write it.
   `time_created >= (strftime('%s', 'now', '-14 days') * 1000)`.
 - Legacy tables `session`, `message`, `part` (V1 layout, `part.data` JSON with `step-finish` rows)
   stop at sessions created 2026-10-17. `session_v2` also holds those older sessions, so the V2
-  tables are the single surface; use the legacy tables only for V1-era fields.
+  tables are the single surface; use the legacy tables only for V1-era fields. Whether V1-era
+  `aborted` tool outcomes map to a V2 status is unverified.
 
 **Permission decisions are not recorded as history.** The `permission` table holds project-scoped
 saved approvals, not decisions; `permission.request.list` and `session.permission.list` show only
 pending requests. Residue only, in the tool call's `state.error`: type `permission.rejected` for both
 a configured deny and a rejected ask, separated by message text (`Permission denied: <tool>` for a
 configured deny; `This non-interactive run cannot ask the user for permission…` for an unanswerable
-ask). An approved ask is `completed`, indistinguishable from a pre-allowed call. Other failures
-carry type `tool.execution`.
+ask); those are the observed cases, not an exhaustive classification, and the message text of a
+human Reject in an interactive client was not observed. An approved ask is `completed`,
+indistinguishable from a pre-allowed call. Calls that fail otherwise carried type `tool.execution`.
 
-**Session-level overrides** cannot be discovered on V2 (`session_v2.permission` is NULL); legacy
-`session.permission` holds V1-era overrides for sessions before 2026-10-17.
+**Session-level overrides.** On the inspected API and store, `session_v2.permission` was NULL in
+every row and no sampled API session carried `permissions`, so a fork's session-level override was
+not discoverable on V2. Legacy `session.permission` holds V1-era overrides for sessions before
+2026-10-17.
 
 ## Threads
 1. **Permission-flow.** Which tool invocations triggered prompts most often, which fire despite a
@@ -105,7 +110,8 @@ carry type `tool.execution`.
 2. Run Thread 3 yourself. Produce a ranked candidate list (deletes, merges, cuts, permission edits)
    ranked by (simplicity impact) × (ease/safety).
 3. Gate via Question tool (accept / defer / reject). Do not action before this step.
-4. Dispatch `@build` to action accepted changes. It leaves the tree dirty; do NOT commit.
+4. Dispatch `@build` to action accepted changes; its prompt tells it to load `AGENTS-LOCAL.md`. It
+   leaves the tree dirty; do NOT commit.
 5. Commit: draft the full message, gate on user approval, then delegate to `@committer` with the
    approved text as `COMMIT MESSAGE (verbatim)`, the exact changed paths as `EXPECTED FILES`, the
    matching `STAGING MODE` (`strict` only when they are every dirty path, else `exact`), and

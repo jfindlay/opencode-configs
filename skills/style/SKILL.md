@@ -1,6 +1,6 @@
 ---
 name: style
-description: Code, test, and documentation style guides (Python, Rust, Go) and the style-audit procedure. Load before writing, modifying, or reviewing any code; before writing or modifying any test code; before writing, editing, auditing, or restructuring any documentation; and for /style/audit. T0/T1 agents only.
+description: Code, test, and documentation style guides (Python, Rust, Go) and the style-audit procedure. Load before writing, modifying, or reviewing any code; before writing or modifying any test code; when planning a refactor or test refactor; before writing, editing, auditing, or restructuring any documentation; and for /style/audit. T0/T1 agents only.
 ---
 
 # Style
@@ -30,6 +30,9 @@ conventions` section.
 
 - **Code:** `code.md` and the matching `code-<lang>.md`.
 - **Tests:** the matching `test-<lang>.md` and its inherited `code-<lang>.md` (plus `code.md`).
+- **Planning a refactor or test refactor:** the structuring guides of the code under change
+  (`code.md`, `code-<lang>.md`, and `test-<lang>.md` for tests), not only `doc.md` for the written
+  plan.
 - **Documentation:** `doc.md`.
 - **Audit:** `audit.md`; the audit's per-surface workers load the references that file names.
 - **Mechanical agents (T2/T3)** load nothing from this skill.

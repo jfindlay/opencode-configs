@@ -42,12 +42,17 @@ judgment register for; tier gating in the table binds.
 |                                        | set seems wrong; an abductive pass or delicate uncertainty|       |
 |                                        | resolution (T-1: proactively; T0: on demand)              |       |
 | AGENTS-HINTS.md                        | The work touches a topic in the file's section headings   | T0/T1 |
-| AGENTS-LOCAL.md                        | Editing files in the `opencode-config` repo itself        | T0/T1 |
-| AGENTS-CAPTURE.md                      | Producing or encountering a CAPTURE-CANDIDATE-shaped      | T0/T1 |
-|                                        | finding                                                   |       |
+|                                        | (advisory, not rules in force)                            |       |
+| AGENTS-LOCAL.md                        | Investigating, reviewing, planning, editing, or           | All   |
+|                                        | committing in the `opencode-config` repo, including via   |       |
+|                                        | `~/.config/opencode/` from another project's session      |       |
+| AGENTS-CAPTURE.md                      | A breakthrough framing that cracked a stuck problem, an   | T0/T1 |
+|                                        | unexpected discovery that turned out to matter, or an     |       |
+|                                        | expensive-to-learn result                                 |       |
 | `style` skill                          | Before writing, modifying, or reviewing code or tests;    | T0/T1 |
-|                                        | before writing, editing, auditing, or restructuring any   |       |
-|                                        | documentation; `/style/audit`                             |       |
+|                                        | planning a refactor or test refactor; before writing,     |       |
+|                                        | editing, auditing, or restructuring any documentation;    |       |
+|                                        | `/style/audit`                                            |       |
 | `code-lenses` skill                    | Code-analysis investigation; choosing among AST,          | T0/T1 |
 |                                        | import-graph, call-graph, coverage, or test analysis; the |       |
 |                                        | user names a lens                                         |       |
@@ -86,9 +91,8 @@ placeholders; a command expands its input in its own body and passes it explicit
   not needed (open-ended or multi-round search, many independent checks, large output reduced to a
   short finding). Never fork a single file read or narrow grep (use `Grep`/`Glob`), or a test or
   format loop, which needs turn-by-turn steering.
-- **Ask structured questions.** When input is needed, or a response would end in a recommendation
-  among two or more options, use the Question tool; not for narrow factual questions with one
-  answer.
+- **Ask structured questions.** When input from the user is needed, use the Question tool to
+  structure complex decisions; not for narrow factual questions with one answer.
 - **Reserve the shell for what only a shell can do**: pytest, docker, git, make, mypy, sqlite3, etc.
 - **JSON in tool calls**: structure array or object parameters as JSON when the tool schema requires
   it.

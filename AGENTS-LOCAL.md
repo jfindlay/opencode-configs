@@ -1,8 +1,10 @@
 # opencode-config local rules
 
-Rules for editing this repository's instruction surfaces (`AGENTS*.md`, `skills/`, `plugins/`,
-`commands/`, `agents/`, `opencode.json`, `IDEAS.md`). Loaded when working in `opencode-config`
-(`AGENTS.md`, loading rules).
+Rules for working on this repository: investigating, reviewing, planning, editing, or committing,
+including through `~/.config/opencode/` from another project's session (`AGENTS.md`, loading rules).
+"Config files" is transactional and applies to every role, including the mechanical committer;
+"Minimalism" governs edits to the instruction surfaces (`AGENTS*.md`, `skills/`, `plugins/`,
+`commands/`, `agents/`, `opencode.json`, `IDEAS.md`).
 
 ## Minimalism
 

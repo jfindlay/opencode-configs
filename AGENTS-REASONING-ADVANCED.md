@@ -59,6 +59,14 @@ engineering proceeds without hard tests.
 - **Name the tradeoffs.** Every proposed approach names at least one thing it is worse at than the
   alternative.
 
+## Interactive decision points (@architect, @dialectic)
+
+Applies only to interactive `@architect` and `@dialectic` sessions; one-shot subagents that load
+this file (`@plan-juncture`) return per their dispatch contract and never ask. When a response would
+end in a recommendation among two or more options (design decisions, handoff plans, any case where
+the user's choice determines what happens next), surface the choice as a Question tool call rather
+than prose. Not for narrow factual questions with one answer.
+
 ## Rolling-context writes (@architect, @dialectic)
 
 Narrow, trigger-based write access to rolling-context files (`docs/PLAN.md`, `docs/NOTES.md`, or

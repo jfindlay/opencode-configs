@@ -1,13 +1,14 @@
 # Agent hints
 
-Facts and procedures that are not rules in force elsewhere, loaded by the section heading that
-matches the work (`AGENTS.md`, loading rules). Not read front to back.
+Advisory reference, not rules in force: `AGENTS.md` and `AGENTS-REASONING.md` stay authoritative,
+and an entry here imposes no obligation unless a rule elsewhere says so. Loaded by the section
+heading that matches the work (`AGENTS.md`, loading rules); not read front to back.
 
 ## Shell permission rules are tripwires, not containment
 
-OpenCode checks each subcommand of a compound line (`&&`, `;`, pipes) against the rules; one `deny`
-denies the line, otherwise one `ask` asks. Redirect targets and flags stay part of the matched text.
-Syntax the scanner cannot analyze is rejected before any rule runs.
+OpenCode (V2, measured on 2.2.5) checks each subcommand of a compound line (`&&`, `;`, pipes)
+against the rules; one `deny` denies the line, otherwise one `ask` asks. Redirect targets and flags
+stay part of the matched text. Syntax the scanner cannot analyze is rejected before any rule runs.
 
 1. **A rule sees command text, not effects.** `git push *` does not match `git -C d push`,
    `env VAR=1 git push`, or a push inside a script; an allow for `git diff *` also matches

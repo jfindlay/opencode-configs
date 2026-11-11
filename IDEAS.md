@@ -3,6 +3,10 @@
 Future work, ideas, and undecided decisions for this repository. Finished or decided entries are
 deleted in the commit that lands the result; their record lives in the git log.
 
+- **Promote** an entry with three or more concrete subtasks when it becomes an arc: split it into
+  its own `ROADMAP.md`-style document.
+- **Remove** an entry quiet for six months or more only if its framing no longer fits reality.
+
 ## Open follow-ups
 
 The permission measurement harness is `~/Source/opencode-permtest` (frozen; its `docs/FINDINGS.md`
@@ -39,6 +43,10 @@ records what is measured). Version labels name the runtime of the observation.
     `permissions` as `temperature` did on 2.0.32 (`top_p` effect also untested).
   - Whether `request.body` reaches the provider.
   - A live-tool confirmation that a config `deny` beats a saved allow.
+- **Projects seeded with the old `## Notes for executors` pointer.** Older `/plan/shard` runs put a
+  pointer to PLAN into the project's `AGENTS.md`; it dangles after the arc. Replace it with the
+  current self-contained `## Register in durable files` block when a seeded project is next touched.
+  Open: whether this migration is worth tracking. No project has been repaired.
 - **Optional upstream reports (owner: user; file through the `report` skill only if wanted).**
   - 2.0.32: `temperature` beside `permissions:` disabled the agent's rules; not reproduced on 2.2.5.
   - The edit tool's validation error does not name an unrecognized argument key.
@@ -85,9 +93,10 @@ gate fired.
 A model cannot reliably measure its own context fill; a plugin-exposed figure could turn
 `@plan-admin`'s warm-resumption-vs-commit-and-close judgment into a measurement. Unverified: that
 the V2 plugin API (<https://opencode.ai/v2/docs/build/plugins>) exposes or can derive a per-session
-fill figure mid-run. `session.step.ended` carries `tokens`, but cumulative tokens are not context
-occupancy, and converting them needs the V2 usable-context formula (the same item that keeps the
-monitor's capacity reading unavailable).
+fill figure mid-run, and that such a figure would be trustworthy. `session.step.ended` carries
+`tokens`, but cumulative tokens are not context occupancy, and converting them needs the V2
+usable-context formula (the same item that keeps the monitor's capacity reading unavailable). Usage
+from the last completed request estimates the next request's size; it does not measure that request.
 
 When the gate fires, fork `@explore` read-only against the `@opencode/plugin` SDK and V2 docs: can a
 plugin read or derive a (sub)session's context token count mid-run and surface it to the
@@ -135,7 +144,8 @@ denial prevents collection.
 V1-era data); adding `ses_f49e95f5cffey4oqjTEoDqSyN3` gives 46 and $44.67. Report any discrepancy
 rather than forcing it. Also: synthetic forests (overlap, missing fields/roots, partial reads,
 archived nodes, malformed lineage, mid-collection change), the real loaded tool and its denial path,
-and no prohibited endpoint.
+and no prohibited endpoint. A later benefit comparison holds task, evidence requirements, and
+approval policy constant.
 
 ### Deferred research (report before implementing; user asks first)
 
@@ -143,14 +153,15 @@ and no prohibited endpoint.
   net effect with the premium on all affected writes. No cache setting change or savings claim is
   authorized.
 - **Leading-`cd` guard.** A narrow pre-execution rejection of the raw leading-`cd` pattern with
-  actionable `workdir` guidance, not silent rewriting. A `cd *` permission deny does not work: CWD
-  commands are excluded before permission matching (checked at V1 tag 1.18.31, not on V2). Verify
-  hook failure behavior and false positives; preserve approval gates. It enforces a convention, not
-  a shell boundary.
+  actionable `workdir` guidance, not silent rewriting. At V1 tag 1.18.31 a `cd *` permission deny
+  did not work: CWD commands are excluded before permission matching (V2 untested). Verify hook
+  failure behavior and false positives; preserve approval gates. It enforces a convention, not a
+  shell boundary.
 - **Large-write requests and long tool spans.** In the combined acceptance cohort, 71 of 902
   requests had cache writes ≥30,000 tokens with reads <5,000 and accounted for $19.72 of $44.67; 66
   followed a tool span of at least five minutes (grouping: `git show 2f95079:PLAN.md`, "Pilot
-  results"). Whether cache expiry makes large-context sessions wait-sensitive is unverified; whole-
-  request cost is not cache-write cost or a savings estimate. Before prescribing shorter driver
-  sessions or a longer TTL, compare equivalent workloads, measure context size and cache behavior
-  alongside request count, and keep required checks and human approval.
+  results"). Tool spans mix execution, approval latency, and other blocking; historical cache TTL
+  settings and provider eviction were not verified. The correlation does not prove cache expiry,
+  avoidable waste, or savings, and whole-request cost is not cache-write cost. Before prescribing
+  shorter driver sessions or a longer TTL, compare equivalent workloads, measure context size and
+  cache behavior alongside request count, and keep required checks and human approval.

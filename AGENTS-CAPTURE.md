@@ -6,11 +6,8 @@ bite on real decisions yet not so local it decays with today's code. Tagging is 
 criteria decide whether a moment merits the test; the three-axis test decides whether it becomes a
 tag.
 
-**Stage 1 — shape criteria (pre-filter).** Run stage 2 only on one of these; not on every thought.
-
-- A spontaneously good framing that cracked a stuck problem.
-- A serendipitous finding that turned out to matter.
-- An expensive-to-learn result (long investigation → short finding).
+**Stage 1 — shape criteria (pre-filter).** The situations that load this file (`AGENTS.md`, loading
+rules) are the only ones worth stage 2; do not run it on every thought.
 
 **Stage 2 — three-axis test.** Tag only if all three hold:
 

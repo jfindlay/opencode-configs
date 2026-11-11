@@ -2,7 +2,7 @@
 
 Loaded on demand by T0/T1 agents before writing, modifying, or reviewing Python test code. Carries
 the test-specific mechanical rules and (eventually) structuring principles. All conventions in
-`STYLE-CODE-PYTHON.md` apply to test code as well — this file adds to them, never relaxes them.
+`code-python.md` apply to test code as well — this file adds to them, never relaxes them.
 Living exemplar: `~/Source/python-template`. When a rule here is ambiguous, the template repo is
 normative.
 
@@ -37,7 +37,7 @@ normative.
   lowest package level that covers all consumers. A fixture used by two sibling test modules belongs
   in their shared parent's `conftest.py`. A fixture used across `unit/` and `integration/` belongs
   in `tests/conftest.py`.
-- **Docstrings and typing.** Per `STYLE-CODE.md`, tests are not exempt from the docstring and mypy
+- **Docstrings and typing.** Per `code-python.md`, tests are not exempt from the docstring and mypy
   rules. Every test function gets a one-line docstring stating what behaviour it pins down; every
   fixture gets a docstring describing what it provides and any teardown contract.
 
@@ -90,5 +90,5 @@ TODO:
 
 ## Audit invocation
 
-`/style-audit <target>` forks a read-only `@explore` against the test surface using this document
-(and the matching `STYLE-CODE-PYTHON.md` as the inherited base) as the reference.
+`/style/audit <target>` forks a read-only `@explore` against the test surface using this document
+(and the matching `code-python.md` as the inherited base) as the reference.

@@ -1,7 +1,7 @@
 # Test Style: Go
 
 Loaded on demand before writing, modifying, or reviewing Go test code. All conventions in
-`STYLE-CODE-GO.md` apply to tests as well. A canonical worked example is the
+`code-go.md` apply to tests as well. A canonical worked example is the
 `jfindlay/go-template` repository (consult locally or via GitHub if available; no local path is
 assumed).
 
@@ -28,7 +28,7 @@ assumed).
 ## Test philosophy
 
 Same setup → run → assert, relentless-focus, minimal-duplication discipline as
-`STYLE-TEST-PYTHON.md`. Unit tests pin inner contracts; subprocess integration tests pin the CLI
+`test-python.md`. Unit tests pin inner contracts; subprocess integration tests pin the CLI
 contract.
 
 TODO:
@@ -41,5 +41,5 @@ TODO.
 
 ## Audit invocation
 
-`/style-audit <target>` forks a read-only `@explore` against the test surface using this document
-(with `STYLE-CODE-GO.md` as the inherited base) as the reference.
+`/style/audit <target>` forks a read-only `@explore` against the test surface using this document
+(with `code-go.md` as the inherited base) as the reference.

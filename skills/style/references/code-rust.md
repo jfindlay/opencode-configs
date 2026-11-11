@@ -1,8 +1,8 @@
 # Code Style: Rust
 
 Loaded on demand by T0/T1 agents before writing, modifying, or reviewing Rust code. Sibling of
-`STYLE-CODE-PYTHON.md` (Python) and `STYLE-CODE-GO.md` (Go); the language-agnostic register rules
-live in `STYLE-DOC.md` and the AGENTS.md `## Code conventions` section. A canonical worked example
+`code-python.md` (Python) and `code-go.md` (Go); the language-agnostic register rules
+live in `doc.md` and the AGENTS.md `## Code conventions` section. A canonical worked example
 of these conventions is the `jfindlay/rust-template` repository; consult it if available locally or
 via its GitHub page. Do not assume any particular local path — its presence on a given system is
 incidental, not a dependency of this guide.
@@ -62,7 +62,7 @@ TODO.
 ### Function structuring principles
 
 Apply the same level/concern-separation, plurality, side-effect-isolation, and size heuristics as
-`STYLE-CODE-PYTHON.md` §"Function structuring principles". Rust's expression orientation and `?`
+`code-python.md` §"Function structuring principles". Rust's expression orientation and `?`
 operator tend to shorten functions; the ~60–90-line guidance still applies at the standard width.
 
 ### Module / crate structuring principles
@@ -71,9 +71,9 @@ TODO.
 
 ## Test philosophy
 
-See `STYLE-TEST-RUST.md`.
+See `test-rust.md`.
 
 ## Audit invocation
 
-`/style-audit <target>` forks a read-only `@explore` against the code surface using this document
+`/style/audit <target>` forks a read-only `@explore` against the code surface using this document
 as the reference. Mechanical rules emit findings; structuring principles surface as observations.

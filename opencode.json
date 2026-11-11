@@ -78,7 +78,7 @@
     // identical) collapse into one action without changing behavior.
     { "action": "edit", "resource": "*", "effect": "ask" },
     // Allow read-only access to the user-level OpenCode config dir so agents can load
-    // AGENTS-*.md, STYLE-*.md, etc. on-demand without an external_directory prompt per file.
+    // AGENTS-*.md, skills/*/references/*.md, etc. on-demand without an external_directory prompt per file.
     { "action": "external_directory", "resource": "*", "effect": "ask" },
     { "action": "external_directory", "resource": "~/.config/opencode/**", "effect": "allow" },
     { "action": "glob", "resource": "*", "effect": "allow" },

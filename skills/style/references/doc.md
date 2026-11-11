@@ -99,7 +99,7 @@ false-positive:
 
 ## Audit checklist
 
-Additive categories beyond what mechanical linters catch. An agent running `/style-audit` on the
+Additive categories beyond what mechanical linters catch. An agent running `/style/audit` on the
 doc surface should check for each:
 
 **Inline-doc categories (Pass A)**

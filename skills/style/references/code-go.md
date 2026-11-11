@@ -1,7 +1,7 @@
 # Code Style: Go
 
 Loaded on demand by T0/T1 agents before writing, modifying, or reviewing Go code. Sibling of
-`STYLE-CODE-PYTHON.md` and `STYLE-CODE-RUST.md`. A canonical worked example is the
+`code-python.md` and `code-rust.md`. A canonical worked example is the
 `jfindlay/go-template` repository (consult locally or via GitHub if available; no local path is
 assumed).
 
@@ -10,7 +10,7 @@ assumed).
 - **`gofmt -s` owns all layout and is non-negotiable.** Go deliberately has no line-length setting;
   do NOT impose the `AGENTS.md` line width on Go source. (Markdown and comment prose still
   follow it.) This is the one deliberate divergence from the sibling guides — see
-  `STYLE-DOC.md`'s Go note.
+  `doc.md`'s Go note.
 - **`go vet` + `staticcheck`** are the lint gate. `staticcheck` is the standard external linter;
   treat its findings as errors in CI.
 - **Doc comments** on every exported identifier, beginning with the identifier's name
@@ -45,7 +45,7 @@ TODO.
 ### Function structuring principles
 
 Apply the same level/concern-separation, plurality, side-effect-isolation, and size heuristics as
-`STYLE-CODE-PYTHON.md`. Go's explicit error returns lengthen functions slightly; judge size at
+`code-python.md`. Go's explicit error returns lengthen functions slightly; judge size at
 gofmt's layout, not a fixed wrap.
 
 ### Package structuring principles
@@ -54,9 +54,9 @@ TODO.
 
 ## Test philosophy
 
-See `STYLE-TEST-GO.md`.
+See `test-go.md`.
 
 ## Audit invocation
 
-`/style-audit <target>` forks a read-only `@explore` against the code surface using this document
+`/style/audit <target>` forks a read-only `@explore` against the code surface using this document
 as the reference. Mechanical rules emit findings; structuring principles surface as observations.

@@ -4,8 +4,8 @@ Loaded on demand by T0/T1 agents before writing, modifying, or reviewing Python 
 the mechanical rules (what a perfect linter would catch) and the structuring principles (what
 linters can't catch — the judgment layer).
 
-Sibling of `STYLE-CODE-RUST.md` (Rust) and `STYLE-CODE-GO.md` (Go). `STYLE-CODE.md` is the index
-that routes by language. Living exemplar: `~/Source/python-template`. When a rule here is
+Sibling of `code-rust.md` (Rust) and `code-go.md` (Go). `SKILL.md` routes by
+language; `code.md` holds the language-agnostic rules. Living exemplar: `~/Source/python-template`. When a rule here is
 ambiguous, the template repo is normative.
 
 ## Mechanical rules
@@ -84,9 +84,9 @@ TODO.
 
 ## Test philosophy
 
-See `STYLE-TEST.md`.
+See `test-python.md`.
 
 ## Audit invocation
 
-`/style-audit <target>` forks a read-only `@explore` against the code surface using this document
+`/style/audit <target>` forks a read-only `@explore` against the code surface using this document
 as the reference. Mechanical rules emit findings; structuring principles surface as observations.

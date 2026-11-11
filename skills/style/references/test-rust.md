@@ -1,7 +1,7 @@
 # Test Style: Rust
 
 Loaded on demand by T0/T1 agents before writing, modifying, or reviewing Rust test code. All
-conventions in `STYLE-CODE-RUST.md` apply to test code as well — this file adds to them, never
+conventions in `code-rust.md` apply to test code as well — this file adds to them, never
 relaxes them. A canonical worked example is the `jfindlay/rust-template` repository (consult
 locally or via GitHub if available; no local path is assumed).
 
@@ -25,7 +25,7 @@ locally or via GitHub if available; no local path is assumed).
 ## Test philosophy
 
 Same three-step pattern (setup → run → assert) and relentless-focus / minimal-duplication
-discipline as `STYLE-TEST-PYTHON.md` §"Test philosophy". Unit tests pin inner contracts (function
+discipline as `test-python.md` §"Test philosophy". Unit tests pin inner contracts (function
 signatures, public API); integration tests pin the external CLI/library contract.
 
 TODO:
@@ -38,5 +38,5 @@ TODO.
 
 ## Audit invocation
 
-`/style-audit <target>` forks a read-only `@explore` against the test surface using this document
-(with `STYLE-CODE-RUST.md` as the inherited base) as the reference.
+`/style/audit <target>` forks a read-only `@explore` against the test surface using this document
+(with `code-rust.md` as the inherited base) as the reference.

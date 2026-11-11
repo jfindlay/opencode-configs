@@ -1,13 +1,12 @@
----
-description: "[jf] Audit a target for code, doc, and test style violations. Args: [target]."
----
+# Style audit procedure
 
-Audit a target (file, dir, or package) for code, doc, and test style violations. Forks one
-read-only `@explore` per applicable surface; merges findings by file; emits proposals only.
+Audit a target (file, directory, or package) for code, doc, and test style violations. Forks one
+read-only `@explore` per applicable surface; merges findings by file; emits proposals only. The
+invoking command supplies the target.
 
-Target (file, directory, or package; may be empty):
-
-$ARGUMENTS
+Reference paths below are relative to this skill's base directory
+(`~/.config/opencode/skills/style/`). Forked workers do not load the skill, so the driver expands
+them to absolute paths in each fork prompt.
 
 ## Steps
 
@@ -36,11 +35,11 @@ $ARGUMENTS
    Audit <target> against the <surface> styleguide. <Surface-specific instruction below.>
 
    INVESTIGATION TASKS
-   1. Load the reference: <see per-surface below>.
+   1. Read the reference files: <absolute paths, see per-surface below>.
    2. Inspect the target. Scope to <surface files>.
    3. For each rule in §"Mechanical rules", emit findings with file:line.
    4. For structuring/philosophy sections, emit observations (not findings).
-   5. For the doc surface only: run the rolling-context lifecycle check per STYLE-DOC.md
+   5. For the doc surface only: run the rolling-context lifecycle check per the doc reference's
       §"Audit checklist".
 
    OUTPUT FORMAT
@@ -49,16 +48,16 @@ $ARGUMENTS
    Target: <absolute path>
    ```
 
-   Per-surface reference:
-   - **code**: `STYLE-CODE-<LANG>.md` via `STYLE-CODE.md` index.
-   - **doc**: `STYLE-DOC.md` (including `## Audit checklist`).
-   - **test**: `STYLE-TEST-<LANG>.md` + `STYLE-CODE-<LANG>.md` as inherited base.
+   Per-surface references (`references/`, expanded to absolute paths):
+   - **code**: `code-<lang>.md` and `code.md`.
+   - **doc**: `doc.md` (including `## Audit checklist`).
+   - **test**: `test-<lang>.md`, with `code-<lang>.md` and `code.md` as the inherited base.
 
 4. **Merge findings by file** (not by surface). When the same line triggers multiple surfaces,
    tag all triggering surface names. Distinguish mechanical findings from structural observations.
 
 5. If Pass A (inline) or rolling-context findings exceed 200 rows total, tooling drift is likely.
-   Recommend running the project's formatter first and stop; this command stays review-only and
+   Recommend running the project's formatter first and stop; this procedure stays review-only and
    never applies fixes.
 
 6. End: "Act on these findings, drill into a specific file, or stop?"

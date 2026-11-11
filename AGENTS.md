@@ -64,15 +64,12 @@ the judgment register for. T0/T1 agents follow the trigger directly.
 |                                        | a specific section in HINTS                               |       |
 | AGENTS-CAPTURE.md                      | When producing or encountering a CAPTURE-CANDIDATE-shaped | T0/T1 |
 |                                        | finding                                                   |       |
-| STYLE-CODE.md                          | Before writing or modifying any code; before reviewing    | T0/T1 |
-|                                        | code; when planning a refactor. Routes to the matching    |       |
-|                                        | per-language sibling (STYLE-CODE-PYTHON/RUST/GO.md).      |       |
-| STYLE-DOC.md                           | Before writing, editing, auditing, or restructuring any   | T0/T1 |
-|                                        | documentation (inline docstrings, human docs, agent docs) |       |
-| STYLE-TEST.md                          | Before writing or modifying any test code; before         | T0/T1 |
-|                                        | reviewing tests; when planning a test refactor. Routes to |       |
-|                                        | the matching per-language sibling                         |       |
-|                                        | (STYLE-TEST-PYTHON/RUST/GO.md).                           |       |
+| `style` skill                          | Before writing or modifying any code or test code; before | T0/T1 |
+|                                        | reviewing code or tests; when planning a refactor or test |       |
+|                                        | refactor; before writing, editing, auditing, or           |       |
+|                                        | restructuring any documentation (inline docstrings, human |       |
+|                                        | docs, agent docs); for /style/audit. Its SKILL.md routes  |       |
+|                                        | to the per-language and per-surface guides                |       |
 | AGENTS-LENSES.md                       | When reaching for a code-reasoning lens at the prompt     | T0/T1 |
 |                                        | level; for design rules and per-lens reference, see       |       |
 |                                        | composable-code-lenses/docs/                              |       |
@@ -138,17 +135,17 @@ These rules exist because violating them costs turns and clutters sessions.
 - Docstrings and code comments are mechanical and thin: a title sentence, a brief description, then
   the parameter/return/raise/yield/ivar/cvar block. Exposition appears only when the code is
   intricate, fragile, load-bearing, or has non-obvious consequences. Narrative-scale and
-  design-scale content lives in human docs, not inline. See `STYLE-DOC.md` for the full register
-  guidance.
+  design-scale content lives in human docs, not inline. See the `style` skill's `doc.md` for the
+  full register guidance.
 
-When writing or modifying code, load the matching per-language guide via the `STYLE-CODE.md` index
-(Python → `STYLE-CODE-PYTHON.md`; Rust → `STYLE-CODE-RUST.md`; Go → `STYLE-CODE-GO.md`).
+When writing or modifying code, load the `style` skill; it routes to the matching per-language guide
+(Python, Rust, Go).
 
 ### Python
 
-When writing or modifying Python code, **load STYLE-CODE-PYTHON.md** before edits. It carries the
-mechanical rules (PEP 8 with the standard line width, mypy strict, rST docstrings, dataclass
-carve-out) and the structuring principles (when to split functions, classes, modules;
+When writing or modifying Python code, **load the `style` skill's `code-python.md`** before edits.
+It carries the mechanical rules (PEP 8 with the standard line width, mypy strict, rST docstrings,
+dataclass carve-out) and the structuring principles (when to split functions, classes, modules;
 decorator/dataclass/Pydantic guidance; test philosophy).
 
 ## Formatting conventions
@@ -156,7 +153,7 @@ decorator/dataclass/Pydantic guidance; test philosophy).
 - **Line width (single authority).** Flow free-flowing text — prose, comments, docstrings, Markdown,
   non-code files — as full as possible without exceeding 100 characters; do not wrap prematurely.
   Every other file defers here instead of restating the number. Exceptions: Go source (`gofmt` owns
-  layout; see `STYLE-CODE-GO.md`) and commit messages (see Git conventions).
+  layout; see the `style` skill's `code-go.md`) and commit messages (see Git conventions).
 - Always use the project's dev/CI environments rather than local formatters.
 
 ## Git conventions
